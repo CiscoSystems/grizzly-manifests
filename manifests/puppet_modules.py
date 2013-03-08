@@ -103,7 +103,7 @@ def get_modules(modules_file=MODULE_FILE):
      We need to prepend the module name with "puppet-" to match the
      package names.
     """
-    return ["puppet-".join(line.strip()) for line in open(modules_file)]
+    return ["puppet-"+ line.strip() for line in open(modules_file)]
 
 
 def get_distribution():
@@ -117,32 +117,38 @@ def setup_apt_repo():
     """
      Setup apt repo to install manifest packages via apt
     """
-    if not os.path.exists(APT_CONFIG_FILE):
-        print("Repo already in %s; assuming it is correct and \
-               not adding an additional repo configuration." % APT_CONFIG_FILE)
+    if os.path.exists(APT_CONFIG_FILE):
+        print("Repo already in %s; assuming it is correct and not adding an additional repo configuration." % APT_CONFIG_FILE)
         return 
     # no config file found, lets set one up
     with open(APT_CONFIG_FILE, 'a') as f:
         f.write(APT_REPO_DATA)
     # add gpg key to apt
-    apt_key_Add()
+    apt_key_add()
 
 
 def apt_key_add():
     """
      Add the gpg key to apt repository
     """
-   with tempfile.NamedTemporaryFile() as temp:
+    with tempfile.NamedTemporaryFile() as temp:
        temp.write(APT_REPO_KEY)
        temp.flush()
        check_call(['apt-key', 'add', temp.name],
              stdout=open(os.devnull,'wb'), stderr=STDOUT) 
 
+def apt_update():
+    """
+     Update apt repo
+    """
+    check_call(['apt-get', 'update'],
+         stdout=open(os.devnull,'wb'), stderr=STDOUT)
 
 def apt_install(modules):
     """
      Install packages via apt
     """
+    apt_update()
     check_call(['apt-get', 'install', '-y', " ".join(modules)],
          stdout=open(os.devnull,'wb'), stderr=STDOUT) 
 
@@ -160,9 +166,8 @@ def setup_yum_repo():
      gpgkey=ftp://ftpeng.cisco.com/openstack/cisco/yum/dist/grizzly/coe.pub
      
     """
-    if not os.path.exists(YUM_CONFIG_FILE):
-        print("Repo already in %s; assuming it is correct and not adding an \
-               additional repo configuration." % YUM_CONFIG_FILE)
+    if os.path.exists(YUM_CONFIG_FILE):
+        print("Repo already in %s; assuming it is correct and not adding an additional repo configuration." % YUM_CONFIG_FILE)
         return
     # no config found, let download from the repo url 
     with open(YUM_CONFIG_FILE, 'wb') as repo_file:
