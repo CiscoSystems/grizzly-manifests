@@ -17,7 +17,6 @@
 #      Example: "folsom/snapshots/2012.2.2"
 
 import os
-import sys
 import optparse
 import platform
 import tempfile
@@ -26,7 +25,6 @@ import subprocess
 #-------- Default Constants ---------------------
 
 ## ----- global variables that can be configurable via cmdline.
-global REPO_NAME
 REPO_NAME = "folsom"
 # If you have proxy, set these values appropriately
 HTTP_PROXY = None
@@ -94,7 +92,7 @@ baseurl= %(repo_url)s
 enabled=1
 gpgcheck=1
 gpgkey=%(repo_url)s/coe.pub
-""" % {'repo_url' : YUM_REPO_URL}
+""" % {'repo_url': YUM_REPO_URL}
 
 # --- helper calls to fetch and install packages ----------
 
@@ -136,7 +134,7 @@ def get_modules(modules_file=MODULE_FILE):
      We need to prepend the module name with "puppet-" to match the
      package names.
     """
-    return ["puppet-"+ line.strip() for line in open(modules_file)]
+    return ["puppet-" + line.strip() for line in open(modules_file)]
 
 
 def get_distribution():
@@ -172,11 +170,13 @@ def apt_key_add():
         temp.flush()
         run_command(['apt-key', 'add', temp.name])
 
+
 def apt_update():
     """
      Update apt repo
     """
     run_command(['apt-get', 'update'])
+
 
 def apt_install(modules):
     """
@@ -184,6 +184,7 @@ def apt_install(modules):
     """
     apt_update()
     run_command(['apt-get', 'install', '-y', " ".join(modules)])
+
 
 def setup_yum_repo():
     """
@@ -249,7 +250,6 @@ def main():
     set_proxy()
     # parse and get list of modules
     modules = get_modules(MODULE_FILE)
-    
     # set up the repos and perform install
     distro = get_distribution().lower() 
     if distro in ["redhat", "fedora"]:
