@@ -169,7 +169,7 @@ def apt_install(modules):
      Install packages via apt
     """
     apt_update()
-    run_command(['apt-get', 'install', '-y', " ".join(modules)])
+    run_command(['apt-get', 'install', '-y'] + modules)
 
 
 def setup_yum_repo():
