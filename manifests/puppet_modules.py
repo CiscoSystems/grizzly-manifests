@@ -26,11 +26,6 @@ import subprocess
 
 ## ----- global variables that can be configurable via cmdline.
 REPO_NAME = "folsom"
-# If you have proxy, set these values appropriately
-HTTP_PROXY = None
-HTTPS_PROXY = None
-NO_PROXY = None
-FTP_PROXY = None
 APT_REPO_URL = "ftp://ftpeng.cisco.com/openstack/cisco"
 # uncomment this line if you prefer to use http
 # APT_REPO_URL = "http://128.107.252.163/openstack/cisco"
@@ -113,19 +108,10 @@ def override_globals(options):
     """
     Override the global variables passed in via commandline
     """
-    for opt_var in ["HTTP_PROXY", "HTTPS_PROXY", "NO_PROXY", "FTP_PROXY", "REPO_NAME", "APT_REPO_URL"]:
+    for opt_var in ["REPO_NAME", "APT_REPO_URL"]:
         if getattr(options, opt_var) is not None:
             # vars()[opt_var] = getattr(options, opt_var)
             globals().__setitem__(opt_var, getattr(options, opt_var))
-
-
-def set_proxy():
-    """
-    Set the env variables for proxy urls
-    """
-    for proxy_var in ["HTTP_PROXY", "HTTPS_PROXY", "NO_PROXY", "FTP_PROXY"]:
-        if eval(proxy_var) is not None:
-            os.environ[proxy_var] = eval(proxy_var)
 
 
 def get_modules(modules_file=MODULE_FILE):
@@ -236,18 +222,9 @@ def main():
     parser = optparse.OptionParser()
     parser.add_option('--repo', help="Name of the repo to fetch packages from; example: folsom", dest='REPO_NAME')
     parser.add_option('--apt-repo-url', help="URL for the APT repo", dest='APT_REPO_URL')
-    proxy_group = optparse.OptionGroup(parser, "Proxy URL Options")
-    proxy_group.add_option('--http-proxy', help='HTTP Proxy url', dest='HTTP_PROXY')
-    proxy_group.add_option('--https-proxy', help='HTTPS Proxy url', dest='HTTPS_PROXY')
-    proxy_group.add_option('--ftp-proxy', help='FTP Proxy url', dest='FTP_PROXY')
-    proxy_group.add_option('--no-proxy', help='A string with comma-separated list of domain extensions proxy should not be used for',
-                           dest='NO_PROXY')
-    parser.add_option_group(proxy_group)
     (args, opts) = parser.parse_args()
     # set the commandline option to globals
     override_globals(args)
-    # setup proxy settings
-    set_proxy()
     # parse and get list of modules
     modules = get_modules(MODULE_FILE)
     # set up the repos and perform install
