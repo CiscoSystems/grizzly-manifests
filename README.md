@@ -7,7 +7,7 @@ Install Ubuntu 12.04.1 LTS x86_64 (preferred)
 
 clone this repo to your build node
 
-	git clone https://github.com/CiscoSystems/grizzly-manifests -b multi-node
+	git clone https://github.com/CiscoSystems/grizzly-manifests -b multi-node-templated
 	cp grizzly-manifests/* /etc/puppet/manifests
 
 Clone the puppet modules
