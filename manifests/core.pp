@@ -122,7 +122,7 @@ node os_base inherits base {
 
 }
 
-class control($internal_ip) {
+class control($crosstalk_ip) {
 
     class { 'openstack::controller':
 	public_address          => $controller_node_public,
@@ -179,7 +179,7 @@ class control($internal_ip) {
 	ovs_enable_tunneling    	=> "True",
 	ovs_tunnel_bridge         	=> "br-tun",
 	ovs_tunnel_id_ranges     	=> "1:1000",
-	ovs_local_ip             	=> $internal_ip,
+	ovs_local_ip             	=> $crosstalk_ip,
 	ovs_server               	=> false,
 	ovs_root_helper          	=> "sudo quantum-rootwrap /etc/quantum/rootwrap.conf",
 	ovs_sql_connection       	=> "mysql://quantum:quantum@${controller_node_address}/quantum",
@@ -275,7 +275,7 @@ class control($internal_ip) {
 }
 
 
-class compute($internal_ip) {
+class compute($internal_ip, $crosstalk_ip) {
 
     class { 'openstack::compute':
 	public_interface   => $public_interface,
@@ -333,7 +333,7 @@ class compute($internal_ip) {
 	ovs_enable_tunneling    	=> "True",
 	ovs_tunnel_bridge       	=> "br-tun",
 	ovs_tunnel_id_ranges     	=> "1:1000",
-	ovs_local_ip             	=> $internal_ip,
+	ovs_local_ip             	=> $crosstalk_ip,
 	ovs_server               	=> false,
 	ovs_root_helper          	=> "sudo quantum-rootwrap /etc/quantum/rootwrap.conf",
 	ovs_sql_connection       	=> "mysql://quantum:quantum@${controller_node_address}/quantum",
