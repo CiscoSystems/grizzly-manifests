@@ -29,18 +29,19 @@ $cobbler_node_fqdn 	        = "${::build_node_name}.${::domain_name}"
 
 
 class { cobbler: 
-  node_subnet 		=> $::node_subnet, 
-  node_netmask 		=> $::node_netmask,
-  node_gateway 		=> $::node_gateway,
-  node_dns 		=> $::node_dns,
-  ip 			=> $::ip,
-  dns_service 		=> $::dns_service,
-  dhcp_service 		=> $::dhcp_service,
+  node_subnet      => $::node_subnet, 
+  node_netmask     => $::node_netmask,
+  node_gateway     => $::node_gateway,
+  node_dns         => $::node_dns,
+  ip               => $::ip,
+  dns_service      => $::dns_service,
+  dhcp_service     => $::dhcp_service,
 # change these two if a dynamic DHCP pool is needed
-  dhcp_ip_low           => false,
-  dhcp_ip_high          => false,
-  domain_name 		=> $::domain_name,
-  password_crypted 	=> $::password_crypted,
+  dhcp_ip_low      => false,
+  dhcp_ip_high     => false,
+  domain_name      => $::domain_name,
+  password_crypted => $::password_crypted,
+  ucsm_port        => $::ucsm_port,
 }
 
 # This will load the Ubuntu Server OS into cobbler
