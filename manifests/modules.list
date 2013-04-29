@@ -5,7 +5,6 @@ cobbler
 collectd
 concat
 corosync
-create_resources
 dnsmasq
 drbd
 glance
@@ -14,7 +13,6 @@ horizon
 inifile
 keystone
 memcached
-monit
 mysql
 naginator
 nova
