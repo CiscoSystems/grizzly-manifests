@@ -139,7 +139,8 @@ def setup_apt_repo():
         try:
             os.remove(APT_CONFIG_FILE)
         except IOError, OSError:
-            raise Exception("Unable to remove the config file [%s]" % APT_CONFIG_FILE)
+            raise Exception("Unable to remove the config " \
+                            "file [%s]" % APT_CONFIG_FILE)
     # no config file found, lets set one up
     with open(APT_CONFIG_FILE, 'a') as f:
         f.write(setup_apt_sources())
@@ -183,18 +184,19 @@ def setup_yum_repo():
      enabled=1
      gpgcheck=1
      gpgkey=ftp://ftpeng.cisco.com/openstack/cisco/yum/dist/grizzly/coe.pub
-     
+
     """
     if os.path.exists(YUM_CONFIG_FILE):
         # could be outdated, lets remove and set it up fresh
         try:
             os.remove(YUM_CONFIG_FILE)
         except IOError, OSError:
-            raise Exception("Unable to remove the config file [%s]" % YUM_CONFIG_FILE)
+            raise Exception("Unable to remove the config file [%s]" \
+                            % YUM_CONFIG_FILE)
     # no config found, let download from the repo url
     with open(YUM_CONFIG_FILE, 'wb') as repo_file:
         repo_file.write(YUM_REPO_DATA)
- 
+
 
 def yum_install(modules):
     """
@@ -220,22 +222,24 @@ def main():
       - install necessary packages
     """
     parser = optparse.OptionParser()
-    parser.add_option('--repo', help="Name of the repo to fetch packages from; example: grizzly", dest='REPO_NAME')
-    parser.add_option('--apt-repo-url', help="URL for the APT repo", dest='APT_REPO_URL')
+    parser.add_option('--repo', help="Name of the repo to fetch packages " \
+                      "from; example: grizzly", dest='REPO_NAME')
+    parser.add_option('--apt-repo-url', help="URL for the APT repo", \
+                      dest='APT_REPO_URL')
     (args, opts) = parser.parse_args()
     # set the commandline option to globals
     override_globals(args)
     # parse and get list of modules
     modules = get_modules(MODULE_FILE)
     # set up the repos and perform install
-    distro = get_distribution().lower() 
+    distro = get_distribution().lower()
     if distro in ["redhat", "fedora"]:
         setup_yum_repo()
         yum_install(modules)
-    elif distro in ["ubuntu",]:
+    elif distro in ["ubuntu", ]:
         setup_apt_repo()
         apt_install(modules)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     main()
