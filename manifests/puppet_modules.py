@@ -25,7 +25,7 @@ import subprocess
 #-------- Default Constants ---------------------
 
 ## ----- global variables that can be configurable via cmdline.
-REPO_NAME = "folsom"
+REPO_NAME = "grizzly"
 APT_REPO_URL = "ftp://ftpeng.cisco.com/openstack/cisco"
 # uncomment this line if you prefer to use http
 # APT_REPO_URL = "http://128.107.252.163/openstack/cisco"
@@ -35,7 +35,7 @@ MODULE_FILE = "modules.list"
 PUPPET_PATH = "/etc/puppet/"
 
 # config file locations for yum and apt
-APT_CONFIG_FILE = "/etc/apt/sources.list.d/cisco-openstack-mirror_folsom.list"
+APT_CONFIG_FILE = "/etc/apt/sources.list.d/cisco-openstack-mirror_grizzly.list"
 YUM_CONFIG_FILE = "/etc/yum.repos.d/cisco-openstack-mirror.repo"
 
 # gpg keys for yum and apt repos with which packages are signed
@@ -220,7 +220,7 @@ def main():
       - install necessary packages
     """
     parser = optparse.OptionParser()
-    parser.add_option('--repo', help="Name of the repo to fetch packages from; example: folsom", dest='REPO_NAME')
+    parser.add_option('--repo', help="Name of the repo to fetch packages from; example: grizzly", dest='REPO_NAME')
     parser.add_option('--apt-repo-url', help="URL for the APT repo", dest='APT_REPO_URL')
     (args, opts) = parser.parse_args()
     # set the commandline option to globals
