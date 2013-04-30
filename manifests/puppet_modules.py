@@ -17,18 +17,21 @@
 #      Example: "folsom/snapshots/2012.2.2"
 
 import os
-import sys
 import optparse
 import platform
 import tempfile
-from subprocess import STDOUT, check_call
-
+import subprocess
 
 #-------- Default Constants ---------------------
 
-##TODO: Some of these could be made configurable via cmdline.
-MODULE_FILE = "modules.list"
+## ----- global variables that can be configurable via cmdline.
 REPO_NAME = "folsom"
+APT_REPO_URL = "ftp://ftpeng.cisco.com/openstack/cisco"
+# uncomment this line if you prefer to use http
+# APT_REPO_URL = "http://128.107.252.163/openstack/cisco"
+
+## ------- Other Constants --------------------------
+MODULE_FILE = "modules.list"
 PUPPET_PATH = "/etc/puppet/"
 
 # config file locations for yum and apt
@@ -67,13 +70,13 @@ xKyLYs5m34d4a0it6wsMem3YCefSYBjyLGSd/kCI/CgOdGN1ZY1HSdLmmjiDkQPQ
 UcXHbA==
 =v6jg
 -----END PGP PUBLIC KEY BLOCK-----"""
-##TODO: Once we have a gpg for redhat manifest packages, include it here.
+##TODO: Once we have a gpg for red hat manifest packages, include it here.
 YUM_REPO_KEY = """TBD"""
 
 ##TODO: replace this with right url location once in place. Ideally
 # we want a generic url with type and dist info. For example:
 # http://eng.cisco.com/openstack/cisco/$type/dist/$release/
-# where $type = 'yum' or 'apt'; $release= 'folsum' or 'grizzly' etc.
+# where $type = 'yum' or 'apt'; $release= 'folsom' or 'grizzly' etc.
 
 # yum repo url and .repo file setup
 YUM_REPO_URL = "ftp://ftpeng.cisco.com/openstack/cisco/fedora/dist/grizzly"
@@ -84,17 +87,31 @@ baseurl= %(repo_url)s
 enabled=1
 gpgcheck=1
 gpgkey=%(repo_url)s/coe.pub
-""" % {'repo_url' : YUM_REPO_URL}
+""" % {'repo_url': YUM_REPO_URL}
 
-# APT repo url and source file setup
-APT_REPO_URL = "ftp://ftpeng.cisco.com/openstack/cisco"
-APT_REPO_DATA="""
+# --- helper calls to fetch and install packages ----------
+
+
+def setup_apt_sources():
+    """
+    # APT repo url and source file setup
+    """
+    global REPO_NAME, APT_REPO_URL
+    return """
 # cisco-openstack-mirror_folsom
 deb %(repo_url)s %(repo_name)s main
-deb-src %(repo_url)s %(repo_name)s main""" % {'repo_url' : APT_REPO_URL, 
-                                              'repo_name' :REPO_NAME}
+deb-src %(repo_url)s %(repo_name)s main""" % {'repo_url': APT_REPO_URL,
+                                              'repo_name': REPO_NAME}
 
-# --- helper calls to fetch the modules ----------
+
+def override_globals(options):
+    """
+    Override the global variables passed in via commandline
+    """
+    for opt_var in ["REPO_NAME", "APT_REPO_URL"]:
+        if getattr(options, opt_var) is not None:
+            # vars()[opt_var] = getattr(options, opt_var)
+            globals().__setitem__(opt_var, getattr(options, opt_var))
 
 
 def get_modules(modules_file=MODULE_FILE):
@@ -103,7 +120,7 @@ def get_modules(modules_file=MODULE_FILE):
      We need to prepend the module name with "puppet-" to match the
      package names.
     """
-    return ["puppet-"+ line.strip() for line in open(modules_file)]
+    return ["puppet-" + line.strip() for line in open(modules_file)]
 
 
 def get_distribution():
@@ -118,11 +135,14 @@ def setup_apt_repo():
      Setup apt repo to install manifest packages via apt
     """
     if os.path.exists(APT_CONFIG_FILE):
-        print("Repo already in %s; assuming it is correct and not adding an additional repo configuration." % APT_CONFIG_FILE)
-        return 
+        # could be outdated, lets remove and set it up fresh
+        try:
+            os.remove(APT_CONFIG_FILE)
+        except IOError, OSError:
+            raise Exception("Unable to remove the config file [%s]" % APT_CONFIG_FILE)
     # no config file found, lets set one up
     with open(APT_CONFIG_FILE, 'a') as f:
-        f.write(APT_REPO_DATA)
+        f.write(setup_apt_sources())
     # add gpg key to apt
     apt_key_add()
 
@@ -132,25 +152,24 @@ def apt_key_add():
      Add the gpg key to apt repository
     """
     with tempfile.NamedTemporaryFile() as temp:
-       temp.write(APT_REPO_KEY)
-       temp.flush()
-       check_call(['apt-key', 'add', temp.name],
-             stdout=open(os.devnull,'wb'), stderr=STDOUT) 
+        temp.write(APT_REPO_KEY)
+        temp.flush()
+        run_command(['apt-key', 'add', temp.name])
+
 
 def apt_update():
     """
      Update apt repo
     """
-    check_call(['apt-get', 'update'],
-         stdout=open(os.devnull,'wb'), stderr=STDOUT)
+    run_command(['apt-get', 'update'])
+
 
 def apt_install(modules):
     """
      Install packages via apt
     """
     apt_update()
-    check_call(['apt-get', 'install', '-y', " ".join(modules)],
-         stdout=open(os.devnull,'wb'), stderr=STDOUT) 
+    run_command(['apt-get', 'install', '-y'] + modules)
 
 
 def setup_yum_repo():
@@ -167,20 +186,29 @@ def setup_yum_repo():
      
     """
     if os.path.exists(YUM_CONFIG_FILE):
-        print("Repo already in %s; assuming it is correct and not adding an additional repo configuration." % YUM_CONFIG_FILE)
-        return
-    # no config found, let download from the repo url 
+        # could be outdated, lets remove and set it up fresh
+        try:
+            os.remove(YUM_CONFIG_FILE)
+        except IOError, OSError:
+            raise Exception("Unable to remove the config file [%s]" % YUM_CONFIG_FILE)
+    # no config found, let download from the repo url
     with open(YUM_CONFIG_FILE, 'wb') as repo_file:
         repo_file.write(YUM_REPO_DATA)
  
-
 
 def yum_install(modules):
     """
      Install packages via yum
     """
-    check_call(['yum', 'install', '-y', " ".join(modules)],
-         stdout=open(os.devnull,'wb'), stderr=STDOUT) 
+    run_command(['yum', 'install', '-y', " ".join(modules)])
+
+
+def run_command(command_args):
+    """
+    Execute system calls
+    """
+    proc = subprocess.Popen(command_args, shell=False)
+    proc.communicate()
 
 
 def main():
@@ -191,17 +219,22 @@ def main():
       - Perform repo setup for yum or apt repos
       - install necessary packages
     """
+    parser = optparse.OptionParser()
+    parser.add_option('--repo', help="Name of the repo to fetch packages from; example: folsom", dest='REPO_NAME')
+    parser.add_option('--apt-repo-url', help="URL for the APT repo", dest='APT_REPO_URL')
+    (args, opts) = parser.parse_args()
+    # set the commandline option to globals
+    override_globals(args)
     # parse and get list of modules
     modules = get_modules(MODULE_FILE)
-    
     # set up the repos and perform install
     distro = get_distribution().lower() 
     if distro in ["redhat", "fedora"]:
-       setup_yum_repo()
-       yum_install(modules)
+        setup_yum_repo()
+        yum_install(modules)
     elif distro in ["ubuntu",]:
-       setup_apt_repo()
-       apt_install(modules)
+        setup_apt_repo()
+        apt_install(modules)
 
 
 if __name__=='__main__':
