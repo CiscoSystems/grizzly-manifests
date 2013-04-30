@@ -220,7 +220,7 @@ def main():
       - install necessary packages
     """
     parser = optparse.OptionParser()
-    parser.add_option('--repo', help="Name of the repo to fetch packages from; example: folsom", dest='REPO_NAME')
+    parser.add_option('--repo', help="Name of the repo to fetch packages from; example: grizzly", dest='REPO_NAME')
     parser.add_option('--apt-repo-url', help="URL for the APT repo", dest='APT_REPO_URL')
     (args, opts) = parser.parse_args()
     # set the commandline option to globals
