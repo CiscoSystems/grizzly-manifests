@@ -2,13 +2,14 @@
 # You will likely also want to change the IP addresses, domain name, and perhaps
 # even the proxy address
 
-define cobbler_node($node_type, $mac, $ip, $power_address, $power_id = undef, $power_user = 'admin', power_password = 'password', power_type = 'ipmitool' ) {
+define cobbler_node($node_type, $mac, $ip, $power_address, $power_id = undef,
+  $power_user = 'admin', $power_password = 'password', $power_type = 'ipmitool' ) {
 cobbler::node { $name:
     mac            => $mac,
     ip             => $ip,
     ### UCS CIMC Details ###
-    # Change these parameters to match the management console settings for your
-server
+    # Change these parameters to match the management console settings
+    # for your server
     power_address  => $power_address,
     power_user     => $power_user,
     power_password => $power_password,
