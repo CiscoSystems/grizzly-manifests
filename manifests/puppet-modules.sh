@@ -3,7 +3,7 @@
 # for the deployment of the Cisco OpenStack Edition (COE)
 echo "Getting Puppet Modules"
 FILE_LIST=modules.list
-RELEASE=folsom
+RELEASE=grizzly-proposed
 REPO=https://github.com/CiscoSystems/
 PUPPET_PATH=/etc/puppet/
 

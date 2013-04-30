@@ -77,25 +77,25 @@ if ! run_cmd apt-get $APT_CONFIG install -qym git puppet ipmitool python-softwar
 fi
 
 # Grab the Cisco puppet global manifests (site.pp, etc.), try to update a previously downloaded set first
-echo "Cloning folsom-manifests multi-node repository branch from github.com..."
-if [ -d /root/cisco-folsom-manifests ] ; then
+echo "Cloning grizzly-manifests multi-node repository branch from github.com..."
+if [ -d /root/cisco-grizzly-manifests ] ; then
 	echo -e "Looks like perhaps you ran this script before? We'll try to update your os-docs directory, just in case..."
-	if ! run_cmd git --git-dir=/root/cisco-folsom-manifests/.git/ pull ; then
+	if ! run_cmd git --git-dir=/root/cisco-grizzly-manifests/.git/ pull ; then
 	   echo "That did not work.  Perhaps rename your os-docs directory, and try again?"
 	   exit 1
         fi
 fi
 
 # Get a new set, as there was no previous download
-if [ ! -d /root/cisco-folsom-manifests ] ; then
-	if ! run_cmd git clone -b multi-node https://github.com/CiscoSystems/folsom-manifests /root/cisco-folsom-manifests ; then
+if [ ! -d /root/cisco-grizzly-manifests ] ; then
+	if ! run_cmd git clone -b multi-node https://github.com/CiscoSystems/grizzly-manifests /root/cisco-grizzly-manifests ; then
  	  echo "Can't run git clone!"
 	  exit 1
 	fi
 fi
 
 echo "Copying manifests examples to manifest dir..."
-if ! run_cmd cp /root/cisco-folsom-manifests/manifests/* /etc/puppet/manifests/ ;then
+if ! run_cmd cp /root/cisco-grizzly-manifests/manifests/* /etc/puppet/manifests/ ;then
   echo "Can't copy sample manifests!!!"
   exit 1
 fi

@@ -5,16 +5,16 @@
 # Choices include:
 #    * A main release repo.  This will include the latest tested and 
 #      released modules.  This is the recommended choice for most users.
-#      Example: "folsom"
+#      Example: "grizzly"
 #    * A proposed repo.  This includes the latest code that developers have
 #      committed.  It is considered bleeding edge and may not have been
 #      fully vetted.  This is recommended only for developers.
-#      Example: "folsom-proposed"
+#      Example: "grizzly-proposed"
 #    * A specific maintenance release repo.  This allows you to download
 #      modules from a specific release.  This is recomended option if you
 #      have qualified only a specific release for your environment and do
 #      not wish to (yet) use the latest stable updates.
-#      Example: "folsom/snapshots/2012.2.2"
+#      Example: "grizzly/snapshots/2013.4.1"
 
 import os
 import optparse
@@ -25,7 +25,7 @@ import subprocess
 #-------- Default Constants ---------------------
 
 ## ----- global variables that can be configurable via cmdline.
-REPO_NAME = "folsom"
+REPO_NAME = "grizzly-proposed"
 APT_REPO_URL = "ftp://ftpeng.cisco.com/openstack/cisco"
 # uncomment this line if you prefer to use http
 # APT_REPO_URL = "http://128.107.252.163/openstack/cisco"
@@ -35,7 +35,7 @@ MODULE_FILE = "modules.list"
 PUPPET_PATH = "/etc/puppet/"
 
 # config file locations for yum and apt
-APT_CONFIG_FILE = "/etc/apt/sources.list.d/cisco-openstack-mirror_folsom.list"
+APT_CONFIG_FILE = "/etc/apt/sources.list.d/cisco-openstack-mirror_grizzly.list"
 YUM_CONFIG_FILE = "/etc/yum.repos.d/cisco-openstack-mirror.repo"
 
 # gpg keys for yum and apt repos with which packages are signed
@@ -98,7 +98,7 @@ def setup_apt_sources():
     """
     global REPO_NAME, APT_REPO_URL
     return """
-# cisco-openstack-mirror_folsom
+# cisco-openstack-mirror_grizzly
 deb %(repo_url)s %(repo_name)s main
 deb-src %(repo_url)s %(repo_name)s main""" % {'repo_url': APT_REPO_URL,
                                               'repo_name': REPO_NAME}
@@ -220,7 +220,7 @@ def main():
       - install necessary packages
     """
     parser = optparse.OptionParser()
-    parser.add_option('--repo', help="Name of the repo to fetch packages from; example: folsom", dest='REPO_NAME')
+    parser.add_option('--repo', help="Name of the repo to fetch packages from; example: grizzly", dest='REPO_NAME')
     parser.add_option('--apt-repo-url', help="URL for the APT repo", dest='APT_REPO_URL')
     (args, opts) = parser.parse_args()
     # set the commandline option to globals
