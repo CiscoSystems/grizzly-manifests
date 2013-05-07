@@ -79,8 +79,7 @@ YUM_REPO_KEY = """TBD"""
 # where $type = 'yum' or 'apt'; $release= 'folsom' or 'grizzly' etc.
 
 # yum repo url and .repo file setup
-#YUM_REPO_URL = "ftp://ftpeng.cisco.com/openstack/cisco/fedora/dist/grizzly"
-YUM_REPO_URL = "http://koji-server.cisco.com/repos/grizzly-el6-devel-build/latest/x86_64/"
+YUM_REPO_URL = "ftp://ftpeng.cisco.com/openstack/cisco/fedora/dist/grizzly"
 YUM_REPO_DATA = """
 [cisco-openstack-mirror]
 name=Cisco Openstack Repository
