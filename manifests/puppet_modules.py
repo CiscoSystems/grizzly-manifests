@@ -17,6 +17,7 @@
 #      Example: "grizzly/snapshots/2013.4.1"
 
 import os
+import sys
 import optparse
 import platform
 import tempfile
@@ -221,6 +222,12 @@ def main():
       - Perform repo setup for yum or apt repos
       - install necessary packages
     """
+    
+    #bail if not root or sudo
+    if not os.getenv("USER") == 'root':
+        print("Must run as root or sudo")
+        sys.exit(1)
+    
     parser = optparse.OptionParser()
     parser.add_option('--repo', help="Name of the repo to fetch packages " \
                       "from; example: grizzly", dest='REPO_NAME')
