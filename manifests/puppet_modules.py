@@ -85,7 +85,7 @@ YUM_REPO_DATA = """
 name=Cisco Openstack Repository
 baseurl= %(repo_url)s
 enabled=1
-gpgcheck=1
+gpgcheck=0
 gpgkey=%(repo_url)s/coe.pub
 """ % {'repo_url': YUM_REPO_URL}
 
@@ -202,7 +202,7 @@ def yum_install(modules):
     """
      Install packages via yum
     """
-    run_command(['yum', 'install', '-y', " ".join(modules)])
+    run_command(['yum', 'install', '-y'] + modules)
 
 
 def run_command(command_args):
@@ -221,14 +221,6 @@ def main():
       - Perform repo setup for yum or apt repos
       - install necessary packages
     """
-    parser = optparse.OptionParser()
-    parser.add_option('--repo', help="Name of the repo to fetch packages " \
-                      "from; example: grizzly", dest='REPO_NAME')
-    parser.add_option('--apt-repo-url', help="URL for the APT repo", \
-                      dest='APT_REPO_URL')
-    (args, opts) = parser.parse_args()
-    # set the commandline option to globals
-    override_globals(args)
     # parse and get list of modules
     modules = get_modules(MODULE_FILE)
     # set up the repos and perform install
