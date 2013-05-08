@@ -17,6 +17,7 @@
 #      Example: "grizzly/snapshots/2013.4.1"
 
 import os
+import sys
 import optparse
 import platform
 import tempfile
@@ -221,6 +222,12 @@ def main():
       - Perform repo setup for yum or apt repos
       - install necessary packages
     """
+    
+    #bail if not root or sudo
+    if not os.getenv("USER") == 'root':
+        print("Must run as root or sudo")
+        sys.exit(1)
+    
     # parse and get list of modules
     modules = get_modules(MODULE_FILE)
     # set up the repos and perform install
@@ -231,7 +238,6 @@ def main():
     elif distro in ["ubuntu", ]:
         setup_apt_repo()
         apt_install(modules)
-
 
 if __name__ == '__main__':
     main()
