@@ -12,7 +12,7 @@ node base {
     # Disable pipelining to avoid unfortunate interactions between apt and
     # upstream network gear that does not properly handle http pipelining
     # See https://bugs.launchpad.net/ubuntu/+source/apt/+bug/996151 for details
-    if ($operatingsystem =~ /(?i:ubuntu|debian)/) {
+    if ($osfamily == 'debian') {
         file { '/etc/apt/apt.conf.d/00no_pipelining':
             ensure  => file,
             owner   => 'root',
@@ -67,7 +67,7 @@ node base {
 		originator => 'Cisco'
     	}
     }
-    elsif ($operatingsystem =~ /(?i:centos|redhat)/) {
+    elsif ($osfamily == 'redhat') {
          yumrepo {
              "cisco-openstack-mirror":
              descr     => "Cisco Openstack Repository",
@@ -75,6 +75,8 @@ node base {
              gpgcheck => "0", #TODO(prad): Add gpg key
              enabled  => "1";
         }
+        # add a resource dependency so yumrepo loads before package
+        Yumrepo <| |> -> Package <|provider == yum |>
     }
 
     class { pip: }
