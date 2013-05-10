@@ -76,7 +76,7 @@ node base {
              enabled  => "1";
         }
         # add a resource dependency so yumrepo loads before package
-        Yumrepo <| |> -> Package <|provider == yum |>
+        Yumrepo <| |> -> Package <| |>
     }
 
     class { pip: }
