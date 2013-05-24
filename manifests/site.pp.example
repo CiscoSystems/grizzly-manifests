@@ -127,10 +127,16 @@ $glance_db_password      = 'glance_pass'
 $glance_user_password    = 'glance_pass'
 $glance_sql_connection   = "mysql://glance:${glance_db_password}@${controller_node_address}/glance"
 $glance_on_swift         = false
+$cinder_user_password    = 'cinder_pass'
+$cinder_db_password      = 'cinder_pass'
+$quantum_user_password   = 'quantum_pass'
+$quantum_db_password     = 'quantum_pass'
 $rabbit_password         = 'openstack_rabbit_password'
 $rabbit_user             = 'openstack_rabbit_user'
 # Nova DB connection
 $sql_connection 	 = "mysql://${nova_user}:${nova_db_password}@${controller_node_address}/nova"
+# glance backend configuration, supports file or swift
+$glance_backend = 'file'
 
 #### end shared variables #################
 
@@ -223,14 +229,16 @@ node build-server inherits build-node { }
 # Change control_server to the host name of your control node
 node control-server inherits os_base {
   class { 'control':
-    internal_ip => '192.168.242.10'
+    internal_ip => '192.168.242.10',
+    vm_net_ip   => $ipaddress_eth3,
   }
 }
 
 # Change compute_server01 to the host name of your first compute node
 node compute-server01 inherits os_base {
   class { 'compute':
-    internal_ip => '192.168.242.21'
+    internal_ip => '192.168.242.21',
+    vm_net_ip   => $ipaddress_eth3,
   }
 }
 
