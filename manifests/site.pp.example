@@ -191,6 +191,11 @@ $ip 		= "${cobbler_node_ip}"
 $dns_service 	= "dnsmasq"
 $dhcp_service 	= "dnsmasq"
 
+# Enable network interface bonding. This will only enable the bonding module in the OS, 
+# it won't acutally bond any interfaces. Edit the networking interfaces template to set 
+# up interface bonds as required after setting this to true should bonding be required.
+#$interface_bonding = 'true' 
+
 # Enable ipv6 router edvertisement
 #$ipv6_ra = '1'
 
