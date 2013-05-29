@@ -33,7 +33,7 @@ if ($::ipv6_ra == "") {
 }
 
 if ($::interface_bonding == 'true'){
-  $bonding = 'echo "bonding" >> /target/etc/modules'
+  $bonding = "echo 'bonding' >> /target/etc/modules"
 } else {
   $bonding = ''
 }
