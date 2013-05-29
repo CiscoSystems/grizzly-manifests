@@ -31,7 +31,14 @@ if ($::ipv6_ra == "") {
 } else {
   $ra = $::ipv6_ra 
 }
+
+if ($::interface_bonding == 'true'){
+  $bonding = 'echo "bonding" >> /target/etc/modules'
+} else {
+  $bonding = ''
+}
  
+$interfaces_file=regsubst(template("interfaces.erb"), '$', "\\n\\", "G")
 
 ####### Shared Variables from Site.pp #######
 $cobbler_node_fqdn 	        = "${::build_node_name}.${::domain_name}"
@@ -47,12 +54,17 @@ sed -e "/logdir/ a pluginsync=true" -i /target/etc/puppet/puppet.conf ; \
 sed -e "/logdir/ a server=%s" -i /target/etc/puppet/puppet.conf ; \
 echo -e "server %s iburst" > /target/etc/ntp.conf ; \
 echo "8021q" >> /target/etc/modules ; \
+%s ; \
 echo "net.ipv6.conf.default.autoconf=%s" >> /target/etc/sysctl.conf ; \
 echo "net.ipv6.conf.default.accept_ra=%s" >> /target/etc/sysctl.conf ; \
 echo "net.ipv6.conf.all.autoconf=%s" >> /target/etc/sysctl.conf ; \
 echo "net.ipv6.conf.all.accept_ra=%s" >> /target/etc/sysctl.conf ; \
+ifconf="`tail +11 </etc/network/interfaces`" ; \
+echo -e "%s
+" > /target/etc/network/interfaces ; \ 
 true
-', $cobbler_node_fqdn, $cobbler_node_fqdn, $ra,$ra,$ra,$ra),
+', $cobbler_node_fqdn, $cobbler_node_fqdn, $bonding,
+   $ra,$ra,$ra,$ra, $interfaces_file),
   proxy 		=> "http://${cobbler_node_fqdn}:3142/",
   expert_disk 		=> true,
   diskpart 		=> [$::install_drive],
