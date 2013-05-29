@@ -51,7 +51,6 @@ echo "net.ipv6.conf.default.autoconf=%s" >> /target/etc/sysctl.conf ; \
 echo "net.ipv6.conf.default.accept_ra=%s" >> /target/etc/sysctl.conf ; \
 echo "net.ipv6.conf.all.autoconf=%s" >> /target/etc/sysctl.conf ; \
 echo "net.ipv6.conf.all.accept_ra=%s" >> /target/etc/sysctl.conf ; \
-true
 ', $cobbler_node_fqdn, $cobbler_node_fqdn, $ra,$ra,$ra,$ra),
   proxy 		=> "http://${cobbler_node_fqdn}:3142/",
   expert_disk 		=> true,

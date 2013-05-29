@@ -143,7 +143,7 @@ node /build-node/ inherits master-node {
 # OpenStack compute node
 
 # Begin compute node
-  cobbler_node { "compute-server01": node_type => "compute", mac => "11:22:33:44:55:66", ip => "192.168.242.21", power_address  => "192.168.242.121" }
+  cobbler_node { "compute-server01": node_type => "compute", mac => "00:11:22:33:44:66", ip => "192.168.242.21", power_address  => "192.168.242.121" }
 # Example with UCS blade power_address with a sub-group (in UCSM), and a ServiceProfile for power_id
 # you will need to change power type to 'USC' in the define macro above 
 #  cobbler_node { "compute-server01": node_type => "compute", mac => "11:22:33:44:66:77", ip => "192.168.242.21", power_address  => "192.168.242.121:org-cisco", power_id => "OpenStack-1" }
