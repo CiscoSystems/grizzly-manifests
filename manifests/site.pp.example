@@ -8,6 +8,13 @@
 # If you do not use an HTTP/HTTPS proxy, leave this setting commented out.
 #$proxy			= "http://proxy-server:port-number"
 
+########### package repo configuration ##########
+#
+# The package repos used to install openstack
+$package_repo = 'cisco_repo'
+# Alternatively, the upstream Ubuntu package from cloud archive can be used
+# $package_repo = 'cloud_archive'
+
 # If you are behind a proxy you may choose not to use our ftp distribution, and
 # instead try our http distribution location. Note the http location is not
 # a permanent location and may change at any time.
@@ -37,7 +44,7 @@ $node_gateway 		= '192.168.242.1'
 # This domain name will be the name your build and compute nodes use for the local DNS
 # It doesn't have to be the name of your corporate DNS - a local DNS server on the build
 # node will serve addresses in this domain - but if it is, you can also add entries for
-# the nodes in your corporate DNS environment they will be usable *if* the above addresses 
+# the nodes in your corporate DNS environment they will be usable *if* the above addresses
 # are routeable from elsewhere in your network.
 $domain_name 		= 'domain.name'
 # This setting likely does not need to be changed
@@ -65,7 +72,7 @@ $autostart_puppet       = true
 
 # If the setup uses the UCS Bseries blades, enter the port on which the
 # ucsm accepts requests. By default the UCSM is enabled to accept requests
-# on port 443 (https). If https is disabled and only http is used, set 
+# on port 443 (https). If https is disabled and only http is used, set
 # $ucsm_port = '80'
 $ucsm_port = '443'
 
@@ -97,7 +104,7 @@ $controller_node_internal      = $controller_node_address
 # This is also known as the Management Interface
 $public_interface        	= 'eth0'
 # Define the interface used for vm networking connectivity when nova-network is being used.
-# Quantum does not require this value, so using eth0 will typically be fine. 
+# Quantum does not require this value, so using eth0 will typically be fine.
 $private_interface		= 'eth0'
 # Specify the interface used for external connectivity such as floating IPs (only in network/controller node)
 $external_interface	 	= 'eth1'
@@ -120,10 +127,16 @@ $glance_db_password      = 'glance_pass'
 $glance_user_password    = 'glance_pass'
 $glance_sql_connection   = "mysql://glance:${glance_db_password}@${controller_node_address}/glance"
 $glance_on_swift         = false
+$cinder_user_password    = 'cinder_pass'
+$cinder_db_password      = 'cinder_pass'
+$quantum_user_password   = 'quantum_pass'
+$quantum_db_password     = 'quantum_pass'
 $rabbit_password         = 'openstack_rabbit_password'
 $rabbit_user             = 'openstack_rabbit_user'
 # Nova DB connection
 $sql_connection 	 = "mysql://${nova_user}:${nova_db_password}@${controller_node_address}/nova"
+# glance backend configuration, supports file or swift
+$glance_backend = 'file'
 
 #### end shared variables #################
 
@@ -165,7 +178,15 @@ node /build-node/ inherits master-node {
 # OpenStack controller, and change the "mac" to the MAC address of the boot interface of your
 # OpenStack controller. Change the "ip" to the IP address of your OpenStack controller
 
-  cobbler_node { "control-server": node_type => "control", mac => "00:11:22:33:44:55", ip => "192.168.242.10", power_address  => "192.168.242.110", power_user => "admin", power_password => "password", power_type => "ipmitool" }
+  cobbler_node { "control-server":
+    node_type => "control",
+    mac => "00:11:22:33:44:55",
+    ip => "192.168.242.10",
+    power_address  => "192.168.242.110",
+    power_user => "admin",
+    power_password => "password",
+    power_type => "ipmitool"
+  }
 
 # This block defines the first compute server. Replace "compute_server01" with the host name
 # of your first OpenStack compute node, and change the "mac" to the MAC address of the boot
@@ -173,16 +194,27 @@ node /build-node/ inherits master-node {
 # OpenStack compute node
 
 # Begin compute node
-  cobbler_node { "compute-server01": node_type => "compute", mac => "00:11:22:33:44:66", ip => "192.168.242.21", power_address  => "192.168.242.121" }
+  cobbler_node { "compute-server01":
+    node_type => "compute",
+    mac => "11:22:33:44:55:66",
+    ip => "192.168.242.21",
+    power_address  => "192.168.242.121"
+  }
 # Example with UCS blade power_address with a sub-group (in UCSM), and a ServiceProfile for power_id
-# you will need to change power type to 'USC' in the define macro above 
-#  cobbler_node { "compute-server01": node_type => "compute", mac => "11:22:33:44:66:77", ip => "192.168.242.21", power_address  => "192.168.242.121:org-cisco", power_id => "OpenStack-1" }
+# you will need to change power type to 'USC' in the define macro above
+#  cobbler_node { "compute-server01":
+#    node_type => "compute",
+#    mac => "11:22:33:44:66:77",
+#    ip => "192.168.242.21",
+#    power_address  => "192.168.242.121:org-cisco",
+#    power_id => "OpenStack-1"
+#  }
 # End compute node
 
 ### Repeat as needed ###
 # Make a copy of your compute node block above for each additional OpenStack node in your cluster
 # and paste the copy in this section. Be sure to change the host name, mac, ip, and power settings
-# for each node 
+# for each node
 
 
 ### End repeated nodes ###
@@ -195,10 +227,20 @@ node /build-node/ inherits master-node {
 node build-server inherits build-node { }
 
 # Change control_server to the host name of your control node
-node control-server inherits os_base { class { control: internal_ip => '192.168.242.10'} }
+node control-server inherits os_base {
+  class { 'control':
+    internal_ip => '192.168.242.10',
+    vm_net_ip   => $ipaddress_eth3,
+  }
+}
 
 # Change compute_server01 to the host name of your first compute node
-node compute-server01 inherits os_base { class { compute: internal_ip => '192.168.242.21'} }
+node compute-server01 inherits os_base {
+  class { 'compute':
+    internal_ip => '192.168.242.21',
+    vm_net_ip   => $ipaddress_eth3,
+  }
+}
 
 ### Repeat as needed ###
 # Copy the compute_server01 line above and paste a copy here for each additional OpenStack node in
