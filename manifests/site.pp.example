@@ -8,6 +8,13 @@
 # If you do not use an HTTP/HTTPS proxy, leave this setting commented out.
 #$proxy			= "http://proxy-server:port-number"
 
+########### package repo configuration ##########
+#
+# The package repos used to install openstack
+$package_repo = 'cisco_repo'
+# Alternatively, the upstream Ubuntu package from cloud archive can be used
+# $package_repo = 'cloud_archive'
+
 # If you are behind a proxy you may choose not to use our ftp distribution, and
 # instead try our http distribution location. Note the http location is not
 # a permanent location and may change at any time.
