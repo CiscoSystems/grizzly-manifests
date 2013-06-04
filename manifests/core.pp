@@ -5,30 +5,30 @@
 
 
 node base {
-    $build_node_fqdn = "${::build_node_name}.${::domain_name}"
+  $build_node_fqdn = "${::build_node_name}.${::domain_name}"
 
-    ########### Folsom Release ###############
+  ########### Folsom Release ###############
 
     # Disable pipelining to avoid unfortunate interactions between apt and
     # upstream network gear that does not properly handle http pipelining
     # See https://bugs.launchpad.net/ubuntu/+source/apt/+bug/996151 for details
     if ($osfamily == 'debian') {
-        file { '/etc/apt/apt.conf.d/00no_pipelining':
-            ensure  => file,
-            owner   => 'root',
-            group   => 'root',
-            mode    => '0644',
-            content => 'Acquire::http::Pipeline-Depth "0";'
-        }
+      file { '/etc/apt/apt.conf.d/00no_pipelining':
+        ensure  => file,
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        content => 'Acquire::http::Pipeline-Depth "0";'
+      }
 
-        # Load apt prerequisites.  This is only valid on Ubuntu systmes
+      # Load apt prerequisites.  This is only valid on Ubuntu systmes
 
-	    apt::source { "cisco-openstack-mirror_grizzly":
-		location => $::location, 
-		release => "grizzly-proposed",
-		repos => "main",
-		key => "E8CC67053ED3B199",
-		key_content => '-----BEGIN PGP PUBLIC KEY BLOCK-----
+	  apt::source { "cisco-openstack-mirror_grizzly":
+		  location => $::location,
+		  release => "grizzly-proposed",
+		  repos => "main",
+		  key => "E8CC67053ED3B199",
+		  key_content => '-----BEGIN PGP PUBLIC KEY BLOCK-----
 	Version: GnuPG v1.4.11 (GNU/Linux)
 
 	mQENBE/oXVkBCACcjAcV7lRGskECEHovgZ6a2robpBroQBW+tJds7B+qn/DslOAN
@@ -59,83 +59,81 @@ node base {
 	UcXHbA==
 	=v6jg
 	-----END PGP PUBLIC KEY BLOCK-----',
-		proxy => $::proxy,
-	    }
+		  proxy => $::proxy,
+	  }
 
-	    apt::pin { "cisco":
-		priority => '990',
-		originator => 'Cisco'
-    	}
+	  apt::pin { "cisco":
+		  priority => '990',
+		  originator => 'Cisco'
     }
-    elsif ($osfamily == 'redhat') {
-         yumrepo {
-             "cisco-openstack-mirror":
-             descr     => "Cisco Openstack Repository",
-             baseurl  => $::location,
-             gpgcheck => "0", #TODO(prad): Add gpg key
-             enabled  => "1";
-        }
-        # add a resource dependency so yumrepo loads before package
-        Yumrepo <| |> -> Package <| |>
+  }
+  elsif ($osfamily == 'redhat') {
+    yumrepo { 'cisco-openstack-mirror':
+      descr     => "Cisco Openstack Repository",
+      baseurl  => $::location,
+      gpgcheck => "0", #TODO(prad): Add gpg key
+      enabled  => "1";
     }
+    # add a resource dependency so yumrepo loads before package
+    Yumrepo <| |> -> Package <| |>
+  }
 
-    class { pip: }
+  class { pip: }
 
-    # Ensure that the pip packages are fetched appropriately when we're using an
-    # install where there's no direct connection to the net from the openstack
-    # nodes
-    if ! $::default_gateway {
-        Package <| provider=='pip' |> {
-            install_options => "--index-url=http://${build_node_name}/packages/simple/",
-        }
-    } else {
-        if($::proxy) {
-            Package <| provider=='pip' |> {
-                # TODO(ijw): untested
-                install_options => "--proxy=$::proxy"
-            }
-        }
+  # Ensure that the pip packages are fetched appropriately when we're using an
+  # install where there's no direct connection to the net from the openstack
+  # nodes
+  if ! $::default_gateway {
+    Package <| provider=='pip' |> {
+      install_options => "--index-url=http://${build_node_name}/packages/simple/",
     }
-    # (the equivalent work for apt is done by the cobbler boot, which sets this up as
-    # a part of the installation.)
-
-
-    # /etc/hosts entries for the controller nodes
-    host { $::controller_hostname:
-	ip => $::controller_node_internal
+  } else {
+    if($::proxy) {
+      Package <| provider=='pip' |> {
+        # TODO(ijw): untested
+        install_options => "--proxy=$::proxy"
+      }
     }
+  }
+  # (the equivalent work for apt is done by the cobbler boot, which sets this up as
+  # a part of the installation.)
 
-    class { 'collectd':
-        graphitehost		=> $build_node_fqdn,
-	management_interface	=> $::public_interface,
-    }
+
+  # /etc/hosts entries for the controller nodes
+  host { $::controller_hostname:
+	  ip => $::controller_node_internal
+  }
+
+  class { 'collectd':
+    graphitehost		=> $build_node_fqdn,
+	  management_interface	=> $::public_interface,
+  }
 }
 
 node os_base inherits base {
-    $build_node_fqdn = "${::build_node_name}.${::domain_name}"
+  $build_node_fqdn = "${::build_node_name}.${::domain_name}"
 
-    class { ntp:
-	servers		=> [$build_node_fqdn],
-	ensure 		=> running,
-	autoupdate 	=> true,
-    }
+  class { ntp:
+	  servers		=> [$build_node_fqdn],
+	  ensure 		=> running,
+	  autoupdate 	=> true,
+  }
 
     # Deploy a script that can be used to test nova
     class { 'openstack::test_file': }
 
-    class { 'openstack::auth_file':
-	admin_password       => $admin_password,
-	keystone_admin_token => $keystone_admin_token,
-	controller_node      => $controller_node_internal,
-    }
+  class { 'openstack::auth_file':
+	  admin_password       => $admin_password,
+	  keystone_admin_token => $keystone_admin_token,
+	  controller_node      => $controller_node_internal,
+  }
 
-    class { "naginator::base_target":
-    }
+  class { "naginator::base_target": }
 
-    # This value can be set to true to increase debug logging when
-    # trouble-shooting services. It should not generally be set to 
-    # true as it is known to break some OpenStack components
-    $verbose            = false
+  # This value can be set to true to increase debug logging when
+  # trouble-shooting services. It should not generally be set to
+  # true as it is known to break some OpenStack components
+  $verbose            = false
 
 }
 
@@ -225,8 +223,7 @@ class control($internal_ip) {
 	dhcp_use_namespaces     	=> "True",
     }
 
-  class { "naginator::control_target":
-  }
+  class { "naginator::control_target": }
 
 }
 
@@ -295,8 +292,7 @@ class compute($internal_ip) {
 	ovs_sql_connection       	=> "mysql://quantum:quantum@${controller_node_address}/quantum",
     }
 
-    class { "naginator::compute_target":
-    }
+  class { "naginator::compute_target": }
 
 }
 
@@ -304,97 +300,96 @@ class compute($internal_ip) {
 ########### Definition of the Build Node #######################
 #
 # Definition of this node should match the name assigned to the build node in your deployment.
-# In this example we are using build-node, you dont need to use the FQDN. 
+# In this example we are using build-node, you dont need to use the FQDN.
 #
 node master-node inherits "cobbler-node" {
-    $build_node_fqdn = "${::build_node_name}.${::domain_name}"
+  $build_node_fqdn = "${::build_node_name}.${::domain_name}"
 
-    host { $build_node_fqdn: 
-	ip => $::cobbler_node_ip
-    }
+  host { $build_node_fqdn:
+	  ip => $::cobbler_node_ip
+  }
 
-    host { $::build_node_name: 
-	ip => $::cobbler_node_ip
-    }
+  host { $::build_node_name:
+	  ip => $::cobbler_node_ip
+  }
 
-    # Change the servers for your NTP environment
-    # (Must be a reachable NTP Server by your build-node, i.e. ntp.esl.cisco.com)
-    class { ntp:
-	servers 	=> $::ntp_servers,
-	ensure 		=> running,
-	autoupdate 	=> true,
-    }
+  # Change the servers for your NTP environment
+  # (Must be a reachable NTP Server by your build-node, i.e. ntp.esl.cisco.com)
+  class { ntp:
+	  servers 	=> $::ntp_servers,
+	  ensure 		=> running,
+	  autoupdate 	=> true,
+  }
 
-    class { 'naginator':
-    }
+  class { 'naginator': }
 
-    class { 'graphite': 
-	graphitehost 	=> $build_node_fqdn,
-    }
+  class { 'graphite':
+	  graphitehost 	=> $build_node_fqdn,
+  }
 
     # set up a local apt cache.  Eventually this may become a local mirror/repo instead
-    class { apt-cacher-ng: 
-	proxy 		=> $::proxy,
-	avoid_if_range  => true, # Some proxies have issues with range headers
-                                 # this stops us attempting to use them
-                                 # msrginally less efficient with other proxies
+  class { apt-cacher-ng:
+  	proxy 		=> $::proxy,
+  	avoid_if_range  => true, # Some proxies have issues with range headers
+                             # this stops us attempting to use them
+                             # marginally less efficient with other proxies
+  }
+
+  if ! $::default_gateway {
+    # Prefetch the pip packages and put them somewhere the openstack nodes can fetch them
+
+    file {  "/var/www":
+      ensure => 'directory',
+	  }
+
+    file {  "/var/www/packages":
+      ensure  => 'directory',
+      require => File['/var/www'],
     }
 
-    if ! $::default_gateway {
-        # Prefetch the pip packages and put them somewhere the openstack nodes can fetch them
-        
-        file {  "/var/www":
-            ensure => 'directory',
-	    }
-
-        file {  "/var/www/packages":
-            ensure  => 'directory',
-            require => File['/var/www'],
-        }
-
-        if($::proxy) {
-            $proxy_pfx = "/usr/bin/env http_proxy=${::proxy} https_proxy=${::proxy} "
-        } else {
-            $proxy_pfx=""
-        }
-        exec { 'pip2pi':
-            # Can't use package provider because we're changing its behaviour to use the cache
-            command => "${proxy_pfx}/usr/bin/pip install pip2pi",
-            creates => "/usr/local/bin/pip2pi",
-            require => Package['python-pip'],
-        }
-        Package <| provider=='pip' |> {
-            require => Exec['pip-cache']
-        }
-        exec { 'pip-cache':
-            # All the packages that all nodes - build, compute and control - require from pip
-            command => "${proxy_pfx}/usr/local/bin/pip2pi /var/www/packages collectd xenapi django-tagging graphite-web carbon whisper",
-            creates => '/var/www/packages/simple', # It *does*, but you'll want to force a refresh if you change the line above
-            require => Exec['pip2pi'],
-        }
+    if($::proxy) {
+      $proxy_pfx = "/usr/bin/env http_proxy=${::proxy} https_proxy=${::proxy} "
+    } else {
+      $proxy_pfx=""
     }
-
-    # set the right local puppet environment up.  This builds puppetmaster with storedconfigs (a nd a local mysql instance)
-    class { puppet:
-	run_master 		=> true,
-	puppetmaster_address 	=> $build_node_fqdn, 
-	certname 		=> $build_node_fqdn,
-	mysql_password 		=> 'ubuntu',
-    }<-
-
-    file {'/etc/puppet/files':
-	ensure => directory,
-	owner => 'root',
-	group => 'root',
-	mode => '0755',
+    exec { 'pip2pi':
+      # Can't use package provider because we're changing its behaviour to use the cache
+      command => "${proxy_pfx}/usr/bin/pip install pip2pi",
+      creates => "/usr/local/bin/pip2pi",
+      require => Package['python-pip'],
     }
+    Package <| provider=='pip' |> {
+      require => Exec['pip-cache']
+    }
+    exec { 'pip-cache':
+      # All the packages that all nodes - build, compute and control - require from pip
+      command => "${proxy_pfx}/usr/local/bin/pip2pi /var/www/packages collectd xenapi django-tagging graphite-web carbon whisper",
+      creates => '/var/www/packages/simple', # It *does*, but you'll want to force a refresh if you change the line above
+      require => Exec['pip2pi'],
+    }
+  }
 
-    file {'/etc/puppet/fileserver.conf':
-	ensure => file,
-	owner => 'root',
-	group => 'root',
-	mode => '0644',
-	content => '
+  # set the right local puppet environment up.  This builds puppetmaster with storedconfigs (a nd a local mysql instance)
+  class { puppet:
+	  run_master 		=> true,
+	  puppetmaster_address 	=> $build_node_fqdn, 
+	  certname 		=> $build_node_fqdn,
+	  mysql_password 		=> 'ubuntu',
+  }<-
+
+  file {'/etc/puppet/files':
+	  ensure => directory,
+	  owner => 'root',
+	  group => 'root',
+	  mode => '0755',
+  }
+
+  file {'/etc/puppet/fileserver.conf':
+	  ensure => file,
+	  owner => 'root',
+	  group => 'root',
+	  mode => '0644',
+	  content => '
 
 # This file consists of arbitrarily named sections/modules
 # defining where files are served from and to whom
