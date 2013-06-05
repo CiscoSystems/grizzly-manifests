@@ -120,7 +120,9 @@ node os_base inherits base {
   }
 
     # Deploy a script that can be used to test nova
-    class { 'openstack::test_file': }
+    class { 'openstack::test_file':
+      image_type => $::test_file_image_type,
+    }
 
   class { 'openstack::auth_file':
 	  admin_password       => $admin_password,
