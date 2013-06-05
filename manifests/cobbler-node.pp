@@ -40,7 +40,6 @@ $cobbler_node_fqdn 	        = "${::build_node_name}.${::domain_name}"
 	sed -e \"/logdir/ a server=$cobbler_node_fqdn\" -i /target/etc/puppet/puppet.conf ; \
 	echo -e \"server $cobbler_node_fqdn iburst\" > /target/etc/ntp.conf ; \
 	echo '8021q' >> /target/etc/modules ; \
-	true
 	",
   proxy 		=> "http://${cobbler_node_fqdn}:3142/",
   expert_disk 		=> true,
