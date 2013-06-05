@@ -5,30 +5,31 @@
 
 
 node base {
-    $build_node_fqdn = "${::build_node_name}.${::domain_name}"
+  $build_node_fqdn = "${::build_node_name}.${::domain_name}"
 
-    ########### Folsom Release ###############
+  ########### Folsom Release ###############
 
     # Disable pipelining to avoid unfortunate interactions between apt and
     # upstream network gear that does not properly handle http pipelining
     # See https://bugs.launchpad.net/ubuntu/+source/apt/+bug/996151 for details
-
+  if ($osfamily == 'debian') {
     file { '/etc/apt/apt.conf.d/00no_pipelining':
-        ensure  => file,
-        owner   => 'root',
-        group   => 'root',
-        mode    => '0644',
-        content => 'Acquire::http::Pipeline-Depth "0";'
+      ensure  => file,
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      content => 'Acquire::http::Pipeline-Depth "0";'
     }
 
     # Load apt prerequisites.  This is only valid on Ubuntu systmes
 
-    apt::source { "cisco-openstack-mirror_grizzly":
-	location => $::location, 
-	release => "grizzly-proposed",
-	repos => "main",
-	key => "E8CC67053ED3B199",
-	key_content => '-----BEGIN PGP PUBLIC KEY BLOCK-----
+    if($::package_repo == 'cisco_repo') {
+      apt::source { "cisco-openstack-mirror_grizzly":
+        location => $::location,
+        release => "grizzly-proposed",
+        repos => "main",
+        key => "E8CC67053ED3B199",
+        key_content => '-----BEGIN PGP PUBLIC KEY BLOCK-----
 Version: GnuPG v1.4.11 (GNU/Linux)
 
 mQENBE/oXVkBCACcjAcV7lRGskECEHovgZ6a2robpBroQBW+tJds7B+qn/DslOAN
@@ -59,293 +60,209 @@ xKyLYs5m34d4a0it6wsMem3YCefSYBjyLGSd/kCI/CgOdGN1ZY1HSdLmmjiDkQPQ
 UcXHbA==
 =v6jg
 -----END PGP PUBLIC KEY BLOCK-----',
-	proxy => $::proxy,
-    }
+        proxy => $::proxy,
+      }
 
-    apt::pin { "cisco":
-	priority => '990',
-	originator => 'Cisco'
-    }
-
-    class { pip: }
-
-    # Ensure that the pip packages are fetched appropriately when we're using an
-    # install where there's no direct connection to the net from the openstack
-    # nodes
-    if ! $::default_gateway {
-        Package <| provider=='pip' |> {
-            install_options => "--index-url=http://${build_node_name}/packages/simple/",
-        }
+      apt::pin { "cisco":
+        priority => '990',
+        originator => 'Cisco'
+      }
+    } elsif($::package_repo == 'cloud_archive') {
+      apt::source { 'openstack_cloud_archive':
+        location          => "http://ubuntu-cloud.archive.canonical.com/ubuntu",
+        release           => "precise-updates/grizzly",
+        repos             => "main",
+        required_packages => 'ubuntu-cloud-keyring',
+      }
     } else {
-        if($::proxy) {
-            Package <| provider=='pip' |> {
-                # TODO(ijw): untested
-                install_options => "--proxy=$::proxy"
-            }
-        }
+      fail("Unsupported package repo ${::package_repo}")
     }
-    # (the equivalent work for apt is done by the cobbler boot, which sets this up as
-    # a part of the installation.)
+  }
+  elsif ($osfamily == 'redhat') {
+    yumrepo { 'cisco-openstack-mirror':
+      descr     => "Cisco Openstack Repository",
+      baseurl  => $::location,
+      gpgcheck => "0", #TODO(prad): Add gpg key
+      enabled  => "1";
+    }
+    # add a resource dependency so yumrepo loads before package
+    Yumrepo <| |> -> Package <| |>
+  }
+
+  class { pip: }
+
+  # Ensure that the pip packages are fetched appropriately when we're using an
+  # install where there's no direct connection to the net from the openstack
+  # nodes
+  if ! $::default_gateway {
+    Package <| provider=='pip' |> {
+      install_options => "--index-url=http://${build_node_name}/packages/simple/",
+    }
+  } else {
+    if($::proxy) {
+      Package <| provider=='pip' |> {
+        # TODO(ijw): untested
+        install_options => "--proxy=$::proxy"
+      }
+    }
+  }
+  # (the equivalent work for apt is done by the cobbler boot, which sets this up as
+  # a part of the installation.)
 
 
-    # /etc/hosts entries for the controller nodes
-    host { $::controller_hostname:
-	ip => $::controller_node_internal
-    }
+  # /etc/hosts entries for the controller nodes
+  host { $::controller_hostname:
+	  ip => $::controller_node_internal
+  }
 
-    class { 'collectd':
-        graphitehost		=> $build_node_fqdn,
-	management_interface	=> $::public_interface,
-    }
+  class { 'collectd':
+    graphitehost		=> $build_node_fqdn,
+	  management_interface	=> $::public_interface,
+  }
 }
 
 node os_base inherits base {
-    $build_node_fqdn = "${::build_node_name}.${::domain_name}"
+  $build_node_fqdn = "${::build_node_name}.${::domain_name}"
 
-    class { ntp:
-	servers		=> [$build_node_fqdn],
-	ensure 		=> running,
-	autoupdate 	=> true,
-    }
+  class { ntp:
+	  servers		=> [$build_node_fqdn],
+	  ensure 		=> running,
+	  autoupdate 	=> true,
+  }
 
     # Deploy a script that can be used to test nova
-    class { 'openstack::test_file': }
-
-    class { 'openstack::auth_file':
-	admin_password       => $admin_password,
-	keystone_admin_token => $keystone_admin_token,
-	controller_node      => $controller_node_internal,
+    class { 'openstack::test_file':
+      image_type => $::test_file_image_type,
     }
 
-    class { "naginator::base_target":
-    }
+  class { 'openstack::auth_file':
+	  admin_password       => $admin_password,
+	  keystone_admin_token => $keystone_admin_token,
+	  controller_node      => $controller_node_internal,
+  }
 
-    # This value can be set to true to increase debug logging when
-    # trouble-shooting services. It should not generally be set to 
-    # true as it is known to break some OpenStack components
-    $verbose            = false
+  class { "naginator::base_target": }
+
+  # This value can be set to true to increase debug logging when
+  # trouble-shooting services. It should not generally be set to
+  # true as it is known to break some OpenStack components
+  $verbose            = false
 
 }
 
-class control($internal_ip) {
+class control(
+  $internal_ip,
+  $vm_net_ip
+) {
 
-    class { 'openstack::controller':
-	public_address          => $controller_node_public,
-	public_interface        => $public_interface,
-	private_interface       => $private_interface,
-	internal_address        => $controller_node_internal,
-	floating_range          => $floating_ip_range,
-	fixed_range             => $fixed_network_range,
-	# by default it does not enable multi-host mode
-	multi_host              => $multi_host,
-	network_manager         => 'nova.network.quantum.manager.QuantumManager',
-	verbose                 => $verbose,
-	auto_assign_floating_ip => $auto_assign_floating_ip,
-	mysql_root_password     => $mysql_root_password,
-	admin_email             => $admin_email,
-	admin_password          => $admin_password,
-	keystone_db_password    => $keystone_db_password,
-	keystone_admin_token    => $keystone_admin_token,
-	glance_db_password      => $glance_db_password,
-	glance_user_password    => $glance_user_password,
-        glance_sql_connection   => $glance_sql_connection,
-        glance_on_swift         => $glance_on_swift,
-	nova_db_password        => $nova_db_password,
-	nova_user_password      => $nova_user_password,
-	rabbit_password         => $rabbit_password,
-	rabbit_user             => $rabbit_user,
-	export_resources        => false,
+  # in the currently support deployment scenario
+  # all network control services are on the controller.
+  # this is not recomended for production and is merely
+  # used for test setups
+  $enable_dhcp_agent      = true
+  $enable_l3_agent        = true
+  $enable_metadata_agent  = true
 
-	######### quantum variables #############
-	quantum_enabled			=> true,
-	quantum_url             	=> "http://${controller_node_address}:9696",
-	quantum_admin_tenant_name    	=> 'services',
-	quantum_admin_username       	=> 'quantum',
-	quantum_admin_password       	=> 'quantum',
-	quantum_admin_auth_url       	=> "http://${controller_node_address}:35357/v2.0",
-	quantum_ip_overlap              => false,
-	libvirt_vif_driver      	=> 'nova.virt.libvirt.vif.LibvirtHybridOVSBridgeDriver',
-	host         		 	=> 'controller',
-	quantum_sql_connection       	=> "mysql://quantum:quantum@${controller_node_address}/quantum",
-	quantum_auth_host            	=> "${controller_node_address}",
-	quantum_auth_port            	=> "35357",
-	quantum_rabbit_host          	=> "${controller_node_address}",
-	quantum_rabbit_port          	=> "5672",
-	quantum_rabbit_user          	=> "${rabbit_user}",
-	quantum_rabbit_password      	=> "${rabbit_password}",
-	quantum_rabbit_virtual_host  	=> "/",
-	quantum_control_exchange     	=> "quantum",
-	quantum_core_plugin          	=> "quantum.plugins.openvswitch.ovs_quantum_plugin.OVSQuantumPluginV2",
-	ovs_bridge_uplinks      	=> ["br-ex:${external_interface}"],
-	ovs_bridge_mappings          	=> ['default:br-ex'],
-	ovs_tenant_network_type  	=> "gre",
-	ovs_network_vlan_ranges  	=> "default:1000:2000",
-	ovs_integration_bridge   	=> "br-int",
-	ovs_enable_tunneling    	=> "True",
-	ovs_tunnel_bridge         	=> "br-tun",
-	ovs_tunnel_id_ranges     	=> "1:1000",
-	ovs_local_ip             	=> $internal_ip,
-	ovs_server               	=> false,
-	ovs_root_helper          	=> "sudo quantum-rootwrap /etc/quantum/rootwrap.conf",
-	ovs_sql_connection       	=> "mysql://quantum:quantum@${controller_node_address}/quantum",
-	quantum_db_password      	=> "quantum",
-	quantum_db_name        	 	=> 'quantum',
-	quantum_db_user          	=> 'quantum',
-	quantum_db_host          	=> $controller_node_address,
-	quantum_db_allowed_hosts 	=> ['localhost', "${db_allowed_network}"],
-	quantum_db_charset       	=> 'latin1',
-	quantum_db_cluster_id    	=> 'localzone',
-	quantum_email              	=> "quantum@${controller_node_address}",
-	quantum_public_address       	=> "${controller_node_address}",
-	quantum_admin_address        	=> "${controller_node_address}",
-	quantum_internal_address     	=> "${controller_node_address}",
-	quantum_port                 	=> '9696',
-	quantum_region               	=> 'RegionOne',
-	l3_interface_driver          	=> "quantum.agent.linux.interface.OVSInterfaceDriver",
-	l3_use_namespaces            	=> "True",
-	l3_metadata_ip               	=> "${controller_node_address}",
-	l3_external_network_bridge   	=> "br-ex",
-	l3_root_helper               	=> "sudo /usr/bin/quantum-rootwrap /etc/quantum/rootwrap.conf",
-	#quantum dhcp
-	dhcp_state_path         	=> "/var/lib/quantum",
-	dhcp_interface_driver   	=> "quantum.agent.linux.interface.OVSInterfaceDriver",
-	dhcp_driver        	 	=> "quantum.agent.linux.dhcp.Dnsmasq",
-	dhcp_use_namespaces     	=> "True",
-    }
+  class { 'openstack::controller':
+    public_address          => $controller_node_public,
+    # network
+    internal_address        => $controller_node_internal,
+    # by default it does not enable multi-host mode
+    multi_host              => $multi_host,
+    verbose                 => $verbose,
+    auto_assign_floating_ip => $auto_assign_floating_ip,
+    mysql_root_password     => $mysql_root_password,
+    admin_email             => $admin_email,
+    admin_password          => $admin_password,
+    keystone_db_password    => $keystone_db_password,
+    keystone_admin_token    => $keystone_admin_token,
+    glance_db_password      => $glance_db_password,
+    glance_user_password    => $glance_user_password,
 
-# Needed to ensure a proper "second" interface is online
-# This same module may be useable for forcing bonded interfaces as well
+    # TODO this needs to be added
+    glance_backend          => $glance_backend,
 
-  if $::node_gateway {
-    network_config { "$::private_interface":
-      ensure => 'present',
-      hotplug => false,
-      family => 'inet',
-      ipaddress => "$::controller_node_address",
-      method => 'static',
-      netmask => "$::node_netmask",
-      options => { 
-        "dns-search" => "$::domain_name",
-        "dns-nameservers" => "$::cobbler_node_ip", 
-        "gateway" => "$::node_gateway"
-      },
-      onboot => 'true',
-      notify => Service['networking'],
-    }
-  } else {
-    network_config { "$::private_interface":
-      ensure => 'present',
-      hotplug => false,
-      family => 'inet',
-      ipaddress => "$::controller_node_address",
-      method => 'static',
-      netmask => "$::node_netmask",
-      options => { 
-        "dns-search" => "$::domain_name",
-        "dns-nameservers" => "$::cobbler_node_ip", 
-      },
-      onboot => 'true',
-      notify => Service['networking'],
-    }
+    nova_db_password        => $nova_db_password,
+    nova_user_password      => $nova_user_password,
+    rabbit_password         => $rabbit_password,
+    rabbit_user             => $rabbit_user,
+    # TODO deprecated
+    #export_resources        => false,
+
+    ######### quantum variables #############
+    # need to set from a variable
+    # database
+    db_host     => $controller_node_address,
+    quantum_db_password => $quantum_db_password,
+    quantum_db_name     => 'quantum',
+    quantum_db_user     => 'quantum',
+    # enable quantum services
+    enable_dhcp_agent     => $enable_dhcp_agent,
+    enable_l3_agent       => $enable_l3_agent,
+    enable_metadata_agent => $enable_metadata_agent,
+    # Metadata Configuration
+    metadata_shared_secret => 'secret',
+    # ovs config
+    ovs_local_ip        => $vm_net_ip,
+    bridge_interface    => $external_interface,
+    enable_ovs_agent    => true,
+    # Keystone
+    quantum_user_password => $quantum_user_password,
+    # horizon
+    secret_key => 'super_secret',
+    # cinder
+    cinder_user_password => $cinder_user_password,
+    cinder_db_password   => $cinder_db_password,
   }
 
-  network_config { 'lo':
-    ensure => 'present',
-    hotplug => false,
-    family => 'inet',
-    method => 'loopback',
-    onboot => 'true',
-    notify => Service['networking'],
-  }
-
-  network_config { "$::external_interface":
-    ensure => 'present',
-    hotplug => false,
-    family => 'inet',
-    method => 'static',
-    ipaddress => '0.0.0.0',
-    netmask => '255.255.255.255',
-    onboot => 'true',
-    notify => Service['networking'],
-  }
-
-  service {'networking':
-    ensure => 'running',
-    restart => 'true',
-  }
-
-  class { "naginator::control_target":
-  }
+  class { "naginator::control_target": }
 
 }
 
 
-class compute($internal_ip) {
+class compute(
+  $internal_ip,
+  $vm_net_ip
+) {
 
-    class { 'openstack::compute':
-	public_interface   => $public_interface,
-	private_interface  => $private_interface,
-	internal_address   => $internal_ip,
-	libvirt_type       => 'kvm',
-	fixed_range        => $fixed_network_range,
-	network_manager    => 'nova.network.quantum.manager.QuantumManager',
-	multi_host         => $multi_host,
-	sql_connection     => $sql_connection,
-	nova_user_password => $nova_user_password,
-	rabbit_host        => $controller_node_internal,
-	rabbit_password    => $rabbit_password,
-	rabbit_user        => $rabbit_user,
-	glance_api_servers => "${controller_node_internal}:9292",
-	vncproxy_host      => $controller_node_public,
-	vnc_enabled        => 'true',
-	verbose            => $verbose,
-	manage_volumes     => true,
-	nova_volume        => 'nova-volumes',
-	# quantum config
-	quantum_enabled			=> false,
-	quantum_url             	=> "http://${controller_node_address}:9696",
-	quantum_admin_tenant_name    	=> 'services',
-	quantum_admin_username       	=> 'quantum',
-	quantum_admin_password       	=> 'quantum',
-	quantum_admin_auth_url       	=> "http://${controller_node_address}:35357/v2.0",
-	quantum_ip_overlap              => false,
-	libvirt_vif_driver      	=> 'nova.virt.libvirt.vif.LibvirtHybridOVSBridgeDriver',
-	libvirt_use_virtio_for_bridges  => 'True',
-	host        	 		=> 'compute',
-	#quantum general
-	quantum_log_verbose          	=> "False",
-	quantum_log_debug            	=> false,
-	quantum_bind_host            	=> "0.0.0.0",
-	quantum_bind_port            	=> "9696",
-	quantum_sql_connection       	=> "mysql://quantum:quantum@${controller_node_address}/quantum",
-	quantum_auth_host            	=> "${controller_node_address}",
-	quantum_auth_port            	=> "35357",
-	quantum_rabbit_host          	=> "${controller_node_address}",
-	quantum_rabbit_port          	=> "5672",
-	quantum_rabbit_user          	=> "${rabbit_user}",
-	quantum_rabbit_password      	=> "${rabbit_password}",
-	quantum_rabbit_virtual_host  	=> "/",
-	quantum_control_exchange     	=> "quantum",
-	quantum_core_plugin            	=> "quantum.plugins.openvswitch.ovs_quantum_plugin.OVSQuantumPluginV2",
-	quantum_mac_generation_retries 	=> 16,
-	quantum_dhcp_lease_duration    	=> 120,
-	#quantum ovs
-	ovs_bridge_uplinks      	=> ["br-ex:${external_interface}"],
-	ovs_bridge_mappings      	=> ['default:br-ex'],
-	ovs_tenant_network_type  	=> "gre",
-	ovs_network_vlan_ranges  	=> "default:1000:2000",
-	ovs_integration_bridge   	=> "br-int",
-	ovs_enable_tunneling    	=> "True",
-	ovs_tunnel_bridge       	=> "br-tun",
-	ovs_tunnel_id_ranges     	=> "1:1000",
-	ovs_local_ip             	=> $internal_ip,
-	ovs_server               	=> false,
-	ovs_root_helper          	=> "sudo quantum-rootwrap /etc/quantum/rootwrap.conf",
-	ovs_sql_connection       	=> "mysql://quantum:quantum@${controller_node_address}/quantum",
-    }
+  class { 'openstack::compute':
+    # keystone
+    db_host            => $controller_node_internal,
+    keystone_host      => $controller_node_internal,
+    quantum_host       => $controller_node_internal,
+    internal_address   => $internal_ip,
+    libvirt_type       => $libvirt_type,
+    multi_host         => $multi_host,
+    # rabbit
+    rabbit_host        => $controller_node_internal,
+    rabbit_password    => $rabbit_password,
+    rabbit_user        => $rabbit_user,
+    # nova
+    nova_user_password => $nova_user_password,
+    nova_db_password   => $nova_db_password,
+    glance_api_servers => "${controller_node_internal}:9292",
+    vncproxy_host      => $controller_node_public,
+    vnc_enabled        => true,
+    # cinder parameters
+    cinder_db_password    => $cinder_db_password,
+    manage_volumes        => true,
+    volume_group          => 'cinder-volumes',
+    setup_test_volume     => true,
+    # quantum config
+    quantum			          => true,
+    quantum_user_password => $quantum_user_password,
+    # Quantum OVS
+    enable_ovs_agent      => true,
+    ovs_local_ip          => $vm_net_ip,
+     # Quantum L3 Agent
+    enable_l3_agent       => false,
+    enable_dhcp_agent     => false,
+    # general
+    enabled               => true,
+    verbose               => $verbose,
+  }
 
-    class { "naginator::compute_target":
-    }
+  class { "naginator::compute_target": }
 
 }
 
@@ -353,97 +270,96 @@ class compute($internal_ip) {
 ########### Definition of the Build Node #######################
 #
 # Definition of this node should match the name assigned to the build node in your deployment.
-# In this example we are using build-node, you dont need to use the FQDN. 
+# In this example we are using build-node, you dont need to use the FQDN.
 #
 node master-node inherits "cobbler-node" {
-    $build_node_fqdn = "${::build_node_name}.${::domain_name}"
+  $build_node_fqdn = "${::build_node_name}.${::domain_name}"
 
-    host { $build_node_fqdn: 
-	ip => $::cobbler_node_ip
-    }
+  host { $build_node_fqdn:
+	  ip => $::cobbler_node_ip
+  }
 
-    host { $::build_node_name: 
-	ip => $::cobbler_node_ip
-    }
+  host { $::build_node_name:
+	  ip => $::cobbler_node_ip
+  }
 
-    # Change the servers for your NTP environment
-    # (Must be a reachable NTP Server by your build-node, i.e. ntp.esl.cisco.com)
-    class { ntp:
-	servers 	=> [$::company_ntp_server],
-	ensure 		=> running,
-	autoupdate 	=> true,
-    }
+  # Change the servers for your NTP environment
+  # (Must be a reachable NTP Server by your build-node, i.e. ntp.esl.cisco.com)
+  class { ntp:
+	  servers 	=> $::ntp_servers,
+	  ensure 		=> running,
+	  autoupdate 	=> true,
+  }
 
-    class { 'naginator':
-    }
+  class { 'naginator': }
 
-    class { 'graphite': 
-	graphitehost 	=> $build_node_fqdn,
-    }
+  class { 'graphite':
+	  graphitehost 	=> $build_node_fqdn,
+  }
 
     # set up a local apt cache.  Eventually this may become a local mirror/repo instead
-    class { apt-cacher-ng: 
+  class { apt-cacher-ng:
   	proxy 		=> $::proxy,
-	avoid_if_range  => true, # Some proxies have issues with range headers
-                                 # this stops us attempting to use them
-                                 # msrginally less efficient with other proxies
+  	avoid_if_range  => true, # Some proxies have issues with range headers
+                             # this stops us attempting to use them
+                             # marginally less efficient with other proxies
+  }
+
+  if ! $::default_gateway {
+    # Prefetch the pip packages and put them somewhere the openstack nodes can fetch them
+
+    file {  "/var/www":
+      ensure => 'directory',
+	  }
+
+    file {  "/var/www/packages":
+      ensure  => 'directory',
+      require => File['/var/www'],
     }
 
-    if ! $::default_gateway {
-        # Prefetch the pip packages and put them somewhere the openstack nodes can fetch them
-        
-        file {  "/var/www":
-            ensure => 'directory',
-	    }
-
-        file {  "/var/www/packages":
-            ensure  => 'directory',
-            require => File['/var/www'],
-        }
-
-        if($::proxy) {
-            $proxy_pfx = "/usr/bin/env http_proxy=${::proxy} https_proxy=${::proxy} "
-        } else {
-            $proxy_pfx=""
-        }
-        exec { 'pip2pi':
-            # Can't use package provider because we're changing its behaviour to use the cache
-            command => "${proxy_pfx}/usr/bin/pip install pip2pi",
-            creates => "/usr/local/bin/pip2pi",
-            require => Package['python-pip'],
-        }
-        Package <| provider=='pip' |> {
-            require => Exec['pip-cache']
-        }
-        exec { 'pip-cache':
-            # All the packages that all nodes - build, compute and control - require from pip
-            command => "${proxy_pfx}/usr/local/bin/pip2pi /var/www/packages collectd xenapi django-tagging graphite-web carbon whisper",
-            creates => '/var/www/packages/simple', # It *does*, but you'll want to force a refresh if you change the line above
-            require => Exec['pip2pi'],
-        }
+    if($::proxy) {
+      $proxy_pfx = "/usr/bin/env http_proxy=${::proxy} https_proxy=${::proxy} "
+    } else {
+      $proxy_pfx=""
     }
-
-    # set the right local puppet environment up.  This builds puppetmaster with storedconfigs (a nd a local mysql instance)
-    class { puppet:
-	run_master 		=> true,
-	puppetmaster_address 	=> $build_node_fqdn, 
-	certname 		=> $build_node_fqdn,
-	mysql_password 		=> 'ubuntu',
-    }<-
-
-    file {'/etc/puppet/files':
-	ensure => directory,
-	owner => 'root',
-	group => 'root',
-	mode => '0755',
+    exec { 'pip2pi':
+      # Can't use package provider because we're changing its behaviour to use the cache
+      command => "${proxy_pfx}/usr/bin/pip install pip2pi",
+      creates => "/usr/local/bin/pip2pi",
+      require => Package['python-pip'],
     }
+    Package <| provider=='pip' |> {
+      require => Exec['pip-cache']
+    }
+    exec { 'pip-cache':
+      # All the packages that all nodes - build, compute and control - require from pip
+      command => "${proxy_pfx}/usr/local/bin/pip2pi /var/www/packages collectd xenapi django-tagging graphite-web carbon whisper",
+      creates => '/var/www/packages/simple', # It *does*, but you'll want to force a refresh if you change the line above
+      require => Exec['pip2pi'],
+    }
+  }
 
-    file {'/etc/puppet/fileserver.conf':
-	ensure => file,
-	owner => 'root',
-	group => 'root',
-	mode => '0644',
-	content => '
+  # set the right local puppet environment up.  This builds puppetmaster with storedconfigs (a nd a local mysql instance)
+  class { puppet:
+	  run_master 		=> true,
+	  puppetmaster_address 	=> $build_node_fqdn, 
+	  certname 		=> $build_node_fqdn,
+	  mysql_password 		=> 'ubuntu',
+  }<-
+
+  file {'/etc/puppet/files':
+	  ensure => directory,
+	  owner => 'root',
+	  group => 'root',
+	  mode => '0755',
+  }
+
+  file {'/etc/puppet/fileserver.conf':
+	  ensure => file,
+	  owner => 'root',
+	  group => 'root',
+	  mode => '0644',
+	  content => '
 
 # This file consists of arbitrarily named sections/modules
 # defining where files are served from and to whom
