@@ -62,7 +62,6 @@ echo "net.ipv6.conf.all.accept_ra=%s" >> /target/etc/sysctl.conf ; \
 ifconf="`tail +11 </etc/network/interfaces`" ; \
 echo -e "%s
 " > /target/etc/network/interfaces ; \ 
-true
 ', $cobbler_node_fqdn, $cobbler_node_fqdn, $bonding,
    $ra,$ra,$ra,$ra, $interfaces_file),
   proxy 		=> "http://${cobbler_node_fqdn}:3142/",
