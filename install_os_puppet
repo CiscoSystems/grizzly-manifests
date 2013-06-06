@@ -120,7 +120,7 @@ cd /etc/puppet/manifests
 
 # Load the lateast modules.
 echo -e "\n\nInstalling Cisco Validated puppet openstack modules...\n\n"
-if ! run_cmd sh puppet-modules.sh ; then
+if ! run_cmd python puppet_modules.py ; then
   echo "Can't install puppet  modules..."
   exit 1
 fi
