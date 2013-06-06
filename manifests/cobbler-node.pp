@@ -35,7 +35,7 @@ if ($::ipv6_ra == "") {
 if ($::interface_bonding == 'true'){
   $bonding = "echo 'bonding' >> /target/etc/modules"
 } else {
-  $bonding = ''
+  $bonding = 'echo "no bonding configured"'
 }
  
 $interfaces_file=regsubst(template("interfaces.erb"), '$', "\\n\\", "G")
