@@ -1,12 +1,15 @@
 apache
 apt
 apt-cacher-ng
+boolean
+cinder
 cobbler
 collectd
 concat
 corosync
 dnsmasq
 drbd
+filemapper
 glance
 graphite
 horizon
@@ -28,5 +31,3 @@ swift
 sysctl
 vswitch
 xinetd
-filemapper
-boolean
