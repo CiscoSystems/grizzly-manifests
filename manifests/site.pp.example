@@ -238,7 +238,6 @@ node build-server inherits build-node { }
 node control-server inherits os_base {
   class { 'control':
     internal_ip => '192.168.242.10',
-    vm_net_ip   => $ipaddress_eth3,
   }
 }
 
@@ -246,7 +245,6 @@ node control-server inherits os_base {
 node compute-server01 inherits os_base {
   class { 'compute':
     internal_ip => '192.168.242.21',
-    vm_net_ip   => $ipaddress_eth3,
   }
 }
 
