@@ -231,6 +231,7 @@ node /build-node/ inherits master-node {
 ### Node types ###
 # These lines specify the host names in your OpenStack cluster and what the function of each host is
 # internal_ip should be the same as what is specified as "ip" in the OpenStack node definitions above.
+#   this sets the IP for the internal interface of the respective node.
 # vm_net_ip allows you to create a network specifically for GRE tunneled traffic between compute and 
 #   network nodes. Generally, you will want to just use "ip" from the OpenStack node definitions above.
 
