@@ -100,13 +100,14 @@ $controller_node_internal      = $controller_node_address
 # Current assumption is that all nodes have the same network interfaces and are
 # cabled identically
 #
-# Specify which interface in each node is the API Interface
-# This is also known as the Management Interface
+# public_interface is the interface that each service's API listens on
+#   it's also commonly referred to as the management interface
 $public_interface        	= 'eth0'
-# Define the interface used for vm networking connectivity when nova-network is being used.
-# Quantum does not require this value, so using eth0 will typically be fine.
+# private_interface is the interface used for network connectivity between VMs.
+#   specifying and interface allows you to create a network specifically for GRE 
+#   tunneled traffic between compute and network nodes.
 $private_interface		= 'eth0'
-# Specify the interface used for external connectivity such as floating IPs (only in network/controller node)
+# external_interface is used for external connectivity such as floating IPs (only in network/controller node)
 $external_interface	 	= 'eth1'
 
 # Select the drive on which Ubuntu and OpenStack will be installed in each node. Current assumption is
@@ -230,10 +231,11 @@ node /build-node/ inherits master-node {
 
 ### Node types ###
 # These lines specify the host names in your OpenStack cluster and what the function of each host is
-# internal_ip should be the same as what is specified as "ip" in the OpenStack node definitions above.
-#   this sets the IP for the internal interface of the respective node.
-# vm_net_ip allows you to create a network specifically for GRE tunneled traffic between compute and 
+# public_ip should be the same as what is specified as "ip" in the OpenStack node definitions above.
+#   this sets the IP for the public interface of the respective node.
+# private_ip allows you to create a network specifically for GRE tunneled traffic between compute and 
 #   network nodes. Generally, you will want to just use "ip" from the OpenStack node definitions above.
+#   This sets the IP for the private interface of the respective node.
 
 # Change build_server to the host name of your build node
 node build-server inherits build-node { }
@@ -241,16 +243,16 @@ node build-server inherits build-node { }
 # Change control_server to the host name of your control node
 node /control-server/ inherits os_base {
   class { 'control':
-    internal_ip => '192.168.242.10',
-    vm_net_ip   => '192.168.242.10'
+    public_ip => '192.168.242.10',
+    private_ip   => '192.168.242.10'
   }
 }
 
 # Change compute_server01 to the host name of your first compute node
 node /compute-server\d+/ inherits os_base {
   class { 'compute':
-    internal_ip => '192.168.242.21',
-    vm_net_ip   => '192.168.242.21',
+    public_ip => '192.168.242.21',
+    private_ip   => '192.168.242.21',
   }
 }
 
