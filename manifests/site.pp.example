@@ -230,6 +230,9 @@ node /build-node/ inherits master-node {
 
 ### Node types ###
 # These lines specify the host names in your OpenStack cluster and what the function of each host is
+# internal_ip should be the same as what is specified as "ip" in the OpenStack node definitions above.
+# vm_net_ip allows you to create a network specifically for GRE tunneled traffic between compute and 
+#   network nodes. Generally, you will want to just use "ip" from the OpenStack node definitions above.
 
 # Change build_server to the host name of your build node
 node build-server inherits build-node { }
@@ -238,7 +241,7 @@ node build-server inherits build-node { }
 node /control-server/ inherits os_base {
   class { 'control':
     internal_ip => '192.168.242.10',
-    vm_net_ip   => $ipaddress_eth3,
+    vm_net_ip   => '192.168.242.10'
   }
 }
 
@@ -246,7 +249,7 @@ node /control-server/ inherits os_base {
 node /compute-server\d+/ inherits os_base {
   class { 'compute':
     internal_ip => '192.168.242.21',
-    vm_net_ip   => $ipaddress_eth3,
+    vm_net_ip   => '192.168.242.21',
   }
 }
 
