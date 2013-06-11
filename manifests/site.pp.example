@@ -232,7 +232,7 @@ node /build-node/ inherits master-node {
 ### Node types ###
 # These lines specify the host names in your OpenStack cluster and what the function of each host is
 # internal_ip should be the same as what is specified as "ip" in the OpenStack node definitions above.
-#   this sets the IP for the public interface of controler nodes, and the internal interface for 
+#   this sets the IP for the private(internal) interface of controller nodes, and the internal interface for 
 #   compute nodes.
 #   In this example, eth0 is both the public and private interface for the controller.
 # tunnel_ip allows you to create a network specifically for GRE tunneled traffic between compute and 
@@ -245,7 +245,7 @@ node build-server inherits build-node { }
 # Change control_server to the host name of your control node
 node /control-server/ inherits os_base {
   class { 'control':
-    internal_ip => $controller_node_address,
+    internal_ip => $controller_node_internal,
     tunnel_ip   => '192.168.242.10'
   }
 }
