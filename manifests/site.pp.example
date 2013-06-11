@@ -231,11 +231,13 @@ node /build-node/ inherits master-node {
 
 ### Node types ###
 # These lines specify the host names in your OpenStack cluster and what the function of each host is
-# public_ip should be the same as what is specified as "ip" in the OpenStack node definitions above.
-#   this sets the IP for the public interface of the respective node.
-# private_ip allows you to create a network specifically for GRE tunneled traffic between compute and 
-#   network nodes. Generally, you will want to just use "ip" from the OpenStack node definitions above.
-#   This sets the IP for the private interface of the respective node.
+# internal_ip should be the same as what is specified as "ip" in the OpenStack node definitions above.
+#   this sets the IP for the public interface of controler nodes, and the internal interface for 
+#   compute nodes.
+#   In this example, eth0 is both the public and private interface for the controller.
+# tunnel_ip allows you to create a network specifically for GRE tunneled traffic between compute and 
+#   network nodes. Generally, you will want to use "ip" from the OpenStack node definitions above.
+#   This sets the IP for the private interface of compute and network nodes.
 
 # Change build_server to the host name of your build node
 node build-server inherits build-node { }
@@ -243,16 +245,16 @@ node build-server inherits build-node { }
 # Change control_server to the host name of your control node
 node /control-server/ inherits os_base {
   class { 'control':
-    public_ip => '192.168.242.10',
-    private_ip   => '192.168.242.10'
+    internal_ip => $controller_node_address,
+    tunnel_ip   => '192.168.242.10'
   }
 }
 
 # Change compute_server01 to the host name of your first compute node
 node /compute-server\d+/ inherits os_base {
   class { 'compute':
-    public_ip => '192.168.242.21',
-    private_ip   => '192.168.242.21',
+    internal_ip => '192.168.242.21',
+    tunnel_ip   => '192.168.242.21',
   }
 }
 
