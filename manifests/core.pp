@@ -151,8 +151,7 @@ node os_base inherits base {
 }
 
 class control(
-  $internal_ip,
-  $vm_net_ip
+  $tunnel_ip
 ) {
 
   # in the currently support deployment scenario
@@ -203,7 +202,7 @@ class control(
     # Metadata Configuration
     metadata_shared_secret => 'secret',
     # ovs config
-    ovs_local_ip        => $vm_net_ip,
+    ovs_local_ip        => $tunnel_ip,
     bridge_interface    => $external_interface,
     enable_ovs_agent    => true,
     # Keystone
@@ -222,7 +221,7 @@ class control(
 
 class compute(
   $internal_ip,
-  $vm_net_ip
+  $tunnel_ip
 ) {
 
   class { 'openstack::compute':
@@ -253,7 +252,7 @@ class compute(
     quantum_user_password => $quantum_user_password,
     # Quantum OVS
     enable_ovs_agent      => true,
-    ovs_local_ip          => $vm_net_ip,
+    ovs_local_ip          => $tunnel_ip,
      # Quantum L3 Agent
     enable_l3_agent       => false,
     enable_dhcp_agent     => false,
