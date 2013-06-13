@@ -85,6 +85,12 @@ UcXHbA==
       gpgcheck => "0", #TODO(prad): Add gpg key
       enabled  => "1";
     }
+    yumrepo { 'openstack-grizzly':
+      descr     => "OpenStack Grizzly Repository",
+      baseurl  => "http://repos.fedorapeople.org/repos/openstack/openstack-grizzly/epel-6/",
+      gpgcheck => "0", #TODO(prad): Add gpg key
+      enabled  => "1";
+    }
     # add a resource dependency so yumrepo loads before package
     Yumrepo <| |> -> Package <| |>
   }
@@ -116,8 +122,6 @@ UcXHbA==
   }
 
   class { 'collectd':
-    graphitehost		=> $build_node_fqdn,
-	  management_interface	=> $::public_interface,
   }
 }
 
@@ -293,16 +297,17 @@ node master-node inherits "cobbler-node" {
   class { 'naginator': }
 
   class { 'graphite':
-	  graphitehost 	=> $build_node_fqdn,
+    gr_apache_port => 8190,
   }
 
     # set up a local apt cache.  Eventually this may become a local mirror/repo instead
-  class { apt-cacher-ng:
-  	proxy 		=> $::proxy,
-  	avoid_if_range  => true, # Some proxies have issues with range headers
+# TODO: add support for REDHAT
+#  class { apt-cacher-ng:
+#  	proxy 		=> $::proxy,
+#  	avoid_if_range  => true, # Some proxies have issues with range headers
                              # this stops us attempting to use them
                              # marginally less efficient with other proxies
-  }
+#  }
 
   if ! $::default_gateway {
     # Prefetch the pip packages and put them somewhere the openstack nodes can fetch them
