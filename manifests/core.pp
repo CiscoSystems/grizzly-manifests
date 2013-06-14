@@ -81,14 +81,15 @@ UcXHbA==
   elsif ($osfamily == 'redhat') {
     yumrepo { 'cisco-openstack-mirror':
       descr     => "Cisco Openstack Repository",
-      baseurl  => $::location,
+      baseurl  => "http://koji-server.cisco.com/repos/grizzly-puppet-el6-build/latest/x86_64/",
       gpgcheck => "0", #TODO(prad): Add gpg key
       enabled  => "1";
     }
     yumrepo { 'openstack-grizzly':
       descr     => "OpenStack Grizzly Repository",
       baseurl  => "http://repos.fedorapeople.org/repos/openstack/openstack-grizzly/epel-6/",
-      gpgcheck => "0", #TODO(prad): Add gpg key
+      gpgkey   => "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-RDO-Grizzly",
+      gpgcheck => "1",
       enabled  => "1";
     }
     # add a resource dependency so yumrepo loads before package
