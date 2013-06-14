@@ -277,6 +277,7 @@ $node_dns       = "${cobbler_node_ip}"
 $ip 		= "${cobbler_node_ip}"
 $dns_service 	= "dnsmasq"
 $dhcp_service 	= "dnsmasq"
+$time_zone      = "UTC"
 
 # Enable network interface bonding. This will only enable the bonding module in the OS, 
 # it won't acutally bond any interfaces. Edit the networking interfaces template to set 
