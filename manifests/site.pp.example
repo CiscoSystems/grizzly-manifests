@@ -286,6 +286,10 @@ $dhcp_service 	= "dnsmasq"
 # Enable ipv6 router edvertisement
 #$ipv6_ra = '1'
 
+# Configure the maximum number of times mysql-server will allow
+# a host to fail connecting before banning it
+$max_connect_errors = '10'
+
 ### Puppet Parameters ###
 # These settings load other puppet components. They should not be changed
 import 'cobbler-node'
