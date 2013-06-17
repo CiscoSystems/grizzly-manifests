@@ -298,18 +298,21 @@ node master-node inherits "cobbler-node" {
   class { 'naginator': }
 
   class { 'graphite':
-    gr_apache_port => 8190,
+    gr_apache_port   => 8190,
   }
 
-    # set up a local apt cache.  Eventually this may become a local mirror/repo instead
-# TODO: add support for REDHAT
-#  class { apt-cacher-ng:
-#  	proxy 		=> $::proxy,
-#  	avoid_if_range  => true, # Some proxies have issues with range headers
-                             # this stops us attempting to use them
+  # set up a local apt cache.  Eventually this may become a local mirror/repo instead
+  if ($osfamily == 'debian') {
+    class { apt-cacher-ng:
+      proxy 		=> $::proxy,
+      avoid_if_range  => true, # Some proxies have issues with range headers
+                                 # this stops us attempting to use them
                              # marginally less efficient with other proxies
-#  }
-
+    }
+  }
+  elsif ($osfamily == 'redhat') {
+    # TODO: Add squid support
+  }
   if ! $::default_gateway {
     # Prefetch the pip packages and put them somewhere the openstack nodes can fetch them
 
