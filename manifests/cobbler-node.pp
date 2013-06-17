@@ -68,7 +68,8 @@ echo -e "%s
   expert_disk 		=> true,
   diskpart 		=> [$::install_drive],
   boot_disk 		=> $::install_drive,
-  autostart_puppet      => $::autostart_puppet
+  autostart_puppet      => $::autostart_puppet,
+  time_zone             => $::time_zone
  }
 
 

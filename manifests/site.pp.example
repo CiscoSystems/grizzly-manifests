@@ -232,7 +232,7 @@ node /build-node/ inherits master-node {
 ### Node types ###
 # These lines specify the host names in your OpenStack cluster and what the function of each host is
 # internal_ip should be the same as what is specified as "ip" in the OpenStack node definitions above.
-#   this sets the IP for the private(internal) interface of controller nodes, and the internal interface for 
+#   this sets the IP for the private(internal) interface of controller nodes (which is predefined already in $controller_node_internal, and the internal interface for 
 #   compute nodes.
 #   In this example, eth0 is both the public and private interface for the controller.
 # tunnel_ip allows you to create a network specifically for GRE tunneled traffic between compute and 
@@ -245,7 +245,6 @@ node build-server inherits build-node { }
 # Change control_server to the host name of your control node
 node /control-server/ inherits os_base {
   class { 'control':
-    internal_ip => $controller_node_internal,
     tunnel_ip   => '192.168.242.10'
   }
 }
@@ -278,6 +277,7 @@ $node_dns       = "${cobbler_node_ip}"
 $ip 		= "${cobbler_node_ip}"
 $dns_service 	= "dnsmasq"
 $dhcp_service 	= "dnsmasq"
+$time_zone      = "UTC"
 
 # Enable network interface bonding. This will only enable the bonding module in the OS, 
 # it won't acutally bond any interfaces. Edit the networking interfaces template to set 
@@ -286,6 +286,10 @@ $dhcp_service 	= "dnsmasq"
 
 # Enable ipv6 router edvertisement
 #$ipv6_ra = '1'
+
+# Configure the maximum number of times mysql-server will allow
+# a host to fail connecting before banning it
+$max_connect_errors = '10'
 
 ### Puppet Parameters ###
 # These settings load other puppet components. They should not be changed
