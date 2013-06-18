@@ -151,16 +151,58 @@ node os_base inherits base {
 }
 
 class control(
-  $tunnel_ip
-) {
+  $tunnel_ip,
+  $public_address          = $::controller_node_public,
+  # network
+  $internal_address        = $::controller_node_internal,
+  # by default it does not enable multi-host mode
+  $multi_host              = $::multi_host,
+  $verbose                 = $::verbose,
+  $auto_assign_floating_ip = $::auto_assign_floating_ip,
+  $mysql_root_password     = $::mysql_root_password,
+  $admin_email             = $::admin_email,
+  $admin_password          = $::admin_password,
+  $keystone_db_password    = $::keystone_db_password,
+  $keystone_admin_token    = $::keystone_admin_token,
+  $glance_db_password      = $::glance_db_password,
+  $glance_user_password    = $::glance_user_password,
 
-  # in the currently support deployment scenario
-  # all network control services are on the controller.
-  # this is not recomended for production and is merely
-  # used for test setups
-  $enable_dhcp_agent      = true
-  $enable_l3_agent        = true
-  $enable_metadata_agent  = true
+  # TODO this needs to be added
+  $glance_backend          = $::glance_backend,
+
+  $nova_db_password        = $::nova_db_password,
+  $nova_user_password      = $::nova_user_password,
+  $rabbit_password         = $::rabbit_password,
+  $rabbit_user             = $::rabbit_user,
+  # TODO deprecated
+  #export_resources        = false,
+
+  ######### quantum variables #############
+  # need to set from a variable
+  # database
+  $db_host                 = $::controller_node_address,
+  $quantum_db_password     = $quantum_db_password,
+  $quantum_db_name         = 'quantum',
+  $quantum_db_user         = 'quantum',
+  # enable quantum services
+  $enable_dhcp_agent       = $true,
+  $enable_l3_agent         = $true,
+  $enable_metadata_agent   = $true,
+  # Metadata Configuration
+  $metadata_shared_secret  = 'secret',
+  # ovs config
+  $ovs_local_ip            = $tunnel_ip,
+  $bridge_interface        = $::external_interface,
+  $enable_ovs_agent        = true,
+  # Keystone
+  $quantum_user_password   = $::quantum_user_password,
+  # horizon
+  $secret_key              = 'super_secret',
+  # cinder
+  $cinder_user_password    = $::cinder_user_password,
+  $cinder_db_password      = $::cinder_db_password,
+)
+{
 
   class { 'openstack::controller':
     public_address          => $controller_node_public,
@@ -191,27 +233,27 @@ class control(
     ######### quantum variables #############
     # need to set from a variable
     # database
-    db_host     => $controller_node_address,
-    quantum_db_password => $quantum_db_password,
-    quantum_db_name     => 'quantum',
-    quantum_db_user     => 'quantum',
+    db_host                 => $db_host,
+    quantum_db_password     => $quantum_db_password,
+    quantum_db_name         => $quantum_db_name,
+    quantum_db_user         => $quantum_db_user,
     # enable quantum services
-    enable_dhcp_agent     => $enable_dhcp_agent,
-    enable_l3_agent       => $enable_l3_agent,
-    enable_metadata_agent => $enable_metadata_agent,
+    enable_dhcp_agent       => $enable_dhcp_agent,
+    enable_l3_agent         => $enable_l3_agent,
+    enable_metadata_agent   => $enable_metadata_agent,
     # Metadata Configuration
-    metadata_shared_secret => 'secret',
+    metadata_shared_secret  => $metadata_shared_secret,
     # ovs config
-    ovs_local_ip        => $tunnel_ip,
-    bridge_interface    => $external_interface,
-    enable_ovs_agent    => true,
+    ovs_local_ip            => $ovs_local_ip,
+    bridge_interface        => $bridge_interface,
+    enable_ovs_agent        => $enable_ovs_agent,
     # Keystone
-    quantum_user_password => $quantum_user_password,
+    quantum_user_password   => $quantum_user_password,
     # horizon
-    secret_key => 'super_secret',
+    secret_key              => $secret_key,
     # cinder
-    cinder_user_password => $cinder_user_password,
-    cinder_db_password   => $cinder_db_password,
+    cinder_user_password    => $cinder_user_password,
+    cinder_db_password      => $cinder_db_password,
   }
 
   class { "naginator::control_target": }
@@ -221,43 +263,78 @@ class control(
 
 class compute(
   $internal_ip,
-  $tunnel_ip
-) {
+  $tunnel_ip,
+  # keystone
+  $db_host               = $::controller_node_internal,
+  $keystone_host         = $::controller_node_internal,
+  $quantum_host          = $::controller_node_internal,
+  $internal_address      = $internal_ip,
+  $libvirt_type          = $::libvirt_type,
+  $multi_host            = $::multi_host,
+  # rabbit
+  $rabbit_host           = $::controller_node_internal,
+  $rabbit_password       = $::rabbit_password,
+  $rabbit_user           = $::rabbit_user,
+  # nova
+  $nova_user_password    = $::nova_user_password,
+  $nova_db_password      = $::nova_db_password,
+  $glance_api_servers    = "${::controller_node_internal}:9292",
+  $vncproxy_host         = $::controller_node_public,
+  $vnc_enabled           = true,
+  # cinder parameters
+  $cinder_db_password    = $::cinder_db_password,
+  $manage_volumes        = true,
+  $volume_group          = 'cinder-volumes',
+  $setup_test_volume     = true,
+  # quantum config
+  $quantum	         = true,
+  $quantum_user_password = $::quantum_user_password,
+  # Quantum OVS
+  $enable_ovs_agent      = true,
+  $ovs_local_ip          = $tunnel_ip,
+  # Quantum L3 Agent
+  $enable_l3_agent       = false,
+  $enable_dhcp_agent     = false,
+  # general
+  $enabled               = true,
+  $verbose               = $::verbose,
+)
+{
 
   class { 'openstack::compute':
     # keystone
-    db_host            => $controller_node_internal,
-    keystone_host      => $controller_node_internal,
-    quantum_host       => $controller_node_internal,
-    internal_address   => $internal_ip,
-    libvirt_type       => $libvirt_type,
-    multi_host         => $multi_host,
+    db_host               => $db_host,
+    keystone_host         => $keystone_host,
+    quantum_host          => $quantum_host,
+    internal_address      => $internal_address,
+    libvirt_type          => $libvirt_type,
+    multi_host            => $multi_host,
     # rabbit
-    rabbit_host        => $controller_node_internal,
-    rabbit_password    => $rabbit_password,
-    rabbit_user        => $rabbit_user,
+    rabbit_host           => $rabbit_host,
+    rabbit_password       => $rabbit_password,
+    rabbit_user           => $rabbit_user,
     # nova
-    nova_user_password => $nova_user_password,
-    nova_db_password   => $nova_db_password,
-    glance_api_servers => "${controller_node_internal}:9292",
-    vncproxy_host      => $controller_node_public,
-    vnc_enabled        => true,
+    nova_user_password    => $nova_user_password,
+    nova_db_password      => $nova_db_password,
+    glance_api_servers    => $glance_api_servers,
+    vncproxy_host         => $vncproxy_host,
+    vnc_enabled           => $vnc_enabled,
     # cinder parameters
     cinder_db_password    => $cinder_db_password,
-    manage_volumes        => true,
-    volume_group          => 'cinder-volumes',
-    setup_test_volume     => true,
+    manage_volumes        => $manage_volumes,
+    volume_group          => $volume_group,
+    setup_test_volume     => $setup_test_volume,
     # quantum config
-    quantum			          => true,
+    quantum	          => $quantum,
     quantum_user_password => $quantum_user_password,
     # Quantum OVS
-    enable_ovs_agent      => true,
-    ovs_local_ip          => $tunnel_ip,
+    enable_ovs_agent      => $enable_ovs_agent,
+    ovs_local_ip          => $ovs_local_ip,
      # Quantum L3 Agent
-    enable_l3_agent       => false,
-    enable_dhcp_agent     => false,
+    enable_l3_agent       => $enable_l3_agent,
+    enable_dhcp_agent     => $enable_dhcp_agent,
     # general
-    enabled               => true,
+    enabled               => $enabled,
     verbose               => $verbose,
   }
 
