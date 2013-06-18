@@ -152,7 +152,7 @@ node os_base inherits base {
 
 
 # configurations that need to be applied to all swift nodes
-node swift_base inherits os_base  {
+node swift_storage inherits os_base  {
 
   class { 'ssh::server::install': }
 
@@ -161,25 +161,13 @@ node swift_base inherits os_base  {
     swift_hash_suffix => "$swift_shared_secret",
     package_ensure    => latest,
   }
+  swift::storage::disk{'sdb':}
 
 }
 
-class swift-ucs-blades {
-
-  include swift::xfs
-  include swift::storage:disk { "sdb":}
-#  $base_dir = '/dev/nova-volumes/'
-#  $byte_size = '1024'
-#  $mnt_base_dir = '/srv/node'
-
-  file { $mnt_base_dir:
-        ensure => directory,
-	owner => 'swift',
-	group => 'swift',
-  }
-
-
-}
+#class swift-ucs-blades {
+#  swift::storage::disk{'sdb':}
+#}
 
 
 
