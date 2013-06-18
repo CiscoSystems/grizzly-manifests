@@ -167,10 +167,10 @@ node swift_base inherits os_base  {
 class swift-ucs-blades {
 
   include swift::xfs
-
-  $base_dir = '/dev/nova-volumes/'
-  $byte_size = '1024'
-  $mnt_base_dir = '/srv/node'
+  include swift::storage:disk { "sdb":}
+#  $base_dir = '/dev/nova-volumes/'
+#  $byte_size = '1024'
+#  $mnt_base_dir = '/srv/node'
 
   file { $mnt_base_dir:
         ensure => directory,
