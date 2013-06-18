@@ -150,6 +150,66 @@ node os_base inherits base {
 
 }
 
+
+# configurations that need to be applied to all swift nodes
+node swift_base inherits os_base  {
+
+  class { 'ssh::server::install': }
+
+  class { 'swift':
+    # not sure how I want to deal with this shared secret
+    swift_hash_suffix => "$swift_shared_secret",
+    package_ensure    => latest,
+  }
+
+}
+
+class swift-ucs-blades {
+
+  include swift::xfs
+
+  $base_dir = '/dev/nova-volumes/'
+  $byte_size = '1024'
+  $mnt_base_dir = '/srv/node'
+
+  file { $mnt_base_dir:
+        ensure => directory,
+	owner => 'swift',
+	group => 'swift',
+  }
+
+  # Already have a VG with space?
+  logical_volume { 'swift-lv-1':
+    ensure => present,
+    size => '200G',
+    volume_group => 'nova-volumes',
+  } 
+
+  swift::storage::xfs { 'swift-lv-1':
+    device => "${base_dir}/swift-lv-1",
+    mnt_base_dir => $mnt_base_dir,
+    byte_size => $byte_size,
+    subscribe    => Logical_volume['swift-lv-1'],
+  }
+
+  logical_volume { 'swift-lv-2':
+    ensure => present,
+    size => '200G',
+    volume_group => 'nova-volumes',
+  } 
+
+  swift::storage::xfs { 'swift-lv-2':
+    device => "${base_dir}/swift-lv-2",
+    mnt_base_dir => $mnt_base_dir,
+    byte_size => $byte_size,
+    subscribe    => Logical_volume['swift-lv-2'],
+  }
+
+
+}
+
+
+
 class control(
   $tunnel_ip,
   $public_address          = $::controller_node_public,
@@ -358,6 +418,9 @@ node master-node inherits "cobbler-node" {
   host { $::build_node_name:
 	  ip => $::cobbler_node_ip
   }
+
+
+
 
   # Change the servers for your NTP environment
   # (Must be a reachable NTP Server by your build-node, i.e. ntp.esl.cisco.com)
