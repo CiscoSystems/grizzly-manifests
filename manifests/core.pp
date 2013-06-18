@@ -178,33 +178,6 @@ class swift-ucs-blades {
 	group => 'swift',
   }
 
-  # Already have a VG with space?
-  logical_volume { 'swift-lv-1':
-    ensure => present,
-    size => '200G',
-    volume_group => 'nova-volumes',
-  } 
-
-  swift::storage::xfs { 'swift-lv-1':
-    device => "${base_dir}/swift-lv-1",
-    mnt_base_dir => $mnt_base_dir,
-    byte_size => $byte_size,
-    subscribe    => Logical_volume['swift-lv-1'],
-  }
-
-  logical_volume { 'swift-lv-2':
-    ensure => present,
-    size => '200G',
-    volume_group => 'nova-volumes',
-  } 
-
-  swift::storage::xfs { 'swift-lv-2':
-    device => "${base_dir}/swift-lv-2",
-    mnt_base_dir => $mnt_base_dir,
-    byte_size => $byte_size,
-    subscribe    => Logical_volume['swift-lv-2'],
-  }
-
 
 }
 
