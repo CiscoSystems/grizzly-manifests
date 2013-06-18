@@ -161,15 +161,21 @@ node swift_storage inherits os_base  {
     swift_hash_suffix => "$swift_shared_secret",
     package_ensure    => latest,
   }
-  swift::storage::disk{'sdb':}
-
+  swift::storage::disk{'sdb': }
+  class {'swift::storage': 
+       storage_local_net_ip => '2.1.1.3',
+  }
 }
 
-#class swift-ucs-blades {
-#  swift::storage::disk{'sdb':}
-#}
-
-
+node swift_proxy inherits os_base {
+  class { 'ssh::server::install': }
+    class {'swift': 
+    swift_hash_suffix => "$swift_shared_secret",
+    package_ensure    => latest,
+  }
+  class {'swift::proxy':}
+  
+}
 
 class control(
   $tunnel_ip,
