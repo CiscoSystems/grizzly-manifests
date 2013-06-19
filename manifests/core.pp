@@ -152,7 +152,10 @@ node os_base inherits base {
 
 
 # configurations that need to be applied to all swift nodes
-node swift_storage inherits os_base  {
+class swift_storage  (
+  $disk,
+)
+{
 
 
   class { 'swift':
@@ -161,7 +164,7 @@ node swift_storage inherits os_base  {
     package_ensure    => latest,
   }
   
-  swift::storage::disk{'sdb': 
+  swift::storage::disk{$disk: 
       require => Class['swift'],
   }
 
@@ -204,13 +207,19 @@ node swift_storage inherits os_base  {
 }
 
 
-node swift_proxy inherits os_base {
+class swift_proxy  (
+    $listen_ip = '127.0.0.1',
+    $part_power = '18',
+    $replicas = '3',
+    $min_part_hours = '1', 
+    )
+{
     class {'swift': 
     swift_hash_suffix => "$swift_hash",
     package_ensure    => latest,
   }
   class { 'memcached':
-    listen_ip => '127.0.0.1',
+    listen_ip => $listen_ip,
   }
 
   class { 'swift::ringbuilder':

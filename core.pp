@@ -152,18 +152,107 @@ node os_base inherits base {
 
 
 # configurations that need to be applied to all swift nodes
-node swift_base inherits os_base  {
+class swift_storage  (
+  $disk,
+)
+{
 
-#  class { 'ssh::server::install': }
 
   class { 'swift':
     # not sure how I want to deal with this shared secret
-    swift_hash_suffix => "$swift_shared_secret",
+    swift_hash_suffix => "$swift_hash",
     package_ensure    => latest,
   }
+  
+  swift::storage::disk{$disk: 
+      require => Class['swift'],
+  }
+
+  class {'swift::storage::all': 
+       storage_local_net_ip => '2.1.1.3',
+  }
+
+  @@ring_object_device { "${ipaddress_eth0}:6000/1":
+  zone   => 1,
+  weight => 1,
+  }
+
+  @@ring_container_device { "${ipaddress_eth0}:6001/1":
+    zone   => 1,
+    weight => 1,
+  }
+
+  @@ring_account_device { "${ipaddress_eth0}:6002/1":
+    zone   => 1,
+    weight => 1,
+  }
+
+  @@ring_object_device { "${ipaddress_eth0}:6000/2":
+    zone   => 1,
+    weight => 1,
+  }
+
+  @@ring_container_device { "${ipaddress_eth0}:6001/2":
+    zone   => 1,
+    weight => 1,
+  }
+
+  @@ring_account_device { "${ipaddress_eth0}:6002/2":
+    zone   => 1,
+    weight => 1,
+  }
+
+  Swift::Ringsync<<||>>
 
 }
 
+
+class swift_proxy  (
+    $listen_ip = '127.0.0.1',
+    $part_power = '18',
+    $replicas = '3',
+    $min_part_hours = '1', 
+    )
+{
+    class {'swift': 
+    swift_hash_suffix => "$swift_hash",
+    package_ensure    => latest,
+  }
+  class { 'memcached':
+    listen_ip => $listen_ip,
+  }
+
+  class { 'swift::ringbuilder':
+          part_power => '18',
+          replicas => '3',
+          min_part_hours => '1',
+        }
+
+  class {'swift::proxy':
+    proxy_local_net_ip => '2.1.1.3',
+    pipeline           => [
+      'catch_errors',
+      'healthcheck',
+      'cache',
+      'ratelimit',
+      'proxy-server'
+    ],
+    account_autocreate => true,
+    require            => Class['swift::ringbuilder'],
+
+  }
+  
+  # configure all of the middlewares
+  class { [
+    'swift::proxy::catch_errors',
+    'swift::proxy::healthcheck',
+    'swift::proxy::swift3',
+    'swift::proxy::cache',
+    'swift::proxy::ratelimit',
+  ]:
+  }
+  
+}
 
 class control(
   $tunnel_ip,
