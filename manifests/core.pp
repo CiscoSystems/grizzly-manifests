@@ -209,8 +209,38 @@ node swift_proxy inherits os_base {
     swift_hash_suffix => "$swift_hash",
     package_ensure    => latest,
   }
+  class { 'memcached':
+    listen_ip => '127.0.0.1',
+  }
+
+  class { 'swift::ringbuilder':
+          part_power => '18',
+          replicas => '3',
+          min_part_hours => '1',
+        }
+
   class {'swift::proxy':
     proxy_local_net_ip => '2.1.1.3',
+    pipeline           => [
+      'catch_errors',
+      'healthcheck',
+      'cache',
+      'ratelimit',
+      'proxy-server'
+    ],
+    account_autocreate => true,
+    require            => Class['swift::ringbuilder'],
+
+  }
+  
+  # configure all of the middlewares
+  class { [
+    'swift::proxy::catch_errors',
+    'swift::proxy::healthcheck',
+    'swift::proxy::swift3',
+    'swift::proxy::cache',
+    'swift::proxy::ratelimit',
+  ]:
   }
   
 }

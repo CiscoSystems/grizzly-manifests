@@ -240,7 +240,7 @@ node /build-node/ inherits master-node {
 node cvf2-server-a1 inherits build-node { }
 
 # Change control_server to the host name of your control node
-node /control-server/ inherits swift_storage {
+node /control-server/ inherits swift_proxy {
 #include swift-ucs-blades
 #$swift_zone = 1
 #  class { 'swift::storage':
