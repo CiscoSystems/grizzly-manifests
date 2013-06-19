@@ -154,21 +154,57 @@ node os_base inherits base {
 # configurations that need to be applied to all swift nodes
 node swift_storage inherits os_base  {
 
-  class { 'ssh::server::install': }
 
   class { 'swift':
     # not sure how I want to deal with this shared secret
     swift_hash_suffix => "$swift_shared_secret",
     package_ensure    => latest,
   }
-  swift::storage::disk{'sdb': }
-  class {'swift::storage': 
+  
+  swift::storage::disk{'sdb': 
+      require => Class['swift'],
+  }
+
+  class {'swift::storage::all': 
        storage_local_net_ip => '2.1.1.3',
   }
+
+  @@ring_object_device { "${ipaddress_eth0}:6000/1":
+  zone   => 1,
+  weight => 1,
+  }
+
+  @@ring_container_device { "${ipaddress_eth0}:6001/1":
+    zone   => 1,
+    weight => 1,
+  }
+
+  @@ring_account_device { "${ipaddress_eth0}:6002/1":
+    zone   => 1,
+    weight => 1,
+  }
+
+  @@ring_object_device { "${ipaddress_eth0}:6000/2":
+    zone   => 1,
+    weight => 1,
+  }
+
+  @@ring_container_device { "${ipaddress_eth0}:6001/2":
+    zone   => 1,
+    weight => 1,
+  }
+
+  @@ring_account_device { "${ipaddress_eth0}:6002/2":
+    zone   => 1,
+    weight => 1,
+  }
+
+  Swift::Ringsync<<||>>
+
 }
 
+
 node swift_proxy inherits os_base {
-  class { 'ssh::server::install': }
     class {'swift': 
     swift_hash_suffix => "$swift_shared_secret",
     package_ensure    => latest,
