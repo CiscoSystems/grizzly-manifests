@@ -138,6 +138,7 @@ $quantum_user_password   = 'quantum_pass'
 $quantum_db_password     = 'quantum_pass'
 $rabbit_password         = 'openstack_rabbit_password'
 $rabbit_user             = 'openstack_rabbit_user'
+$swift_hash              = 'swift_hash'
 # Nova DB connection
 $sql_connection          = "mysql://${nova_user}:${nova_db_password}@${controller_node_address}/nova"
 # glance backend configuration, supports file or swift
