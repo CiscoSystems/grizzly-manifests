@@ -173,7 +173,9 @@ node swift_proxy inherits os_base {
     swift_hash_suffix => "$swift_shared_secret",
     package_ensure    => latest,
   }
-  class {'swift::proxy':}
+  class {'swift::proxy':
+    proxy_local_net_ip => '2.1.1.3',
+  }
   
 }
 
