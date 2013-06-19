@@ -157,7 +157,7 @@ node swift_storage inherits os_base  {
 
   class { 'swift':
     # not sure how I want to deal with this shared secret
-    swift_hash_suffix => "$swift_shared_secret",
+    swift_hash_suffix => "$swift_hash",
     package_ensure    => latest,
   }
   
@@ -206,7 +206,7 @@ node swift_storage inherits os_base  {
 
 node swift_proxy inherits os_base {
     class {'swift': 
-    swift_hash_suffix => "$swift_shared_secret",
+    swift_hash_suffix => "$swift_hash",
     package_ensure    => latest,
   }
   class {'swift::proxy':
