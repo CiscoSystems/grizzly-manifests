@@ -340,6 +340,10 @@ class compute(
 
   class { "naginator::compute_target": }
 
+  realize File['/etc/libvirt/qemu.conf']
+  
+  realize Exec[ '/etc/init.d/libvirt-bin restart']
+
 }
 
 
