@@ -154,6 +154,7 @@ node os_base inherits base {
 # swift storage
 class swift_storage  (
   $disk,
+  $local_net_ip,
 )
 {
 
@@ -167,7 +168,7 @@ class swift_storage  (
   }
 
   class {'swift::storage::all': 
-       storage_local_net_ip => '2.1.1.3',
+       storage_local_net_ip => $local_net_ip,
   }
 
   #rings
@@ -203,14 +204,12 @@ class swift_storage  (
 
   Swift::Ringsync<<||>>
 
-  #naginator monitoring
-  class { "naginator::control_target": }
 
 }
 
-
+#swift proxy
 class swift_proxy  (
-    $listen_ip = '127.0.0.1',
+    $local_net_ip,
     $part_power = '18',
     $replicas = '3',
     $min_part_hours = '1', 
@@ -223,7 +222,7 @@ class swift_proxy  (
   }
 
   class { 'memcached':
-    listen_ip => $listen_ip,
+    listen_ip => '127.0.0.1',
   }
 
   class { 'swift::ringbuilder':
@@ -233,7 +232,7 @@ class swift_proxy  (
         }
 
   class {'swift::proxy':
-    proxy_local_net_ip => '2.1.1.3',
+    proxy_local_net_ip => $local_net_ip,
     pipeline           => [
       'catch_errors',
       'healthcheck',
@@ -254,9 +253,6 @@ class swift_proxy  (
     'swift::proxy::ratelimit',
   ]:
   }
-
-  #naginator monitoring
-  class { "naginator::control_target": }
 
 }
 
