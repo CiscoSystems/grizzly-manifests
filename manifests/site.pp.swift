@@ -224,6 +224,35 @@ node /build-node/ inherits master-node {
 #  }
 # End compute node
 
+
+# This block defines a swift proxy server. Replace "swift_proxy01" with the host name
+# of your first OpenStack swift proxy node, and change the "mac" to the MAC address of the boot
+# interface of your first OpenStack swift proxy node. Change the "ip" to the IP address of your first
+# OpenStack swift proxy node
+
+# Begin compute swift proxy node
+#  cobbler_node { "swift-proxy01":
+#    node_type => "swift_proxy",
+#    mac => "11:22:33:44:55:66",
+#    ip => "192.168.242.21",
+#    power_address  => "192.168.242.121"
+#  }
+
+
+# This block defines a swift storage server. Replace "swift_storage01" with the host name
+# of your first OpenStack swift storage node, and change the "mac" to the MAC address of the boot
+# interface of your first OpenStack swift storage node. Change the "ip" to the IP address of your first
+# OpenStack swift storage node
+
+# Begin compute swift proxy node
+#  cobbler_node { "swift-storage01":
+#    node_type => "swift_storage",
+#    mac => "11:22:33:44:55:66",
+#    ip => "192.168.242.21",
+#    power_address  => "192.168.242.121"
+#  }
+
+
 ### Repeat as needed ###
 # Make a copy of your compute node block above for each additional OpenStack node in your cluster
 # and paste the copy in this section. Be sure to change the host name, mac, ip, and power settings
@@ -257,6 +286,20 @@ node /compute-server\d+/ inherits os_base {
     internal_ip => '192.168.242.21',
   }
 }
+
+# Change swift_proxy01 to the host name of your swift proxy node disk is the device on which objects will
+# be stored. 
+#node /swift-proxy01/ inherits os_base {
+#    class {'swift_proxy':
+#       disk => 'sdb';   
+#     }
+#}
+
+# Change swift-storage01 to the host name of your swift proxy node
+#node /swift-storage01/ inherits os_base {
+#    class {'swift_storage':}
+#}
+
 
 ### Repeat as needed ###
 # Copy the compute_server01 line above and paste a copy here for each additional OpenStack node in
