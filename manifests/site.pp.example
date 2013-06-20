@@ -18,9 +18,9 @@ $package_repo = 'cisco_repo'
 # If you are behind a proxy you may choose not to use our ftp distribution, and
 # instead try our http distribution location. Note the http location is not
 # a permanent location and may change at any time.
-#$location 		= "ftp://ftpeng.cisco.com/openstack/cisco"
+$location 		= "ftp://ftpeng.cisco.com/openstack/cisco"
 # Alternate, uncomment this one, and comment out the one above
-$location		= "http://openstack-repo.cisco.com/openstack/cisco"
+#$location		= "http://openstack-repo.cisco.com/openstack/cisco"
 ########### Build Node (Cobbler, Puppet Master, NTP) ######
 # Change the following to the host name you have given your build node.
 # This name should be in all lower case letters due to a Puppet limitation
