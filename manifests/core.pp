@@ -150,6 +150,112 @@ node os_base inherits base {
 
 }
 
+
+# swift storage
+class swift_storage  (
+  $disk,
+  $local_net_ip,
+)
+{
+
+  class { 'swift':
+    swift_hash_suffix => "$swift_hash",
+    package_ensure    => latest,
+  }
+  
+  swift::storage::disk{$disk: 
+      require => Class['swift'],
+  }
+
+  class {'swift::storage::all': 
+       storage_local_net_ip => $local_net_ip,
+  }
+
+  #rings
+  @@ring_object_device { "${ipaddress_eth0}:6000/1":
+  zone   => 1,
+  weight => 1,
+  }
+
+  @@ring_container_device { "${ipaddress_eth0}:6001/1":
+    zone   => 1,
+    weight => 1,
+  }
+
+  @@ring_account_device { "${ipaddress_eth0}:6002/1":
+    zone   => 1,
+    weight => 1,
+  }
+
+  @@ring_object_device { "${ipaddress_eth0}:6000/2":
+    zone   => 1,
+    weight => 1,
+  }
+
+  @@ring_container_device { "${ipaddress_eth0}:6001/2":
+    zone   => 1,
+    weight => 1,
+  }
+
+  @@ring_account_device { "${ipaddress_eth0}:6002/2":
+    zone   => 1,
+    weight => 1,
+  }
+
+  Swift::Ringsync<<||>>
+
+
+}
+
+#swift proxy
+class swift_proxy  (
+    $local_net_ip,
+    $part_power = '18',
+    $replicas = '3',
+    $min_part_hours = '1', 
+)
+{
+
+  class {'swift': 
+    swift_hash_suffix => "$swift_hash",
+    package_ensure    => latest,
+  }
+
+  class { 'memcached':
+    listen_ip => '127.0.0.1',
+  }
+
+  class { 'swift::ringbuilder':
+          part_power => $part_power,
+          replicas => $replicas,
+          min_part_hours => $min_part_hours,
+        }
+
+  class {'swift::proxy':
+    proxy_local_net_ip => $local_net_ip,
+    pipeline           => [
+      'catch_errors',
+      'healthcheck',
+      'cache',
+      'ratelimit',
+      'proxy-server'
+    ],
+    account_autocreate => true,
+    require            => Class['swift::ringbuilder'],
+  }
+  
+  # load pipeline classes
+  class { [
+    'swift::proxy::catch_errors',
+    'swift::proxy::healthcheck',
+    'swift::proxy::swift3',
+    'swift::proxy::cache',
+    'swift::proxy::ratelimit',
+  ]:
+  }
+
+}
+
 class control(
   $tunnel_ip,
   $public_address          = $::controller_node_public,
@@ -358,6 +464,9 @@ node master-node inherits "cobbler-node" {
   host { $::build_node_name:
 	  ip => $::cobbler_node_ip
   }
+
+
+
 
   # Change the servers for your NTP environment
   # (Must be a reachable NTP Server by your build-node, i.e. ntp.esl.cisco.com)
