@@ -18,9 +18,9 @@ $package_repo = 'cisco_repo'
 # If you are behind a proxy you may choose not to use our ftp distribution, and
 # instead try our http distribution location. Note the http location is not
 # a permanent location and may change at any time.
-$location 		= "ftp://ftpeng.cisco.com/openstack/cisco"
+#$location 		= "ftp://ftpeng.cisco.com/openstack/cisco"
 # Alternate, uncomment this one, and comment out the one above
-#$location		= "http://openstack-repo.cisco.com/openstack/cisco"
+$location		= "http://openstack-repo.cisco.com/openstack/cisco"
 ########### Build Node (Cobbler, Puppet Master, NTP) ######
 # Change the following to the host name you have given your build node.
 # This name should be in all lower case letters due to a Puppet limitation
@@ -100,18 +100,30 @@ $controller_node_public        = $controller_node_address
 # This is the interface used for external backend communication
 $controller_node_internal      = $controller_node_address
 
-# These next three parameters specify the networking hardware used in each node
+# These next two parameters specify the networking hardware used in each node
 # Current assumption is that all nodes have the same network interfaces and are
-# cabled identically
+# cabled identically.  However, with the control node acting as network node,
+# only the control node requires 2 interfaces.  For all other nodes, a single
+# interface is functional with the assumption that:
+#   a) The public_interface will have an IP address reachable by
+#      all other nodes in the openstack cluster.  This address will
+#      be used for API Access, for the Horizon UI, and as an endpoint
+#      for the default GRE tunnel mechanism used in the OVS network
+#      configuration.
+#   b) The external_interface is used to provide a Layer2 path for 
+#      the l3_agent external router interface.  It is expected that
+#      this interface be attached to an upstream device that provides
+#      a L3 router interface, with the default router configuration
+#      assuming that the first non "network" address in the external 
+#      network IP subnet will be used as the default forwarding path
+#      if no more specific host routes are added.
 #
-# public_interface is the interface that each service's API listens on
-#   it's also commonly referred to as the management interface
+# It is assumed that this interface has an IP Address associated with it
+# and is available and connected on every host in the OpenStack cluster
 $public_interface        	= 'eth0'
-# private_interface is the interface used for network connectivity between VMs.
-#   specifying and interface allows you to create a network specifically for GRE 
-#   tunneled traffic between compute and network nodes.
-$private_interface		= 'eth0'
-# external_interface is used for external connectivity such as floating IPs (only in network/controller node)
+# The external_interface is used for external connectivity in association
+# with the l3_agent external router interface, providing floating IPs
+# (this is only required on the network/controller node)
 $external_interface	 	= 'eth1'
 
 # Select the drive on which Ubuntu and OpenStack will be installed in each node. Current assumption is
