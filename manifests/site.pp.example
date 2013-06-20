@@ -272,6 +272,27 @@ node /compute-server\d+/ inherits os_base {
 # each additional node
 
 
+
+# Swift Proxy
+#node /swift-proxy01/ inherits os_base {
+#    class {'swift_proxy':
+#        local_net_ip => '2.1.1.3',
+#    }
+#}
+
+
+# Swift Storage nodes
+#node /swift-storage\d+/ inherits os_base {
+#    class {'swift_storage':
+#        local_net_ip => '2.1.1.4',
+#        disk => 'sdb',
+#    }
+#}
+
+### Repeat as needed ###
+# Copy the swift-storage01 line above and paste a copy here for each additional OpenStack swift storage
+# node in your cluster. 
+
 ### End repeated nodes ###
 
 ########################################################################
