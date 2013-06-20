@@ -151,15 +151,13 @@ node os_base inherits base {
 }
 
 
-# configurations that need to be applied to all swift nodes
+# swift storage
 class swift_storage  (
   $disk,
 )
 {
 
-
   class { 'swift':
-    # not sure how I want to deal with this shared secret
     swift_hash_suffix => "$swift_hash",
     package_ensure    => latest,
   }
@@ -172,6 +170,7 @@ class swift_storage  (
        storage_local_net_ip => '2.1.1.3',
   }
 
+  #rings
   @@ring_object_device { "${ipaddress_eth0}:6000/1":
   zone   => 1,
   weight => 1,
@@ -204,6 +203,9 @@ class swift_storage  (
 
   Swift::Ringsync<<||>>
 
+  #naginator monitoring
+  class { "naginator::control_target": }
+
 }
 
 
@@ -212,20 +214,22 @@ class swift_proxy  (
     $part_power = '18',
     $replicas = '3',
     $min_part_hours = '1', 
-    )
+)
 {
-    class {'swift': 
+
+  class {'swift': 
     swift_hash_suffix => "$swift_hash",
     package_ensure    => latest,
   }
+
   class { 'memcached':
     listen_ip => $listen_ip,
   }
 
   class { 'swift::ringbuilder':
-          part_power => '18',
-          replicas => '3',
-          min_part_hours => '1',
+          part_power => $part_power,
+          replicas => $replicas,
+          min_part_hours => $min_part_hours,
         }
 
   class {'swift::proxy':
@@ -239,10 +243,9 @@ class swift_proxy  (
     ],
     account_autocreate => true,
     require            => Class['swift::ringbuilder'],
-
   }
   
-  # configure all of the middlewares
+  # load pipeline classes
   class { [
     'swift::proxy::catch_errors',
     'swift::proxy::healthcheck',
@@ -251,7 +254,10 @@ class swift_proxy  (
     'swift::proxy::ratelimit',
   ]:
   }
-  
+
+  #naginator monitoring
+  class { "naginator::control_target": }
+
 }
 
 class control(
