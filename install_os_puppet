@@ -70,8 +70,8 @@ if ! run_cmd apt-get $APT_CONFIG update; then
 fi
 
 # Install prerequisite packages
-echo "Installing prerequisite apps: git, puppet, ipmitool, python-software-properties.."
-if ! run_cmd apt-get $APT_CONFIG install -qym git puppet ipmitool python-software-properties; then
+echo "Installing prerequisite apps: git, puppet, ipmitool..."
+if ! run_cmd apt-get $APT_CONFIG install -qym git puppet ipmitool; then
   echo "Can't install prerequisites!..."
   exit 1
 fi
