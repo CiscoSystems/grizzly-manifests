@@ -197,7 +197,8 @@ $cinder_storage_driver         = 'iscsi'
 # for OpenStack. Cobbler will automate the installation of Ubuntu onto these nodes using
 # these settings
 
-node /build-node/ inherits master-node {
+# Change "build-node" to the name of your build node.
+node 'build-node' inherits master-node {
 
 # This block defines the control server. Replace "control_server" with the 
 # host name of your OpenStack controller, and change the "mac" to the MAC 
@@ -264,14 +265,14 @@ node build-server inherits build-node { }
 # Change control_server to the host name of your control node.  Note that the
 # hostname should be in all lowercase letters due to a limitation of Puppet
 # (refer to http://projects.puppetlabs.com/issues/1168).
-node /control-server/ inherits os_base {
+node 'control_server' inherits os_base {
   class { 'control':
     tunnel_ip   => '192.168.242.10'
   }
 }
 
 # Change compute_server01 to the host name of your first compute node
-node /compute-server\d+/ inherits os_base {
+node 'compute_server01' inherits os_base {
   class { 'compute':
     internal_ip => '192.168.242.21',
     tunnel_ip   => '192.168.242.21',
