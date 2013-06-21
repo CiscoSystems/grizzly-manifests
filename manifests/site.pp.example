@@ -307,18 +307,13 @@ node /compute-server\d+/ inherits os_base {
 
 # Swift Proxy
 #node /swift-proxy01/ inherits os_base {
-#    class {'swift_proxy':
-#        local_net_ip => '2.1.1.3',
-#    }
+#    class {'openstack::swift::proxy':}
 #}
 
 
 # Swift Storage nodes
 #node /swift-storage\d+/ inherits os_base {
-#    class {'swift_storage':
-#        local_net_ip => '2.1.1.4',
-#        disk => 'sdb',
-#    }
+#    class {'openstack::swift::storage-node':}
 #}
 
 ### Repeat as needed ###
