@@ -80,7 +80,7 @@ $admin_user 		= 'localadmin'
 $password_crypted 	= '$6$UfgWxrIv$k4KfzAEMqMg.fppmSOTd0usI4j6gfjs0962.JXsoJRWa5wMz8yQk4SfInn4.WZ3L/MCt5u.62tHDGB36EhiKF1'
 $autostart_puppet       = true
 
-# If the setup uses the UCS Bseries blades, enter the port on which the
+# If the setup uses the UCS B-series blades, enter the port on which the
 # ucsm accepts requests. By default the UCSM is enabled to accept requests
 # on port 443 (https). If https is disabled and only http is used, set
 # $ucsm_port = '80'
@@ -217,7 +217,13 @@ node 'build-node' inherits master-node {
 # This block defines the control server. Replace "control_server" with the 
 # host name of your OpenStack controller, and change the "mac" to the MAC 
 # address of the boot interface of your OpenStack controller. Change the 
-# "ip" to the IP address of your OpenStack controller.
+# "ip" to the IP address of your OpenStack controller.  The power_address
+# parameter specifies the address to use for device power management,
+# power_user and power_password specify the login credentials to use for
+# power management, and power_type determines which Cobbler fence script
+# is used for power management.  Supported values for power_type are
+# 'ipmitool' for generic IPMI devices and UCS C-series servers in standalone
+# mode or 'ucs' for C-series or B-series UCS devices managed by UCSM.
 
   cobbler_node { "control-server":
     node_type => "control",
@@ -244,14 +250,14 @@ node 'build-node' inherits master-node {
     power_address  => "192.168.242.121"
   }
 # Example with UCS blade power_address with a sub-group (in UCSM), and 
-# a ServiceProfile for power_id.  You will need to change power type to 
-# 'UCS' in the define macro above
+# a ServiceProfile for power_id.
 #  cobbler_node { "compute-server01":
 #    node_type => "compute",
 #    mac => "11:22:33:44:66:77",
 #    ip => "192.168.242.21",
 #    power_address  => "192.168.242.121:org-cisco",
-#    power_id => "OpenStack-1"
+#    power_id => "OpenStack-1",
+#    power_type => 'ucs'
 #  }
 # End compute node
 
