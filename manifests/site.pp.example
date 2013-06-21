@@ -313,7 +313,9 @@ node /compute-server\d+/ inherits os_base {
 
 # Swift Storage nodes
 #node /swift-storage\d+/ inherits os_base {
-#    class {'openstack::swift::storage-node':}
+#  class {'openstack::swift::storage-node':
+#     swift_zone => '1',
+#   }
 #}
 
 ### Repeat as needed ###
