@@ -247,7 +247,10 @@ node 'build-node' inherits master-node {
     node_type => "compute",
     mac => "11:22:33:44:55:66",
     ip => "192.168.242.21",
-    power_address  => "192.168.242.121"
+    power_address  => "192.168.242.121",
+    power_user => "admin",
+    power_password => "password",
+    power_type => "ipmitool"
   }
 # Example with UCS blade power_address with a sub-group (in UCSM), and 
 # a ServiceProfile for power_id.
@@ -257,7 +260,9 @@ node 'build-node' inherits master-node {
 #    ip => "192.168.242.21",
 #    power_address  => "192.168.242.121:org-cisco",
 #    power_id => "OpenStack-1",
-#    power_type => 'ucs'
+#    power_type => 'ucs',
+#    power_user => 'admin',
+#    power_password => 'password'
 #  }
 # End compute node
 
