@@ -1,7 +1,6 @@
 # This document serves as an example of how to deploy
 # basic multi-node openstack environments.
 # In this scenario Quantum is using OVS with GRE Tunnels
-# Swift is not included.
 
 ########### Proxy Configuration ##########
 # If you use an HTTP/HTTPS proxy, uncomment this setting and specify the
@@ -252,6 +251,7 @@ node 'build-node' inherits master-node {
     power_password => "password",
     power_type => "ipmitool"
   }
+
 # Example with UCS blade power_address with a sub-group (in UCSM), and 
 # a ServiceProfile for power_id.
 #  cobbler_node { "compute-server01":
@@ -270,6 +270,41 @@ node 'build-node' inherits master-node {
 # Make a copy of your compute node block above for each additional OpenStack
 # node in your cluster and paste the copy in this section. Be sure to change
 # the host name, mac, ip, and power settings for each node.
+
+# This block defines the first swift proxy server. Replace "swift-server01"
+# with the host name of your first OpenStack swift proxy node (note: the hostname
+# should be in all lowercase letters due to a limitation of Puppet; refer to
+# http://projects.puppetlabs.com/issues/1168), and change the "mac" to the
+# MAC address of the boot interface of your first OpenStack swift proxy node.
+# Change the "ip" to the IP address of your first OpenStack swift proxy node.
+
+# Begin swift proxy node
+#  cobbler_node { "swift-proxy01":
+#    node_type => "swift-proxy",
+#    mac => "11:22:33:44:55:66",
+#    ip => "192.168.242.21",
+#    power_address  => "192.168.242.121"
+#  }
+
+# This block defines the first swift storage server. Replace "swift-storage01"
+# with the host name of your first OpenStack swift storage node (note: the hostname
+# should be in all lowercase letters due to a limitation of Puppet; refer to
+# http://projects.puppetlabs.com/issues/1168), and change the "mac" to the
+# MAC address of the boot interface of your first OpenStack swift storage node.
+# Change the "ip" to the IP address of your first OpenStack swift storage node.
+
+# Begin swift storage node
+#  cobbler_node { "swift-storage01":
+#    node_type => "swift-storage",
+#    mac => "11:22:33:44:55:66",
+#    ip => "192.168.242.21",
+#    power_address  => "192.168.242.121"
+#  }
+
+### Repeat as needed ###
+# Make a copy of your swift storage node block above for each additional
+# node in your swift cluster and paste the copy in this section. Be sure 
+# to change the host name, mac, ip, and power settings for each node.
 
 
 ### End repeated nodes ###
@@ -318,6 +353,28 @@ node 'compute_server01' inherits os_base {
 # additional OpenStack node in your cluster. Be sure to replace the
 # 'compute_server01' parameter with the correct host name for each 
 # additional node.
+
+# Swift Proxy
+#node 'swift-proxy01' inherits os_base {
+#  class {'openstack::swift::proxy':
+#    swift_local_net_ip => '192.168.242.21',
+#    keystone_host => $controller_node_address,
+#  }
+#}
+
+# Swift Storage
+#node 'swift-storage01' inherits os_base {
+#  class {'openstack::swift::storage-node':
+#    swift_zone => '1',
+#    swift_local_net_ip => '192.168.242,21',
+#    storage_type => 'disk',
+#    storage_devices => ['sdb','sdc','sdd']
+#  }
+#}
+
+### Repeat as needed ###
+# Copy the swift-storage01 line above and paste a copy here for each
+# additional OpenStack swift storage node in your cluster.
 
 
 ### End repeated nodes ###
