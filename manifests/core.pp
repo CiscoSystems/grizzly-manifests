@@ -257,12 +257,10 @@ class control(
   }
 
   class { 'swift::keystone::auth':
-    tenant => $swift_auth_tenant,
-    auth_name => $swift_auth_user,
-    password => $swift_auth_password,
-    address => swiftproxy_cluster_vip,
+    auth_name => $swift_user,
+    password => $swift_password,
+    public_address => $::controller_node_internal,
   }
-
 
   class { "naginator::control_target": }
 
