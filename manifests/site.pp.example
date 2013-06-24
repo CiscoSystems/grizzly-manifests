@@ -161,8 +161,8 @@ $quantum_user_password   = 'quantum_pass'
 $quantum_db_password     = 'quantum_pass'
 $rabbit_password         = 'openstack_rabbit_password'
 $rabbit_user             = 'openstack_rabbit_user'
-#$swift_password          = 'openstack_swift_password'
-#$swift_user              = 'openstack_swift_user'
+$swift_password          = 'openstack_swift_password'
+$swift_user              = 'openstack_swift_user'
 
 # Nova DB connection
 $sql_connection 	 = "mysql://${nova_user}:${nova_db_password}@${controller_node_address}/nova"
@@ -275,11 +275,12 @@ node 'build-node' inherits master-node {
 # the host name, mac, ip, and power settings for each node.
 
 # This block defines the first swift proxy server. Replace "swift-server01"
-# with the host name of your first OpenStack swift proxy node (note: the hostname
-# should be in all lowercase letters due to a limitation of Puppet; refer to
-# http://projects.puppetlabs.com/issues/1168), and change the "mac" to the
-# MAC address of the boot interface of your first OpenStack swift proxy node.
-# Change the "ip" to the IP address of your first OpenStack swift proxy node.
+# with the host name of your first OpenStack swift proxy node (note: 
+# the hostname should be in all lowercase letters due to a limitation of
+# Puppet; refer to http://projects.puppetlabs.com/issues/1168), and change
+# the "mac" to the MAC address of the boot interface of your first OpenStack
+# swift proxy node.  Change the "ip" to the IP address of your first
+# OpenStack swift proxy node.
 
 # Begin swift proxy node
 #  cobbler_node { "swift-proxy01":
@@ -290,11 +291,12 @@ node 'build-node' inherits master-node {
 #  }
 
 # This block defines the first swift storage server. Replace "swift-storage01"
-# with the host name of your first OpenStack swift storage node (note: the hostname
-# should be in all lowercase letters due to a limitation of Puppet; refer to
-# http://projects.puppetlabs.com/issues/1168), and change the "mac" to the
-# MAC address of the boot interface of your first OpenStack swift storage node.
-# Change the "ip" to the IP address of your first OpenStack swift storage node.
+# with the host name of your first OpenStack swift storage node (note: the
+# hostname should be in all lowercase letters due to a limitation of Puppet;
+# refer to http://projects.puppetlabs.com/issues/1168), and change the "mac"
+# to the MAC address of the boot interface of your first OpenStack swift
+# storage node.  Change the "ip" to the IP address of your first OpenStack
+# swift storage node.
 
 # Begin swift storage node
 #  cobbler_node { "swift-storage01":
@@ -358,6 +360,10 @@ node 'compute_server01' inherits os_base {
 # additional node.
 
 # Swift Proxy
+# Adjust the value of swift_local_net_ip to match the IP address
+# of your first Swift proxy node.  It is generally not necessary
+# to modify the value of keystone_host, as it will default to the
+# address of your control node.
 #node 'swift-proxy01' inherits os_base {
 #  class {'openstack::swift::proxy':
 #    swift_local_net_ip => '192.168.242.21',
@@ -366,6 +372,10 @@ node 'compute_server01' inherits os_base {
 #}
 
 # Swift Storage
+# Modify the swift_local_net_ip parameter to match the IP address of
+# your first Swift storage node.  Modify the storage_devices parameter
+# to set the list of disk devices to be formatted with XFS and used
+# for Swift storage.
 #node 'swift-storage01' inherits os_base {
 #  class {'openstack::swift::storage-node':
 #    swift_zone => '1',
@@ -376,8 +386,10 @@ node 'compute_server01' inherits os_base {
 #}
 
 ### Repeat as needed ###
-# Copy the swift-storage01 line above and paste a copy here for each
-# additional OpenStack swift storage node in your cluster.
+# Copy the swift-storage01 node definition above and paste a copy here for
+# each additional OpenStack swift storage node in your cluster.  Modify
+# the node name, swift_local_net_ip, and storage_devices parameters 
+# accordingly.
 
 
 ### End repeated nodes ###
