@@ -383,8 +383,8 @@ node 'compute_server01' inherits os_base {
 #    swift_zone => '1',
 #    swift_local_net_ip => '192.168.242,21',
 #    storage_type => 'disk',
-#    storage_devices => ['sdb','sdc','sdd']
-
+#    storage_devices => ['sdb','sdc','sdd'],
+#    swift_hash_suffix => $swift_hash,
 #  }
 #}
 
