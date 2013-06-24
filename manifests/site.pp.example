@@ -209,9 +209,8 @@ $cinder_storage_driver         = 'iscsi'
 # which will be used for OpenStack. Cobbler will automate the installation
 # of Ubuntu onto these nodes using these settings.
 
-# Change "build-node" to the name of your build node.
-# Note: the hostname should be in all lowercase letters due to a limitation
-# of Puppet; refer to http://projects.puppetlabs.com/issues/1168.
+# The build node name is changed in the "node type" section further down
+# in the file. This line should not be changed here.
 node 'build-node' inherits master-node {
 
 # This block defines the control server. Replace "control_server" with the 
