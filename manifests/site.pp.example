@@ -351,7 +351,7 @@ node 'compute_server01' inherits os_base {
 # additional node.
 
 # Swift Proxy
-#node /swift-proxy01/ inherits os_base {
+#node 'swift-proxy01' inherits os_base {
 #  class {'openstack::swift::proxy':
 #    swift_local_net_ip => '192.168.242.21',
 #    keystone_host => $controller_node_address,
@@ -359,7 +359,7 @@ node 'compute_server01' inherits os_base {
 #}
 
 # Swift Storage
-#node /swift-storage01/ inherits os_base {
+#node 'swift-storage01' inherits os_base {
 #  class {'openstack::swift::storage-node':
 #    swift_zone => '1',
 #    swift_local_net_ip => '192.168.242,21',
