@@ -1,7 +1,6 @@
 # This document serves as an example of how to deploy
 # basic multi-node openstack environments.
 # In this scenario Quantum is using OVS with GRE Tunnels
-# Swift is not included.
 
 
 node base {
