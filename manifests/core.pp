@@ -256,6 +256,14 @@ class control(
     cinder_db_password      => $cinder_db_password,
   }
 
+  class { 'swift::keystone::auth':
+    tenant => $swift_auth_tenant,
+    auth_name => $swift_auth_user,
+    password => $swift_auth_password,
+    address => swiftproxy_cluster_vip,
+  }
+
+
   class { "naginator::control_target": }
 
 }
