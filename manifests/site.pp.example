@@ -284,9 +284,9 @@ node 'build-node' inherits master-node {
 # Begin swift proxy node
 #  cobbler_node { "swift-proxy01":
 #    node_type => "swift-proxy",
-#    mac => "11:22:33:44:55:66",
-#    ip => "192.168.242.21",
-#    power_address  => "192.168.242.121"
+#    mac => "11:22:33:aa:bb:cc",
+#    ip => "192.168.242.179",
+#    power_address  => "192.168.242.12"
 #  }
 
 # This block defines the first swift storage server. Replace "swift-storage01"
@@ -300,9 +300,9 @@ node 'build-node' inherits master-node {
 # Begin swift storage node
 #  cobbler_node { "swift-storage01":
 #    node_type => "swift-storage",
-#    mac => "11:22:33:44:55:66",
-#    ip => "192.168.242.21",
-#    power_address  => "192.168.242.121"
+#    mac => "11:22:33:cc:bb:aa",
+#    ip => "192.168.242.180",
+#    power_address  => "192.168.242.13"
 #  }
 
 ### Repeat as needed ###
@@ -365,7 +365,7 @@ node 'compute_server01' inherits os_base {
 # address of your control node.
 #node 'swift-proxy01' inherits os_base {
 #  class {'openstack::swift::proxy':
-#    swift_local_net_ip => '192.168.242.21',
+#    swift_local_net_ip => '192.168.242.179',
 #    keystone_host => $controller_node_address,
 #    swift_user_password => $swift_password,
 #    swift_hash_suffix => $swift_hash,
@@ -380,7 +380,7 @@ node 'compute_server01' inherits os_base {
 #node 'swift-storage01' inherits os_base {
 #  class {'openstack::swift::storage-node':
 #    swift_zone => '1',
-#    swift_local_net_ip => '192.168.242,21',
+#    swift_local_net_ip => '192.168.242.180',
 #    storage_type => 'disk',
 #    storage_devices => ['sdb','sdc','sdd'],
 #    swift_hash_suffix => $swift_hash,
