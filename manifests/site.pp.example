@@ -373,8 +373,8 @@ node 'compute_server01' inherits os_base {
 #    swift_local_net_ip  => $swift_proxy_address,
 #    keystone_host       => $controller_node_address,
 #    swift_user_password => $admin_password,
-#    swift_admin_tenant  => admin,
-#    swift_admin_user    => admin,
+#    swift_admin_tenant  => 'admin',
+#    swift_admin_user    => 'admin',
 #    swift_hash_suffix   => $swift_hash,
 #  }
 #}
