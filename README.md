@@ -1,32 +1,9 @@
 Grizzly-manifests
 ================
 
-Install Ubuntu 12.04.1 LTS x86_64 (preferred)
+These manifests provide the base code for the Cisco OpenStack Installer.
+For instructions on how to deploy, please refer to the PDF/ePub documents
+in ./documents or view instructions online at:
 
-	apt-get update && apt-get upgrade && apt-get install git puppet ipmitool python-jinja2 python-passlib python-yaml
-
-clone this repo to your build node
-
-	git clone https://github.com/CiscoSystems/grizzly-manifests -b multi-node
-	cp grizzly-manifests/* /etc/puppet/manifests
-
-Clone the puppet modules
-
-	cd /etc/puppet/manifests/
-	/etc/puppet/manifests/puppet-modules.sh
-
-Create a copy of the site.pp.example file and name it site.pp:
-
-	cp site.pp.example site.pp
-
-"Reset" your environment
-
-	puppet apply -v /etc/puppet/manifests/site.pp
-	puppet plugin download
-	/etc/puppet/manifests/reset_site.sh
-
-Wait ~ 15 minutes, and then check out your new OpenStack cluster:
-
-	http://{control_node_ip_or_dns}/
-
+http://docwiki.cisco.com/wiki/OpenStack:Grizzly-Multinode
 
