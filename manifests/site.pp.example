@@ -108,6 +108,11 @@ $controller_node_public        = $controller_node_address
 # This is the interface used for external backend communication.
 $controller_node_internal      = $controller_node_address
 
+# Specify the address of the Swift proxy
+# If you have multiple Swift proxy nodes, this should be the address
+# of the VIP used to load-balance across the individual nodes
+$swift_proxy_address           = '192.168.242.179'
+
 # These next two parameters specify the networking hardware used in each node
 # Current assumption is that all nodes have the same network interfaces and are
 # cabled identically.  However, with the control node acting as network node,
@@ -365,7 +370,7 @@ node 'compute_server01' inherits os_base {
 # address of your control node.
 #node 'swift-proxy01' inherits os_base {
 #  class {'openstack::swift::proxy':
-#    swift_local_net_ip => '192.168.242.179',
+#    swift_local_net_ip => $swift_proxy_address,
 #    keystone_host => $controller_node_address,
 #    swift_user_password => $swift_password,
 #    swift_hash_suffix => $swift_hash,
