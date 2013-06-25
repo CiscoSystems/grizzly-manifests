@@ -220,7 +220,7 @@ $cinder_storage_driver         = 'iscsi'
 # in the file. This line should not be changed here.
 node 'build-node' inherits master-node {
 
-# This block defines the control server. Replace "control_server" with the 
+# This block defines the control server. Replace "control-server" with the 
 # host name of your OpenStack controller, and change the "mac" to the MAC 
 # address of the boot interface of your OpenStack controller. Change the 
 # "ip" to the IP address of your OpenStack controller.  The power_address
@@ -241,7 +241,7 @@ node 'build-node' inherits master-node {
     power_type => "ipmitool"
   }
 
-# This block defines the first compute server. Replace "compute_server01" 
+# This block defines the first compute server. Replace "compute-server01" 
 # with the host name of your first OpenStack compute node (note: the hostname
 # should be in all lowercase letters due to a limitation of Puppet; refer to
 # http://projects.puppetlabs.com/issues/1168), and change the "mac" to the 
@@ -338,19 +338,19 @@ node 'build-node' inherits master-node {
 # limitation of Puppet (refer to http://projects.puppetlabs.com/issues/1168).
 node build-server inherits build-node { }
 
-# Change control_server to the host name of your control node.  Note that the
+# Change control-server to the host name of your control node.  Note that the
 # hostname should be in all lowercase letters due to a limitation of Puppet
 # (refer to http://projects.puppetlabs.com/issues/1168).
-node 'control_server' inherits os_base {
+node 'control-server' inherits os_base {
   class { 'control':
     tunnel_ip   => '192.168.242.10'
   }
 }
 
-# Change compute_server01 to the host name of your first compute node.
+# Change compute-server01 to the host name of your first compute node.
 # Note that the hostname should be in all lowercase letters due to a
 # limitation of Puppet (refer to http://projects.puppetlabs.com/issues/1168).
-node 'compute_server01' inherits os_base {
+node 'compute-server01' inherits os_base {
   class { 'compute':
     internal_ip => '192.168.242.21',
     tunnel_ip   => '192.168.242.21',
@@ -358,9 +358,9 @@ node 'compute_server01' inherits os_base {
 }
 
 ### Repeat as needed ###
-# Copy the compute_server01 line above and paste a copy here for each 
+# Copy the compute-server01 line above and paste a copy here for each 
 # additional OpenStack node in your cluster. Be sure to replace the
-# 'compute_server01' parameter with the correct host name for each 
+# 'compute-server01' parameter with the correct host name for each 
 # additional node.
 
 # Swift Proxy
