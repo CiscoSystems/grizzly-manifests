@@ -256,9 +256,11 @@ class control(
   }
 
   class { 'swift::keystone::auth':
-    auth_name => $swift_user,
-    password => $swift_password,
-    public_address => $::controller_node_internal,
+    auth_name        => $swift_user,
+    password         => $swift_password,
+    public_address   => $::swift_proxy_address,
+    admin_address    => $::swift_proxy_address,
+    internal_address => $::swift_proxy_address,
   }
 
   class { "naginator::control_target": }
