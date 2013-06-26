@@ -25,7 +25,7 @@ node base {
     if($::package_repo == 'cisco_repo') {
       apt::source { "cisco-openstack-mirror_grizzly":
         location => $::location,
-        release => "grizzly-proposed",
+        release => "grizzly",
         repos => "main",
         key => "E8CC67053ED3B199",
         key_content => '-----BEGIN PGP PUBLIC KEY BLOCK-----
