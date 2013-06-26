@@ -80,8 +80,16 @@ UcXHbA==
   elsif ($osfamily == 'redhat') {
     yumrepo { 'cisco-openstack-mirror':
       descr     => "Cisco Openstack Repository",
+      # this value should point to repo with puppet modules ex: http://koji-server.cisco.com/repos/grizzly-puppet-el6-build/latest/x86_64/
       baseurl  => $::location,
       gpgcheck => "0", #TODO(prad): Add gpg key
+      enabled  => "1";
+    }
+    yumrepo { 'openstack-grizzly':
+      descr     => "OpenStack Grizzly Repository",
+      baseurl  => "http://repos.fedorapeople.org/repos/openstack/openstack-grizzly/epel-6/",
+      gpgkey   => "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-RDO-Grizzly",
+      gpgcheck => "1",
       enabled  => "1";
     }
     # add a resource dependency so yumrepo loads before package
@@ -115,8 +123,6 @@ UcXHbA==
   }
 
   class { 'collectd':
-    graphitehost		=> $build_node_fqdn,
-	  management_interface	=> $::public_interface,
   }
 }
 
@@ -381,17 +387,21 @@ node master-node inherits "cobbler-node" {
   class { 'naginator': }
 
   class { 'graphite':
-	  graphitehost 	=> $build_node_fqdn,
+    gr_apache_port   => 8190,
   }
 
-    # set up a local apt cache.  Eventually this may become a local mirror/repo instead
-  class { apt-cacher-ng:
-  	proxy 		=> $::proxy,
-  	avoid_if_range  => true, # Some proxies have issues with range headers
-                             # this stops us attempting to use them
+  # set up a local apt cache.  Eventually this may become a local mirror/repo instead
+  if ($osfamily == 'debian') {
+    class { apt-cacher-ng:
+      proxy 		=> $::proxy,
+      avoid_if_range  => true, # Some proxies have issues with range headers
+                                 # this stops us attempting to use them
                              # marginally less efficient with other proxies
+    }
   }
-
+  elsif ($osfamily == 'redhat') {
+    # TODO: Add squid support
+  }
   if ! $::default_gateway {
     # Prefetch the pip packages and put them somewhere the openstack nodes can fetch them
 
@@ -409,10 +419,18 @@ node master-node inherits "cobbler-node" {
     } else {
       $proxy_pfx=""
     }
+
+    if $::osfamily == 'Redhat' {
+        $pip2pi_path = "/usr/bin/pip2pi"
+    }
+    else {
+        $pip2pi_path = "/usr/local/bin/pip2pi"
+    }
+
     exec { 'pip2pi':
       # Can't use package provider because we're changing its behaviour to use the cache
       command => "${proxy_pfx}/usr/bin/pip install pip2pi",
-      creates => "/usr/local/bin/pip2pi",
+      creates => $pip2pi_path,
       require => Package['python-pip'],
     }
     Package <| provider=='pip' |> {
@@ -420,7 +438,7 @@ node master-node inherits "cobbler-node" {
     }
     exec { 'pip-cache':
       # All the packages that all nodes - build, compute and control - require from pip
-      command => "${proxy_pfx}/usr/local/bin/pip2pi /var/www/packages collectd xenapi django-tagging graphite-web carbon whisper",
+      command => "${proxy_pfx}${pip2pi_path} /var/www/packages collectd xenapi django-tagging graphite-web carbon whisper",
       creates => '/var/www/packages/simple', # It *does*, but you'll want to force a refresh if you change the line above
       require => Exec['pip2pi'],
     }
