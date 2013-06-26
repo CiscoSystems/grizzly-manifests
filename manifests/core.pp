@@ -80,7 +80,8 @@ UcXHbA==
   elsif ($osfamily == 'redhat') {
     yumrepo { 'cisco-openstack-mirror':
       descr     => "Cisco Openstack Repository",
-      baseurl  => "http://koji-server.cisco.com/repos/grizzly-puppet-el6-build/latest/x86_64/",
+      # this value should point to repo with puppet modules ex: http://koji-server.cisco.com/repos/grizzly-puppet-el6-build/latest/x86_64/
+      baseurl  => $::location,
       gpgcheck => "0", #TODO(prad): Add gpg key
       enabled  => "1";
     }
