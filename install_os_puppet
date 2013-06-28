@@ -136,7 +136,7 @@ fi
 if [ -d /root/cisco-grizzly-manifests/templates ]
 then
 	echo "Copying templates to templates dir..."
-	if ! run_cmd cp -R /root/cisco-grizzly-manifests/templates /etc/puppet/templates/ ;then
+	if ! run_cmd cp -R /root/cisco-grizzly-manifests/templates/* /etc/puppet/templates/ ;then
   		echo "Can't copy templates!!!"
 		exit 1
 	fi
