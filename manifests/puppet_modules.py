@@ -26,7 +26,7 @@ import subprocess
 #-------- Default Constants ---------------------
 
 ## ----- global variables that can be configurable via cmdline.
-REPO_NAME = "grizzly-proposed"
+REPO_NAME = "grizzly"
 APT_REPO_URL = "ftp://ftpeng.cisco.com/openstack/cisco"
 # uncomment this line if you prefer to use http
 # APT_REPO_URL = "http://128.107.252.163/openstack/cisco"

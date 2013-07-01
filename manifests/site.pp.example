@@ -1,11 +1,11 @@
 # This document serves as an example of how to deploy
 # basic multi-node openstack environments.
 # In this scenario Quantum is using OVS with GRE Tunnels
-# Swift is not included.
 
 ########### Proxy Configuration ##########
-# If you use an HTTP/HTTPS proxy, uncomment this setting and specify the correct proxy URL.
-# If you do not use an HTTP/HTTPS proxy, leave this setting commented out.
+# If you use an HTTP/HTTPS proxy, uncomment this setting and specify the
+# correct proxy URL.  If you do not use an HTTP/HTTPS proxy, leave this
+# setting commented out.
 #$proxy			= "http://proxy-server:port-number"
 
 ########### package repo configuration ##########
@@ -19,104 +19,135 @@ $package_repo = 'cisco_repo'
 # instead try our http distribution location. Note the http location is not
 # a permanent location and may change at any time.
 $location 		= "ftp://ftpeng.cisco.com/openstack/cisco"
-# Alternate, uncomment this one, and comment out the one above
+# Alternate, uncomment this one, and comment out the one above.
 #$location		= "http://openstack-repo.cisco.com/openstack/cisco"
+
 ########### Build Node (Cobbler, Puppet Master, NTP) ######
-# Change the following to the host name you have given your build node
+# Change the following to the host name you have given your build node.
+# This name should be in all lower case letters due to a Puppet limitation
+# (refer to http://projects.puppetlabs.com/issues/1168).
 $build_node_name        = "build-server"
 
 ########### NTP Configuration ############
-# Change this to the location of a time server in your organization accessible to the build server
-# The build server will synchronize with this time server, and will in turn function as the time
-# server for your OpenStack nodes
+# Change this to the location of a time server in your organization accessible
+# to the build server.  The build server will synchronize with this time
+# server, and will in turn function as the time server for your OpenStack
+# nodes.
 $ntp_servers	= ["time-server.domain.name"]
 
 ########### Build Node Cobbler Variables ############
-# Change these 5 parameters to define the IP address and other network settings of your build node
-# The cobbler node *must* have this IP configured and it *must* be on the same network as
-# the hosts to install
+# Change these 5 parameters to define the IP address and other network 
+# settings of your build node.  The cobbler node *must* have this IP 
+# configured and it *must* be on the same network as the hosts to install.
 $cobbler_node_ip 	= '192.168.242.100'
 $node_subnet 		= '192.168.242.0'
 $node_netmask 		= '255.255.255.0'
-# This gateway is optional - if there's a gateway providing a default route, put it here
-# If not, comment it out
+# This gateway is optional - if there's a gateway providing a default route,
+# specify it here.  If not, comment this line out.
 $node_gateway 		= '192.168.242.1'
-# This domain name will be the name your build and compute nodes use for the local DNS
-# It doesn't have to be the name of your corporate DNS - a local DNS server on the build
-# node will serve addresses in this domain - but if it is, you can also add entries for
-# the nodes in your corporate DNS environment they will be usable *if* the above addresses
-# are routeable from elsewhere in your network.
+# This domain name will be the name your build and compute nodes use for the
+# local DNS.  It doesn't have to be the name of your corporate DNS - a local
+# DNS server on the build node will serve addresses in this domain - but if
+# it is, you can also add entries for the nodes in your corporate DNS
+# environment they will be usable *if* the above addresses are routeable
+# from elsewhere in your network.
 $domain_name 		= 'domain.name'
-# This setting likely does not need to be changed
-# To speed installation of your OpenStack nodes, it configures your build node to function
-# as a caching proxy storing the Ubuntu install files used to deploy the OpenStack nodes
+# This setting likely does not need to be changed.
+# To speed installation of your OpenStack nodes, it configures your build
+# node to function as a caching proxy storing the Ubuntu install files used
+# to deploy the OpenStack nodes.
 $cobbler_proxy 		= "http://${cobbler_node_ip}:3142/"
 
 ####### Preseed File Configuration #######
-# This will build a preseed file called 'cisco-preseed' in /etc/cobbler/preseeds/
-# The preseed file automates the installation of Ubuntu onto the OpenStack nodes
+# This will build a preseed file called 'cisco-preseed' in
+# /etc/cobbler/preseeds/
+# The preseed file automates the installation of Ubuntu onto the OpenStack
+# nodes.
 #
 # The following variables may be changed by the system admin:
 # 1) admin_user
 # 2) password_crypted
 # 3) autostart_puppet -- whether the puppet agent will auto start
 # Default user is: localadmin 
-# Default SHA-512 hashed password is "ubuntu": $6$UfgWxrIv$k4KfzAEMqMg.fppmSOTd0usI4j6gfjs0962.JXsoJRWa5wMz8yQk4SfInn4.WZ3L/MCt5u.62tHDGB36EhiKF1
+# Default SHA-512 hashed password is "ubuntu": 
+# $6$UfgWxrIv$k4KfzAEMqMg.fppmSOTd0usI4j6gfjs0962.JXsoJRWa5wMz8yQk4SfInn4.WZ3L/MCt5u.62tHDGB36EhiKF1
 # To generate a new SHA-512 hashed password, run the following replacing
 # the word "password" with your new password. Then use the result as the
-# $password_crypted variable
+# $password_crypted variable.
 # python -c "import crypt, getpass, pwd; print crypt.crypt('password', '\$6\$UfgWxrIv\$')"
 $admin_user 		= 'localadmin'
 $password_crypted 	= '$6$UfgWxrIv$k4KfzAEMqMg.fppmSOTd0usI4j6gfjs0962.JXsoJRWa5wMz8yQk4SfInn4.WZ3L/MCt5u.62tHDGB36EhiKF1'
 $autostart_puppet       = true
 
-# If the setup uses the UCS Bseries blades, enter the port on which the
+# If the setup uses the UCS B-series blades, enter the port on which the
 # ucsm accepts requests. By default the UCSM is enabled to accept requests
 # on port 443 (https). If https is disabled and only http is used, set
 # $ucsm_port = '80'
 $ucsm_port = '443'
 
 ########### OpenStack Variables ############
-# These values define parameters which will be used to deploy and configure OpenStack
-# once Ubuntu is installed on your nodes
+# These values define parameters which will be used to deploy and configure 
+# OpenStack once Ubuntu is installed on your nodes.
 #
-# Change these next 3 parameters to the network settings of the node which will be your
-# OpenStack control node
+# Change these next 3 parameters to the network settings of the node which 
+# will be your OpenStack control node.  Note that the $controller_hostname
+# should be in all lowercase letters due to a limitation of Puppet
+# (refer to http://projects.puppetlabs.com/issues/1168).
 $controller_node_address       = '192.168.242.10'
 $controller_node_network       = '192.168.242.0'
 $controller_hostname           = 'control-server'
-# Specify the network which should have access to the MySQL database on the OpenStack control
-# node. Typically, this will be the same network as defined in the controller_node_network
-# parameter above. Use MySQL network wild card syntax to specify the desired network.
+# Specify the network which should have access to the MySQL database on 
+# the OpenStack control node. Typically, this will be the same network as
+# defined in the controller_node_network parameter above. Use MySQL network
+# wild card syntax to specify the desired network.
 $db_allowed_network            = '192.168.242.%'
-# These next two values typically do not need to be changed. They define the network connectivity
-# of the OpenStack controller
-# This is the interface used to connect to Horizon dashboard
+# These next two values typically do not need to be changed. They define the
+# network connectivity of the OpenStack controller.  This is the interface
+# used to connect to Horizon dashboard.
 $controller_node_public        = $controller_node_address
-# This is the interface used for external backend communication
+# This is the interface used for external backend communication.
 $controller_node_internal      = $controller_node_address
 
-# These next three parameters specify the networking hardware used in each node
+# Specify the address of the Swift proxy
+# If you have multiple Swift proxy nodes, this should be the address
+# of the VIP used to load-balance across the individual nodes
+$swift_proxy_address           = '192.168.242.179'
+
+# These next two parameters specify the networking hardware used in each node
 # Current assumption is that all nodes have the same network interfaces and are
-# cabled identically
+# cabled identically.  However, with the control node acting as network node,
+# only the control node requires 2 interfaces.  For all other nodes, a single
+# interface is functional with the assumption that:
+#   a) The public_interface will have an IP address reachable by
+#      all other nodes in the openstack cluster.  This address will
+#      be used for API Access, for the Horizon UI, and as an endpoint
+#      for the default GRE tunnel mechanism used in the OVS network
+#      configuration.
+#   b) The external_interface is used to provide a Layer2 path for 
+#      the l3_agent external router interface.  It is expected that
+#      this interface be attached to an upstream device that provides
+#      a L3 router interface, with the default router configuration
+#      assuming that the first non "network" address in the external 
+#      network IP subnet will be used as the default forwarding path
+#      if no more specific host routes are added.
 #
-# public_interface is the interface that each service's API listens on
-#   it's also commonly referred to as the management interface
+# It is assumed that this interface has an IP Address associated with it
+# and is available and connected on every host in the OpenStack cluster
 $public_interface        	= 'eth0'
-# private_interface is the interface used for network connectivity between VMs.
-#   specifying and interface allows you to create a network specifically for GRE 
-#   tunneled traffic between compute and network nodes.
-$private_interface		= 'eth0'
-# external_interface is used for external connectivity such as floating IPs (only in network/controller node)
+# The external_interface is used for external connectivity in association
+# with the l3_agent external router interface, providing floating IPs
+# (this is only required on the network/controller node)
 $external_interface	 	= 'eth1'
 
-# Select the drive on which Ubuntu and OpenStack will be installed in each node. Current assumption is
-# that all nodes will be installed on the same device name
+# Select the drive on which Ubuntu and OpenStack will be installed in each
+# node. The current assumption is that all nodes will be installed on the
+# same device name.
 $install_drive           = '/dev/sda'
 
 ########### OpenStack Service Credentials ############
-# This block of parameters is used to change the user names and passwords used by the services which
-# make up OpenStack. The following defaults should be changed for any production deployment
+# This block of parameters is used to change the user names and passwords
+# used by the services which make up OpenStack. The following defaults should
+# be changed for any production deployment.
 $admin_email             = 'root@localhost'
 $admin_password          = 'Cisco123'
 $keystone_db_password    = 'keystone_db_pass'
@@ -135,28 +166,31 @@ $quantum_user_password   = 'quantum_pass'
 $quantum_db_password     = 'quantum_pass'
 $rabbit_password         = 'openstack_rabbit_password'
 $rabbit_user             = 'openstack_rabbit_user'
+$swift_password          = 'openstack_swift_password'
+$swift_user              = 'openstack_swift_user'
+$swift_hash              = 'swift_secret'
 # Nova DB connection
 $sql_connection 	 = "mysql://${nova_user}:${nova_db_password}@${controller_node_address}/nova"
-# glance backend configuration, supports file or swift
+# Glance backend configuration, supports 'file' or 'swift'.
 $glance_backend = 'file'
 
 ########### Test variables ############
-# variables used to populate test script:
+# Variables used to populate test script:
 # /tmp/test_nova.sh
 #
-# image to use for tests. Accepts kvm or cirros
+# Image to use for tests. Accepts 'kvm' or 'cirros'.
 $test_file_image_type = 'kvm'
 
 #### end shared variables #################
 
 # Storage Configuration
-# Set to true to enable Cinder services
+# Set to true to enable Cinder services.
 $cinder_controller_enabled     = true
 
-# Set to true to enable Cinder deployment to all compute nodes
+# Set to true to enable Cinder deployment to all compute nodes.
 $cinder_compute_enabled        = true
 
-# The cinder storage driver to use. Default is iscsi
+# The cinder storage driver to use. Default is 'iscsi'.
 $cinder_storage_driver         = 'iscsi'
 
 # Other drivers exist for cinder. Here are examples on how to enable them.
@@ -168,8 +202,9 @@ $cinder_storage_driver         = 'iscsi'
 # $netapp_password       = ''
 #
 # NFS
-# share information is stored in flat text file specified in $nfs_shares_config
-# the format for this file is hostname:/mountpoint eg 192.168.2.55:/myshare, with only one entry per line
+# share information is stored in flat text file specified in 
+# $nfs_shares_config.  The format for this file is "hostname:/mountpoint",
+# e.g. "192.168.2.55:/myshare", with only one entry per line.
 #
 # $cinder_storage_driver = 'nfs'
 # $nfs_shares_config     = '/etc/cinder/shares.conf'
@@ -177,15 +212,24 @@ $cinder_storage_driver         = 'iscsi'
 
 
 ####### OpenStack Node Definitions #####
-# This section is used to define the hardware parameters of the nodes which will be used
-# for OpenStack. Cobbler will automate the installation of Ubuntu onto these nodes using
-# these settings
+# This section is used to define the hardware parameters of the nodes 
+# which will be used for OpenStack. Cobbler will automate the installation
+# of Ubuntu onto these nodes using these settings.
 
-node /build-node/ inherits master-node {
+# The build node name is changed in the "node type" section further down
+# in the file. This line should not be changed here.
+node 'build-node' inherits master-node {
 
-# This block defines the control server. Replace "control_server" with the host name of your
-# OpenStack controller, and change the "mac" to the MAC address of the boot interface of your
-# OpenStack controller. Change the "ip" to the IP address of your OpenStack controller
+# This block defines the control server. Replace "control-server" with the 
+# host name of your OpenStack controller, and change the "mac" to the MAC 
+# address of the boot interface of your OpenStack controller. Change the 
+# "ip" to the IP address of your OpenStack controller.  The power_address
+# parameter specifies the address to use for device power management,
+# power_user and power_password specify the login credentials to use for
+# power management, and power_type determines which Cobbler fence script
+# is used for power management.  Supported values for power_type are
+# 'ipmitool' for generic IPMI devices and UCS C-series servers in standalone
+# mode or 'ucs' for C-series or B-series UCS devices managed by UCSM.
 
   cobbler_node { "control-server":
     node_type => "control",
@@ -197,60 +241,116 @@ node /build-node/ inherits master-node {
     power_type => "ipmitool"
   }
 
-# This block defines the first compute server. Replace "compute_server01" with the host name
-# of your first OpenStack compute node, and change the "mac" to the MAC address of the boot
-# interface of your first OpenStack compute node. Change the "ip" to the IP address of your first
-# OpenStack compute node
+# This block defines the first compute server. Replace "compute-server01" 
+# with the host name of your first OpenStack compute node (note: the hostname
+# should be in all lowercase letters due to a limitation of Puppet; refer to
+# http://projects.puppetlabs.com/issues/1168), and change the "mac" to the 
+# MAC address of the boot interface of your first OpenStack compute node. 
+# Change the "ip" to the IP address of your first OpenStack compute node.
 
 # Begin compute node
   cobbler_node { "compute-server01":
     node_type => "compute",
     mac => "11:22:33:44:55:66",
     ip => "192.168.242.21",
-    power_address  => "192.168.242.121"
+    power_address  => "192.168.242.121",
+    power_user => "admin",
+    power_password => "password",
+    power_type => "ipmitool"
   }
-# Example with UCS blade power_address with a sub-group (in UCSM), and a ServiceProfile for power_id
-# you will need to change power type to 'USC' in the define macro above
+
+# Example with UCS blade power_address with a sub-group (in UCSM), and 
+# a ServiceProfile for power_id.
 #  cobbler_node { "compute-server01":
 #    node_type => "compute",
 #    mac => "11:22:33:44:66:77",
 #    ip => "192.168.242.21",
 #    power_address  => "192.168.242.121:org-cisco",
-#    power_id => "OpenStack-1"
+#    power_id => "OpenStack-1",
+#    power_type => 'ucs',
+#    power_user => 'admin',
+#    power_password => 'password'
 #  }
 # End compute node
 
 ### Repeat as needed ###
-# Make a copy of your compute node block above for each additional OpenStack node in your cluster
-# and paste the copy in this section. Be sure to change the host name, mac, ip, and power settings
-# for each node
+# Make a copy of your compute node block above for each additional OpenStack
+# node in your cluster and paste the copy in this section. Be sure to change
+# the host name, mac, ip, and power settings for each node.
+
+# This block defines the first swift proxy server. Replace "swift-server01"
+# with the host name of your first OpenStack swift proxy node (note: 
+# the hostname should be in all lowercase letters due to a limitation of
+# Puppet; refer to http://projects.puppetlabs.com/issues/1168), and change
+# the "mac" to the MAC address of the boot interface of your first OpenStack
+# swift proxy node.  Change the "ip" to the IP address of your first
+# OpenStack swift proxy node.
+
+# Begin swift proxy node
+#  cobbler_node { "swift-proxy01":
+#    node_type => "swift-proxy",
+#    mac => "11:22:33:aa:bb:cc",
+#    ip => "192.168.242.179",
+#    power_address  => "192.168.242.12"
+#  }
+
+# This block defines the first swift storage server. Replace "swift-storage01"
+# with the host name of your first OpenStack swift storage node (note: the
+# hostname should be in all lowercase letters due to a limitation of Puppet;
+# refer to http://projects.puppetlabs.com/issues/1168), and change the "mac"
+# to the MAC address of the boot interface of your first OpenStack swift
+# storage node.  Change the "ip" to the IP address of your first OpenStack
+# swift storage node.
+
+# Begin swift storage node
+#  cobbler_node { "swift-storage01":
+#    node_type => "swift-storage",
+#    mac => "11:22:33:cc:bb:aa",
+#    ip => "192.168.242.180",
+#    power_address  => "192.168.242.13"
+#  }
+
+### Repeat as needed ###
+# Make a copy of your swift storage node block above for each additional
+# node in your swift cluster and paste the copy in this section. Be sure 
+# to change the host name, mac, ip, and power settings for each node.
 
 
 ### End repeated nodes ###
 }
 
 ### Node types ###
-# These lines specify the host names in your OpenStack cluster and what the function of each host is
-# internal_ip should be the same as what is specified as "ip" in the OpenStack node definitions above.
-#   this sets the IP for the private(internal) interface of controller nodes (which is predefined already in $controller_node_internal, and the internal interface for 
-#   compute nodes.
-#   In this example, eth0 is both the public and private interface for the controller.
-# tunnel_ip allows you to create a network specifically for GRE tunneled traffic between compute and 
-#   network nodes. Generally, you will want to use "ip" from the OpenStack node definitions above.
-#   This sets the IP for the private interface of compute and network nodes.
+# These lines specify the host names in your OpenStack cluster and what the
+# function of each host is.  internal_ip should be the same as what is
+# specified as "ip" in the OpenStack node definitions above.
+# This sets the IP for the private(internal) interface of controller nodes
+# (which is predefined already in $controller_node_internal, and the internal
+# interface for compute nodes.
+# In this example, eth0 is both the public and private interface for the
+# controller.
+# tunnel_ip allows you to create a network specifically for GRE tunneled
+# traffic between compute and network nodes. Generally, you will want to
+# use "ip" from the OpenStack node definitions above.
+# This sets the IP for the private interface of compute and network nodes.
 
-# Change build_server to the host name of your build node
+# Change build_server to the host name of your build node.
+# Note that the hostname should be in all lowercase letters due to a
+# limitation of Puppet (refer to http://projects.puppetlabs.com/issues/1168).
 node build-server inherits build-node { }
 
-# Change control_server to the host name of your control node
-node /control-server/ inherits os_base {
+# Change control-server to the host name of your control node.  Note that the
+# hostname should be in all lowercase letters due to a limitation of Puppet
+# (refer to http://projects.puppetlabs.com/issues/1168).
+node 'control-server' inherits os_base {
   class { 'control':
     tunnel_ip   => '192.168.242.10'
   }
 }
 
-# Change compute_server01 to the host name of your first compute node
-node /compute-server\d+/ inherits os_base {
+# Change compute-server01 to the host name of your first compute node.
+# Note that the hostname should be in all lowercase letters due to a
+# limitation of Puppet (refer to http://projects.puppetlabs.com/issues/1168).
+node 'compute-server01' inherits os_base {
   class { 'compute':
     internal_ip => '192.168.242.21',
     tunnel_ip   => '192.168.242.21',
@@ -258,9 +358,47 @@ node /compute-server\d+/ inherits os_base {
 }
 
 ### Repeat as needed ###
-# Copy the compute_server01 line above and paste a copy here for each additional OpenStack node in
-# your cluster. Be sure to replace the compute_server01 parameter with the correct host name for
-# each additional node
+# Copy the compute-server01 line above and paste a copy here for each 
+# additional OpenStack node in your cluster. Be sure to replace the
+# 'compute-server01' parameter with the correct host name for each 
+# additional node.
+
+# Swift Proxy
+# Adjust the value of swift_local_net_ip to match the IP address
+# of your first Swift proxy node.  It is generally not necessary
+# to modify the value of keystone_host, as it will default to the
+# address of your control node.
+#node 'swift-proxy01' inherits os_base {
+#  class {'openstack::swift::proxy':
+#    swift_local_net_ip  => $swift_proxy_address,
+#    keystone_host       => $controller_node_address,
+#    swift_user_password => $admin_password,
+#    swift_admin_tenant  => 'admin',
+#    swift_admin_user    => 'admin',
+#    swift_hash_suffix   => $swift_hash,
+#  }
+#}
+
+# Swift Storage
+# Modify the swift_local_net_ip parameter to match the IP address of
+# your first Swift storage node.  Modify the storage_devices parameter
+# to set the list of disk devices to be formatted with XFS and used
+# for Swift storage.
+#node 'swift-storage01' inherits os_base {
+#  class {'openstack::swift::storage-node':
+#    swift_zone => '1',
+#    swift_local_net_ip => '192.168.242.180',
+#    storage_type => 'disk',
+#    storage_devices => ['sdb','sdc','sdd'],
+#    swift_hash_suffix => $swift_hash,
+#  }
+#}
+
+### Repeat as needed ###
+# Copy the swift-storage01 node definition above and paste a copy here for
+# each additional OpenStack swift storage node in your cluster.  Modify
+# the node name, swift_local_net_ip, and storage_devices parameters 
+# accordingly.
 
 
 ### End repeated nodes ###
@@ -270,24 +408,31 @@ node /compute-server\d+/ inherits os_base {
 ########################################################################
 
 ### Advanced Users Configuration ###
-# These four settings typically do not need to be changed
-# In the default deployment, the build node functions as the DNS and static DHCP server for
-# the OpenStack nodes. These settings can be used if alternate configurations are needed
+# These four settings typically do not need to be changed.
+# In the default deployment, the build node functions as the DNS and static
+# DHCP server for the OpenStack nodes. These settings can be used if 
+# alternate configurations are needed.
 $node_dns       = "${cobbler_node_ip}"
 $ip 		= "${cobbler_node_ip}"
 $dns_service 	= "dnsmasq"
 $dhcp_service 	= "dnsmasq"
+$time_zone      = "UTC"
 
-# Enable network interface bonding. This will only enable the bonding module in the OS, 
-# it won't acutally bond any interfaces. Edit the networking interfaces template to set 
-# up interface bonds as required after setting this to true should bonding be required.
+# Enable network interface bonding. This will only enable the bonding module
+# in the OS, it won't acutally bond any interfaces. Edit the networking
+# interfaces template to set up interface bonds as required after setting
+# this to true should bonding be required.
 #$interface_bonding = 'true' 
 
-# Enable ipv6 router edvertisement
+# Enable ipv6 router edvertisement.
 #$ipv6_ra = '1'
 
+# Configure the maximum number of times mysql-server will allow
+# a host to fail connecting before banning it.
+$max_connect_errors = '10'
+
 ### Puppet Parameters ###
-# These settings load other puppet components. They should not be changed
+# These settings load other puppet components. They should not be changed.
 import 'cobbler-node'
 import 'core'
 
