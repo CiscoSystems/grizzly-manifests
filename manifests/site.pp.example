@@ -427,6 +427,27 @@ $time_zone      = "UTC"
 # Enable ipv6 router edvertisement.
 #$ipv6_ra = '1'
 
+# Adjust Quantum quotas
+# These are the default Quantum quotas for various network resources.
+# Adjust these values as necessary. Set a quota to '-1' to remove all
+# quotas for that resource. Also, keep in mind that Nova has separate
+# quotas which may also apply as well.
+#
+# Number of networks allowed per tenant
+$quantum_quota_network             = '10'
+# Number of subnets allowed per tenant
+$quantum_quota_subnet              = '10'
+# Number of ports allowed per tenant
+$quantum_quota_port                = '50'
+# Number of Quantum routers allowed per tenant
+$quantum_quota_router              = '10'
+# Number of floating IPs allowed per tenant
+$quantum_quota_floatingip          = '50'
+# Number of Quantum security groups allowed per tenant
+$quantum_quota_security_group      = '10'
+# Number of security rules allowed per security group
+$quantum_quota_security_group_rule = '100'
+
 # Configure the maximum number of times mysql-server will allow
 # a host to fail connecting before banning it.
 $max_connect_errors = '10'
