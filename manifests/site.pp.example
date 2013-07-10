@@ -488,6 +488,7 @@ node 'compute-server01' inherits os_base {
   # puppet agent will need to run four times for the device to be formatted,
   #   and for the OSD to be added to the crushmap.
 #  ceph::osd::device { '/dev/sdd': }
+#  include ceph::apt::ceph
 #}
 
 
