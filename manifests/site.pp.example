@@ -452,6 +452,9 @@ node 'compute-server01' inherits os_base {
 #$ceph_cluster_interface = 'eth2'
 #$ceph_release           = 'cuttlefish'
 
+# this global path needs to be uncommented for puppet-ceph to work.
+#Exec { path => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin' }
+
 #node 'ceph-mon01' inherits os_base {
   # only mon0 should export the admin keys.
   # This means the following if statement is not needed on the additional mon nodes.
