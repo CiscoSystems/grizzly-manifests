@@ -466,12 +466,12 @@ node 'compute-server01' inherits os_base {
 #  }
 
   # each MON needs a unique id, you can start at 0 and increment as needed.
-#  class {'openstack::ceph::mon': id => 0 }
+#  class {'ceph_mon': id => 0 }
 #}
 
 # Model each additional MON after the following. Remember to increment the id.
 # node 'ceph-mon02' inherits os_base {
-#  class { 'openstack::ceph::mon': id => 1 }
+#  class { 'ceph_mon': id => 1 }
 #}
 
 # This is the OSD node definition example. You will need to specify the public and cluster IP for each unique node.
