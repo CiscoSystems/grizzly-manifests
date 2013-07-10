@@ -255,12 +255,14 @@ class control(
     cinder_db_password      => $cinder_db_password,
   }
 
-  class { 'swift::keystone::auth':
-    auth_name        => $swift_user,
-    password         => $swift_password,
-    public_address   => $::swift_proxy_address,
-    admin_address    => $::swift_proxy_address,
-    internal_address => $::swift_proxy_address,
+  if ($::swift_proxy_address) { 
+    class { 'swift::keystone::auth':
+      auth_name        => $swift_user,
+      password         => $swift_password,
+      public_address   => $::swift_proxy_address,
+      admin_address    => $::swift_proxy_address,
+      internal_address => $::swift_proxy_address,
+    }
   }
 
   class { "naginator::control_target": }
