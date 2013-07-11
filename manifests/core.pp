@@ -441,6 +441,7 @@ class compute(
   $glance_api_servers                = "${::controller_node_internal}:9292",
   $vncproxy_host                     = $::controller_node_public,
   $vnc_enabled                       = true,
+  $force_config_drive                = $::force_config_drive,
   # cinder parameters
   $cinder_db_password                = $::cinder_db_password,
   $manage_volumes                    = true,
@@ -493,6 +494,7 @@ class compute(
     glance_api_servers      => $glance_api_servers,
     vncproxy_host           => $vncproxy_host,
     vnc_enabled             => $vnc_enabled,
+    force_config_drive      => $force_config_drive,
     # cinder parameters
     cinder_db_password      => $cinder_db_password,
     manage_volumes          => $manage_volumes,
