@@ -316,6 +316,8 @@ node 'build-node' inherits master-node {
 # to change the host name, mac, ip, and power settings for each node.
 
 ### this block defines the ceph monitor nodes
+### you will need to add a node type for each addtional mon node
+### eg ceph-mon02, etc. This is due to their unique id requirements
 #  cobbler_node { "ceph-mon01":
 #    node_type     => "ceph-mon01",
 #    mac           => "11:22:33:cc:bb:aa",
@@ -323,7 +325,8 @@ node 'build-node' inherits master-node {
 #    power_address => "192.168.242.13",
 #  }
 
-# this block define ceph osd nodes
+### this block define ceph osd nodes
+### add a new entry for each node
 #  cobbler_node { "ceph-osd01":
 #    node_type     => "ceph-osd01",
 #    mac           => "11:22:33:cc:bb:aa",
@@ -438,7 +441,7 @@ node 'compute-server01' inherits os_base {
 #   (todo: fix conflict when using the same interface specified in $::external_interface. this is due to our late_command.)
 # ceph_cluster_interface: the name of your public interface (can be identical to the public interface).
 #   (todo: fix conflict when using the same interface specified in $::external_interface. this is due to our late_command.)
-# ceph_release: specify the release codename to install the respective release. (todo: pass to ceph::apt::ceph)
+# ceph_release: specify the release codename to install the respective release.
 
 
 #$ceph_auth_type         = 'cephx'
@@ -446,14 +449,20 @@ node 'compute-server01' inherits os_base {
 #$ceph_monitor_secret    = 'AQAJzNxR+PNRIRAA7yUp9hJJdWZ3PVz242Xjiw=='
 #$ceph_monitor_port      = '6789'
 #$ceph_monitor_address   = $ipaddress_eth2
-#$ceph_cluster_network   = '2.5.1.0/24'
-#$ceph_public_network    = '2.5.1.0/24'
+#$ceph_cluster_network   = '192.168.242.0/24'
+#$ceph_public_network    = '192.168.242.0/24'
 #$ceph_public_interface  = 'eth2'
 #$ceph_cluster_interface = 'eth2'
 #$ceph_release           = 'cuttlefish'
 
 # this global path needs to be uncommented for puppet-ceph to work.
-#Exec { path => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin' }
+# uncomment and define the proxy server if your nodes don't have direct
+# access to the internet. this is needed to obtain the latest ceph packages..
+#Exec {
+#  path        => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
+#  environment => 'https_proxy=http://proxy-rtp-1.cisco.com:8080',
+#}
+
 
 #node 'ceph-mon01' inherits os_base {
   # only mon0 should export the admin keys.
@@ -467,11 +476,13 @@ node 'compute-server01' inherits os_base {
 
   # each MON needs a unique id, you can start at 0 and increment as needed.
 #  class {'ceph_mon': id => 0 }
+#  class { 'ceph::apt::ceph': release => $::ceph_release }
 #}
 
 # Model each additional MON after the following. Remember to increment the id.
 # node 'ceph-mon02' inherits os_base {
 #  class { 'ceph_mon': id => 1 }
+#  class { 'ceph::apt::ceph': release => $::ceph_release }
 #}
 
 # This is the OSD node definition example. You will need to specify the public and cluster IP for each unique node.
@@ -484,14 +495,15 @@ node 'compute-server01' inherits os_base {
 #    public_network  => $::ceph_public_network,
 #  }
 #  class { 'ceph::osd':
-#    public_address  => '2.5.1.3',
-#    cluster_address => '2.5.1.3',
+#    public_address  => '192.168.242.3',
+#    cluster_address => '192.168.242.3',
 #  }
-  # Specify the disk devices to use for OSD here
+  # Specify the disk devices to use for OSD here.
+  # Add a new entry for each device on the node that ceph should consume.
   # puppet agent will need to run four times for the device to be formatted,
   #   and for the OSD to be added to the crushmap.
 #  ceph::osd::device { '/dev/sdd': }
-#  include ceph::apt::ceph
+#  class { 'ceph::apt::ceph': release => $::ceph_release }
 #}
 
 
