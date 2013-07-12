@@ -28,4 +28,5 @@ stdlib
 swift
 sysctl
 vswitch
+vcsrepo
 xinetd
