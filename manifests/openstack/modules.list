@@ -1,10 +1,7 @@
 apache
 apt
-apt-cacher-ng
 boolean
-ceph
 cinder
-cobbler
 collectd
 concat
 corosync
@@ -27,9 +24,9 @@ puppet
 quantum
 rabbitmq
 rsync
-ssh
 stdlib
 swift
 sysctl
 vswitch
+vcsrepo
 xinetd
