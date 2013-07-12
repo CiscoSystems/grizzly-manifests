@@ -1,0 +1,5 @@
+import './openstack/nodes.pp'
+
+node default {
+  notify{ "Default Node: Perhaps add a node definition to site.pp": }
+}
