@@ -1,2 +1,2 @@
-grizzly-manifests
-=================
+grizzly-manifests for a MaaS Multi Node Openstack
+=================================================
