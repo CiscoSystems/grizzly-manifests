@@ -160,7 +160,6 @@ $libvirt_type            = 'kvm'
 $glance_db_password      = 'glance_pass'
 $glance_user_password    = 'glance_pass'
 $glance_sql_connection   = "mysql://glance:${glance_db_password}@${controller_node_address}/glance"
-$glance_on_swift         = false
 $cinder_user_password    = 'cinder_pass'
 $cinder_db_password      = 'cinder_pass'
 $quantum_user_password   = 'quantum_pass'
