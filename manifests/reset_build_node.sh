@@ -2,7 +2,7 @@
 #
 # revert build node to "clean" state
 
-for j in nagios collectd cobbler dnsmasq puppet passenger apache2 mysql
+for j in nagios collectd cobbler dnsmasq puppet passenger apache2 mysql apt-cacher-ng
 do
     echo "Purging $j"
     for i in `dpkg -l | grep "$j" | awk '{ print $2 }'`
