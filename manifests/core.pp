@@ -268,6 +268,25 @@ class control(
 }
 
 
+### begin cinder standalone nodes
+class cinder_node() {
+  class { 'cinder':
+    rabbit_userid   => $::rabbit_user,
+    rabbit_host     => $::controller_node_address,
+    rabbit_password => $::rabbit_password,
+    sql_connection  => "mysql://${cinder_user}:${cinder_db_password}@${controller_node_address}/cinder",
+    verbose         => true,
+  }
+  class { 'cinder::volume': }
+
+  package {'python-mysqldb':
+    ensure => present,
+  }
+
+}
+
+### end cinder standalone nodes
+
 class compute(
   $internal_ip,
   $tunnel_ip,
