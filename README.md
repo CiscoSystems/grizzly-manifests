@@ -1,2 +1,3 @@
-grizzly-manifests for a MaaS Multi Node Openstack
-=================================================
+Grizzly-manifests for Ubuntu MaaS Environment
+=============================================
+
