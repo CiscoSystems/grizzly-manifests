@@ -278,7 +278,6 @@ class ceph_common (
     cluster_network => $::ceph_cluster_network,
     public_network  => $::ceph_public_network,
   }
-  include ceph::apt::ceph
 }
 
 class ceph_mon (
