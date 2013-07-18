@@ -338,39 +338,42 @@ class compute(
 
   class { 'openstack::compute':
     # keystone
-    db_host               => $db_host,
-    keystone_host         => $keystone_host,
-    quantum_host          => $quantum_host,
-    internal_address      => $internal_address,
-    libvirt_type          => $libvirt_type,
-    multi_host            => $multi_host,
+    db_host                 => $db_host,
+    keystone_host           => $keystone_host,
+    quantum_host            => $quantum_host,
+    internal_address        => $internal_address,
+    libvirt_type            => $libvirt_type,
+    multi_host              => $multi_host,
     # rabbit
-    rabbit_host           => $rabbit_host,
-    rabbit_password       => $rabbit_password,
-    rabbit_user           => $rabbit_user,
+    rabbit_host             => $rabbit_host,
+    rabbit_password         => $rabbit_password,
+    rabbit_user             => $rabbit_user,
     # nova
-    nova_user_password    => $nova_user_password,
-    nova_db_password      => $nova_db_password,
-    glance_api_servers    => $glance_api_servers,
-    vncproxy_host         => $vncproxy_host,
-    vnc_enabled           => $vnc_enabled,
+    nova_user_password      => $nova_user_password,
+    nova_db_password        => $nova_db_password,
+    glance_api_servers      => $glance_api_servers,
+    vncproxy_host           => $vncproxy_host,
+    vnc_enabled             => $vnc_enabled,
     # cinder parameters
-    cinder_db_password    => $cinder_db_password,
-    manage_volumes        => $manage_volumes,
-    volume_group          => $volume_group,
-    setup_test_volume     => $setup_test_volume,
+    cinder_db_password      => $cinder_db_password,
+    manage_volumes          => $manage_volumes,
+    volume_group            => $volume_group,
+    setup_test_volume       => $setup_test_volume,
     # quantum config
-    quantum	          => $quantum,
-    quantum_user_password => $quantum_user_password,
+    quantum	                => $quantum,
+    quantum_user_password   => $quantum_user_password,
     # Quantum OVS
-    enable_ovs_agent      => $enable_ovs_agent,
-    ovs_local_ip          => $ovs_local_ip,
-     # Quantum L3 Agent
-    enable_l3_agent       => $enable_l3_agent,
-    enable_dhcp_agent     => $enable_dhcp_agent,
+    enable_ovs_agent        => $enable_ovs_agent,
+    ovs_local_ip            => $ovs_local_ip,
+    # Quantum L3 Agent
+    enable_l3_agent         => $enable_l3_agent,
+    enable_dhcp_agent       => $enable_dhcp_agent,
+    # Quantum Security Groups with OVS
+    libvirt_vif_driver      => 'nova.virt.libvirt.vif.LibvirtHybridOVSBridgeDriver',
+    quantum_firewall_driver => 'quantum.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver',
     # general
-    enabled               => $enabled,
-    verbose               => $verbose,
+    enabled                 => $enabled,
+    verbose                 => $verbose,
   }
 
   class { "naginator::compute_target": }
