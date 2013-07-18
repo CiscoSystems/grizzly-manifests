@@ -369,8 +369,8 @@ class compute(
     enable_l3_agent         => $enable_l3_agent,
     enable_dhcp_agent       => $enable_dhcp_agent,
     # Quantum Security Groups with OVS
-    libvirt_vif_driver      => 'nova.virt.libvirt.vif.LibvirtHybridOVSBridgeDriver',
-    quantum_firewall_driver => 'quantum.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver',
+    libvirt_vif_driver      => $libvirt_vif_driver,
+    quantum_firewall_driver => $quantum_firewall_driver,
     # general
     enabled                 => $enabled,
     verbose                 => $verbose,
