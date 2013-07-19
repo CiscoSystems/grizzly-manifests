@@ -289,7 +289,9 @@ node 'build-node' inherits master-node {
 #  }
 # End compute node
 
-# Standalone cinder storage nodes
+# Standalone cinder storage nodes. If cinder is enabled above,
+# it is automatically installed on all compute nodes. The below definition
+# allows the addition of cinder volume only nodes.
 # cobbler_node { "cinder-storage1":
 # node_type => "cinder-storage",
 # mac => "11:22:33:44:55:66",
