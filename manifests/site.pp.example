@@ -201,7 +201,7 @@ $cinder_iscsi_ip = $ipaddress_eth2
 # cinder storage node definitions
 node /^cinder-storage[0-9]/ inherits os_base {
   class { 'cinder_node': }
-  # the vclume class can be changed to different drivers (eg iscsi, rbd)
+  # the volume class can be changed to different drivers (eg iscsi, rbd)
   # if you are targeting multiple backends using different driver on different
   # hosts, you will need to explicitly define your storage nodes
   class { 'cinder::volume::iscsi':
