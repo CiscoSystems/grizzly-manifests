@@ -161,8 +161,9 @@ $libvirt_type            = 'kvm'
 $glance_db_password      = 'glance_pass'
 $glance_user_password    = 'glance_pass'
 $glance_sql_connection   = "mysql://glance:${glance_db_password}@${controller_node_address}/glance"
-$cinder_user_password    = 'cinder_pass'
+$cinder_user             = 'cinder'
 $cinder_db_password      = 'cinder_pass'
+$cinder_user_password    = 'cinder_pass'
 $quantum_user_password   = 'quantum_pass'
 $quantum_db_password     = 'quantum_pass'
 $rabbit_password         = 'openstack_rabbit_password'
@@ -193,6 +194,21 @@ $cinder_compute_enabled        = true
 
 # The cinder storage driver to use. Default is 'iscsi'.
 $cinder_storage_driver         = 'iscsi'
+
+# the public IP address iSCSI should use
+# this uses facter for address info. Ex. $ipaddress_eth0, etc.
+$cinder_iscsi_ip = $ipaddress_eth2
+
+# cinder storage node definitions
+node /^cinder-storage[0-9]/ inherits os_base {
+  class { 'cinder_node': }
+  # the volume class can be changed to different drivers (eg iscsi, rbd)
+  # if you are targeting multiple backends using different driver on different
+  # hosts, you will need to explicitly define your storage nodes
+  class { 'cinder::volume::iscsi':
+    iscsi_ip_address => $::cinder_iscsi_ip,
+  }
+}
 
 # Other drivers exist for cinder. Here are examples on how to enable them.
 #
@@ -273,6 +289,19 @@ node 'build-node' inherits master-node {
 #    power_password => 'password'
 #  }
 # End compute node
+
+# Standalone cinder storage nodes. If cinder is enabled above,
+# it is automatically installed on all compute nodes. The below definition
+# allows the addition of cinder volume only nodes.
+# cobbler_node { "cinder-storage1":
+# node_type => "cinder-storage",
+# mac => "11:22:33:44:55:66",
+# ip => "192.168.242.22",
+# power_address => "192.168.242.122",
+# power_user => "admin",
+# power_password => "password",
+# power_type => "ipmitool"
+# }
 
 ### Repeat as needed ###
 # Make a copy of your compute node block above for each additional OpenStack

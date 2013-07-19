@@ -287,34 +287,6 @@ class control(
 
 }
 
-### begin ceph ###
-class ceph_common (
-  $fsid,
-  $auth_type = $::ceph_auth_type,
-) {
-  class { 'ceph::conf':
-    fsid            => $::ceph_monitor_fsid,
-    auth_type       => $::ceph_auth_type,
-    cluster_network => $::ceph_cluster_network,
-    public_network  => $::ceph_public_network,
-  }
-}
-
-class ceph_mon (
-  $id
-) {
-  class { 'ceph_common':
-    fsid      => $::ceph_monitor_fsid,
-    auth_type => $::ceph_auth_type,
-  }
-  ceph::mon { $id:
-    monitor_secret => $::ceph_monitor_secret,
-    mon_port       => 6789,
-    mon_addr       => $::ceph_monitor_address,
-  }
-}
-
-### end ceph
 
 class compute(
   $internal_ip,
