@@ -44,7 +44,7 @@ $node_subnet 		= '192.168.242.0'
 $node_netmask 		= '255.255.255.0'
 # This gateway is optional - if there's a gateway providing a default route,
 # specify it here.  If not, comment this line out.
-$node_gateway 		= '192.168.242.1'
+# $node_gateway 		= '192.168.242.1'
 # This domain name will be the name your build and compute nodes use for the
 # local DNS.  It doesn't have to be the name of your corporate DNS - a local
 # DNS server on the build node will serve addresses in this domain - but if
