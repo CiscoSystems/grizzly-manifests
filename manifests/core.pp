@@ -285,6 +285,8 @@ class control(
     quota_security_group_rule => $quantum_quota_security_group_rule,
   }
 
+  class { "coe::quantum_log": }
+
 }
 
 ### begin ceph ###
@@ -412,6 +414,8 @@ class compute(
     quota_security_group      => $quantum_quota_security_group,
     quota_security_group_rule => $quantum_quota_security_group_rule,
   }
+
+  class { "coe::quantum_log": }
 
 }
 
