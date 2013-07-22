@@ -204,6 +204,29 @@ define interfaces {
   }
 }
 
+define cinder_extend($drive = $title) {
+  Exec { path => ["/sbin/"], }
+  exec { "mkpart${drive}":
+    command => "parted -a optimal --script /dev/sd${drive} -- mkpart primary 0% 100%",
+    creates => "/dev/sd${drive}1",
+  }
+  exec { "lvmflag${drive}":
+    command   => "parted -a optimal --script /dev/sd${drive} -- set 1 lvm on",
+    refreshonly => true,
+    subscribe => Exec["mkpart${drive}"],
+  }
+  exec { "pvcreate${drive}":
+    command   => "pvcreate /dev/sd${drive}1",
+    refreshonly => true,
+    subscribe => Exec["lvmflag${drive}"], 
+  }
+  exec { "vgextend${drive}":
+    command   => "vgextend cinder-volumes /dev/sd${drive}1",
+    refreshonly => true,
+    subscribe => Exec["pvcreate${drive}"], 
+  }
+}
+
 node /openstackcontrol/ inherits os_base {
   hosts_file { "${ipaddress}": }  
   ->
@@ -224,6 +247,15 @@ node /openstackcompute\d+/ inherits os_base {
     internal_ip => "${ipaddress}",
     tunnel_ip   => "${ipaddress}",
   }
+  
+  exec { "vgreduce":
+    command => "vgreduce cinder-volumes --removemissing",
+    path => ["/sbin/"]
+  }
+
+  cinder_extend { ["b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x"]: 
+    subscribe => Class['compute']
+  } 
 }
 
 #### END NODES ####

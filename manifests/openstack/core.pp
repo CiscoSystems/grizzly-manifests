@@ -68,7 +68,7 @@ node os_base inherits base {
   # This value can be set to true to increase debug logging when
   # trouble-shooting services. It should not generally be set to
   # true as it is known to break some OpenStack components
-  $verbose = false
+  $verbose = true
 }
 
 class control(
