@@ -285,6 +285,8 @@ class control(
     quota_security_group_rule => $quantum_quota_security_group_rule,
   }
 
+  class { "coe::quantum_log": }
+
 }
 
 ### begin ceph ###
@@ -416,6 +418,8 @@ class compute(
     quota_security_group_rule => $quantum_quota_security_group_rule,
   }
 
+  class { "coe::quantum_log": }
+
 }
 
 
@@ -449,7 +453,9 @@ node master-node inherits "cobbler-node" {
 	  graphitehost 	=> $build_node_fqdn,
   }
 
-    # set up a local apt cache.  Eventually this may become a local mirror/repo instead
+  class { 'coe::site_index': }
+
+  # set up a local apt cache.  Eventually this may become a local mirror/repo instead
   class { apt-cacher-ng:
   	proxy 		=> $::proxy,
   	avoid_if_range  => true, # Some proxies have issues with range headers
