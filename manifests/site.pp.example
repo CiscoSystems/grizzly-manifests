@@ -559,6 +559,14 @@ $quantum_quota_security_group_rule = '100'
 # a host to fail connecting before banning it.
 $max_connect_errors = '10'
 
+# Select vif_driver and firewall_driver for quantum and quantum plugin
+# These two parameters can be changed if necessary to support more complex
+# network topologies as well as some Quantum plugins.
+# These default values are required for Quantum security groups to work
+# when using Quantum with OVS.
+$libvirt_vif_driver      = 'nova.virt.libvirt.vif.LibvirtHybridOVSBridgeDriver'
+$quantum_firewall_driver = 'quantum.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver'
+
 ### Puppet Parameters ###
 # These settings load other puppet components. They should not be changed.
 import 'cobbler-node'
