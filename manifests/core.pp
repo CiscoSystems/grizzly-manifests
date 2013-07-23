@@ -177,6 +177,7 @@ class control(
   #export_resources                  = false,
 
   ######### quantum variables #############
+  $core_plugin                       = $::quantum_core_plugin,
   # need to set from a variable
   # database
   $db_host                           = $::controller_node_address,
@@ -238,6 +239,7 @@ class control(
     #export_resources        => false,
 
     ######### quantum variables #############
+    core_plugin             => $core_plugin,
     # need to set from a variable
     # database
     db_host                 => $db_host,
@@ -285,6 +287,17 @@ class control(
     quota_security_group_rule => $quantum_quota_security_group_rule,
   }
 
+  if $core_plugin == 'quantum.plugins.cisco.network_plugin.PluginV2' {
+    class { 'quantum::plugins::cisco':
+      database_name => $quantum_db_name,
+      database_user => $quantum_db_user,
+      database_pass => $quantum_db_password,
+      database_host => $db_host,
+      keystone_username => 'quantum',
+      keystone_password => $quantum_user_password,
+      keystone_auth_url => "http://${controller_node_public}:35357/v2.0/",
+      keystone_tenant   => 'services'
+  }
   class { "coe::quantum_log": }
 
 }
