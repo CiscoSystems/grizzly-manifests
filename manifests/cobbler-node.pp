@@ -74,7 +74,7 @@ sed -e "s/^[ ]*//" -i /target/etc/network/interfaces ; \
   root_part_size        => $::root_part_size,
   var_part_size         => $::var_part_size,
   enable_var            => $::enable_var,
-  enable_hack           => $::enable_hack,
+  enable_vol_space      => $::enable_vol_space,
   }
 
 
