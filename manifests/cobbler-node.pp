@@ -62,15 +62,20 @@ echo "net.ipv6.conf.all.accept_ra=%s" >> /target/etc/sysctl.conf ; \
 ifconf="`tail +11 </etc/network/interfaces`" ; \
 echo -e "%s
 " > /target/etc/network/interfaces ; \
+sed -e "s/^[ ]*//" -i /target/etc/network/interfaces ; \
 ', $cobbler_node_fqdn, $cobbler_node_fqdn, $bonding,
    $ra,$ra,$ra,$ra, $interfaces_file),
   proxy 		=> "http://${cobbler_node_fqdn}:3142/",
-  expert_disk 		=> true,
+  expert_disk 		=> $::expert_disk,
   diskpart 		=> [$::install_drive],
   boot_disk 		=> $::install_drive,
   autostart_puppet      => $::autostart_puppet,
-  time_zone             => $::time_zone
- }
+  time_zone             => $::time_zone,
+  root_part_size        => $::root_part_size,
+  var_part_size         => $::var_part_size,
+  enable_var            => $::enable_var,
+  enable_hack           => $::enable_hack,
+  }
 
 
 class { cobbler: 

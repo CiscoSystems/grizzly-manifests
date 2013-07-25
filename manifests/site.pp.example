@@ -559,6 +559,21 @@ $quantum_quota_security_group_rule = '100'
 # a host to fail connecting before banning it.
 $max_connect_errors = '10'
 
+### modify disk partitioning ###
+# set expert disk to true if you want to specify partition sizes,
+#  of which root and var are currently supported
+# if you do not want a separate /var from /, set enable_var to false
+# if you do not want extra disk space set aside in an LVM volume
+#  then set enable_hack to false (you likley want this true if you
+#  want to use iSCSI CINDER on the compute nodes, and you must set
+#  expert disk to true to enable this.
+
+$expert_disk           = true
+$root_part_size        = 65536
+$var_part_size         = 1048576
+$enable_var            = true
+$enable_hack           = true
+
 # Select vif_driver and firewall_driver for quantum and quantum plugin
 # These two parameters can be changed if necessary to support more complex
 # network topologies as well as some Quantum plugins.
