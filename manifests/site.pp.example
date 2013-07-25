@@ -161,6 +161,7 @@ $libvirt_type            = 'kvm'
 $glance_db_password      = 'glance_pass'
 $glance_user_password    = 'glance_pass'
 $glance_sql_connection   = "mysql://glance:${glance_db_password}@${controller_node_address}/glance"
+$cinder_user             = 'cinder'
 $cinder_user_password    = 'cinder_pass'
 $cinder_db_password      = 'cinder_pass'
 $quantum_user_password   = 'quantum_pass'
@@ -197,23 +198,6 @@ $cinder_compute_enabled        = true
 
 # The cinder storage driver to use. Default is 'iscsi'.
 $cinder_storage_driver         = 'iscsi'
-
-# Other drivers exist for cinder. Here are examples on how to enable them.
-#
-# NetApp iSCSI Driver
-# $cinder_storage_driver = 'netapp'
-# $netapp_wsdl_url       = ''
-# $netapp_login          = ''
-# $netapp_password       = ''
-#
-# NFS
-# share information is stored in flat text file specified in 
-# $nfs_shares_config.  The format for this file is "hostname:/mountpoint",
-# e.g. "192.168.2.55:/myshare", with only one entry per line.
-#
-# $cinder_storage_driver = 'nfs'
-# $nfs_shares_config     = '/etc/cinder/shares.conf'
-
 
 
 ####### OpenStack Node Definitions #####
@@ -277,6 +261,20 @@ node 'build-node' inherits master-node {
 #    power_password => 'password'
 #  }
 # End compute node
+
+# Standalone cinder storage nodes. If cinder is enabled above,
+# it is automatically installed on all compute nodes. The below definition
+# allows the addition of cinder volume only nodes.
+# cobbler_node { "cinder-storage1":
+# node_type => "cinder-storage",
+# mac => "11:22:33:44:55:66",
+# ip => "192.168.242.22",
+# power_address => "192.168.242.122",
+# power_user => "admin",
+# power_password => "password",
+# power_type => "ipmitool"
+# }
+ 
 
 ### Repeat as needed ###
 # Make a copy of your compute node block above for each additional OpenStack
@@ -386,6 +384,23 @@ node 'compute-server01' inherits os_base {
 # 'compute-server01' parameter with the correct host name for each 
 # additional node.
 
+# Defining cinder storage nodes is only necessary if you want to run cinder volume
+# servers aside from those already on the compute nodes. To do so, create a node entry for each
+# cinder-volume node follwing this model.
+#node 'cinder-volume01' inherits os_base {
+#  class { 'cinder_node': }
+  # the volume class can be changed to different drivers (eg iscsi, rbd)
+  # if you are targeting multiple backends using different driver on different
+  # hosts, you will need to explicitly define your storage nodes
+
+  # if you are using iscsi as your storage type, uncomment the following class
+  #   and use a facter readable address for the interface that iscsi should use
+  #   eg. $::ipaddress, or for a specific interface $::ipaddress_eth0 etc.
+  #class { 'cinder::volume::iscsi':
+  #  iscsi_ip_address => $::ipaddress,
+  #}
+#}
+
 # Swift Proxy
 # Adjust the value of swift_local_net_ip to match the IP address
 # of your first Swift proxy node.  It is generally not necessary
@@ -453,7 +468,7 @@ node 'compute-server01' inherits os_base {
 #$ceph_monitor_fsid      = 'e80afa94-a64c-486c-9e34-d55e85f26406'
 #$ceph_monitor_secret    = 'AQAJzNxR+PNRIRAA7yUp9hJJdWZ3PVz242Xjiw=='
 #$ceph_monitor_port      = '6789'
-#$ceph_monitor_address   = $ipaddress_eth2
+#$ceph_monitor_address   = $::ipaddress
 #$ceph_cluster_network   = '192.168.242.0/24'
 #$ceph_public_network    = '192.168.242.0/24'
 #$ceph_public_interface  = 'eth2'
