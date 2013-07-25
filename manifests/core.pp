@@ -239,7 +239,7 @@ class control(
     #export_resources        => false,
 
     ######### quantum variables #############
-    core_plugin             => $core_plugin,
+    quantum_core_plugin             => $core_plugin,
     # need to set from a variable
     # database
     db_host                 => $db_host,
