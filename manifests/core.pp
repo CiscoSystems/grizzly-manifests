@@ -297,9 +297,10 @@ class control(
       keystone_password => $quantum_user_password,
       keystone_auth_url => "http://${controller_node_public}:35357/v2.0/",
       keystone_tenant   => 'services'
+    }
+    
+    class { "coe::quantum_log": }
   }
-  class { "coe::quantum_log": }
-
 }
 
 ### begin cinder standalone nodes
