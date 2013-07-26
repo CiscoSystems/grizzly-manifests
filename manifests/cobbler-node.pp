@@ -49,21 +49,12 @@ $cobbler_node_fqdn 	        = "${::build_node_name}.${::domain_name}"
   password_crypted 	=> $::password_crypted,
   packages 		=> "openssh-server vim vlan lvm2 ntp puppet",
   ntp_server 		=> $::build_node_fqdn,
-  late_command 		=> sprintf('
-sed -e "/logdir/ a pluginsync=true" -i /target/etc/puppet/puppet.conf ; \
-sed -e "/logdir/ a server=%s" -i /target/etc/puppet/puppet.conf ; \
-echo -e "server %s iburst" > /target/etc/ntp.conf ; \
-echo "8021q" >> /target/etc/modules ; \
-%s ; \
-echo "net.ipv6.conf.default.autoconf=%s" >> /target/etc/sysctl.conf ; \
-echo "net.ipv6.conf.default.accept_ra=%s" >> /target/etc/sysctl.conf ; \
-echo "net.ipv6.conf.all.autoconf=%s" >> /target/etc/sysctl.conf ; \
-echo "net.ipv6.conf.all.accept_ra=%s" >> /target/etc/sysctl.conf ; \
-ifconf="`tail +11 </etc/network/interfaces`" ; \
-echo -e "%s
-" > /target/etc/network/interfaces ; \
-', $cobbler_node_fqdn, $cobbler_node_fqdn, $bonding,
-   $ra,$ra,$ra,$ra, $interfaces_file),
+  late_command 		=> "
+	sed -e '/logdir/ a pluginsync=true' -i /target/etc/puppet/puppet.conf ; \
+	sed -e \"/logdir/ a server=$cobbler_node_fqdn\" -i /target/etc/puppet/puppet.conf ; \
+	sed -e 's/START=no/START=yes/' -i /target/etc/default/puppet ; \
+	echo '8021q' >> /target/etc/modules ; \
+	",
   proxy 		=> "http://${cobbler_node_fqdn}:3142/",
   expert_disk 		=> true,
   diskpart 		=> [$::install_drive],

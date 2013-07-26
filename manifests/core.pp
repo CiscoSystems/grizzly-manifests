@@ -25,7 +25,7 @@ node base {
     if($::package_repo == 'cisco_repo') {
       apt::source { "cisco-openstack-mirror_grizzly":
         location => $::location,
-        release => "grizzly",
+        release => "grizzly-proposed",
         repos => "main",
         key => "E8CC67053ED3B199",
         key_content => '-----BEGIN PGP PUBLIC KEY BLOCK-----
@@ -93,30 +93,32 @@ UcXHbA==
   # Ensure that the pip packages are fetched appropriately when we're using an
   # install where there's no direct connection to the net from the openstack
   # nodes
-  if ! $::default_gateway {
-    Package <| provider=='pip' |> {
-      install_options => "--index-url=http://${build_node_name}/packages/simple/",
-    }
-  } else {
-    if($::proxy) {
-      Package <| provider=='pip' |> {
-        # TODO(ijw): untested
-        install_options => "--proxy=$::proxy"
-      }
-    }
-  }
+#  if ! $::default_gateway {
+#    Package <| provider=='pip' |> {
+#      install_options => "--index-url=http://${build_node_name}/packages/simple/",
+#    }
+#  } else {
+#    if($::proxy) {
+#      Package <| provider=='pip' |> {
+#        # TODO(ijw): untested
+#        install_options => "--proxy=$::proxy"
+#      }
+#    }
+#  }
   # (the equivalent work for apt is done by the cobbler boot, which sets this up as
   # a part of the installation.)
 
 
-  # /etc/hosts entries for the controller nodes
-  host { $::controller_hostname:
-	  ip => $::controller_node_internal
-  }
+#  # /etc/hosts entries for the controller nodes
+#  host { $::controller_hostname:
+#	  ip => $::controller_node_internal
+#  }
 
-  class { 'collectd':
-    graphitehost		=> $build_node_fqdn,
-	  management_interface	=> $::public_interface,
+  if ($::enable_monitoring) {
+    class { 'collectd':
+      graphitehost         => $build_node_fqdn,
+      management_interface => $::public_interface,
+    }
   }
 }
 
@@ -124,156 +126,129 @@ node os_base inherits base {
   $build_node_fqdn = "${::build_node_name}.${::domain_name}"
 
   class { ntp:
-	  servers		=> [$build_node_fqdn],
-	  ensure 		=> running,
-	  autoupdate 	=> true,
+    servers    => [$build_node_fqdn],
+    ensure     => running,
+    autoupdate => true,
   }
 
-    # Deploy a script that can be used to test nova
-    class { 'openstack::test_file':
-      image_type => $::test_file_image_type,
-    }
+  # Deploy a script that can be used to test nova
+  class { 'openstack::test_file':
+    image_type => $::test_file_image_type,
+  }
 
+  # Configure your auth (openrc) file.
   class { 'openstack::auth_file':
-	  admin_password       => $admin_password,
-	  keystone_admin_token => $keystone_admin_token,
-	  controller_node      => $controller_node_internal,
+    admin_password       => $admin_password,
+    keystone_admin_token => $keystone_admin_token,
+    controller_node      => $controller_cluster_vip,
   }
 
-  class { "naginator::base_target": }
-
-  # This value can be set to true to increase debug logging when
-  # trouble-shooting services. It should not generally be set to
-  # true as it is known to break some OpenStack components
-  $verbose            = false
+  if ($::enable_monitoring) {
+    class { "naginator::base_target": }
+  }
 
 }
 
 class control(
-  $tunnel_ip,
-  $public_address                    = $::controller_node_public,
-  # network
-  $internal_address                  = $::controller_node_internal,
-  # by default it does not enable multi-host mode
-  $multi_host                        = $::multi_host,
-  $verbose                           = $::verbose,
-  $auto_assign_floating_ip           = $::auto_assign_floating_ip,
-  $mysql_root_password               = $::mysql_root_password,
-  $admin_email                       = $::admin_email,
-  $admin_password                    = $::admin_password,
-  $keystone_db_password              = $::keystone_db_password,
-  $keystone_admin_token              = $::keystone_admin_token,
-  $glance_db_password                = $::glance_db_password,
-  $glance_user_password              = $::glance_user_password,
+  $public_ip,
+  $internal_ip,
+  $admin_ip,
+  $galera_master_ip         = false,
+  $keystone_swift_endpoint  = false
+) {
 
-  # TODO this needs to be added
-  $glance_backend                    = $::glance_backend,
-
-  $nova_db_password                  = $::nova_db_password,
-  $nova_user_password                = $::nova_user_password,
-  $rabbit_password                   = $::rabbit_password,
-  $rabbit_user                       = $::rabbit_user,
-  # TODO deprecated
-  #export_resources                  = false,
-
-  ######### quantum variables #############
-  # need to set from a variable
-  # database
-  $db_host                           = $::controller_node_address,
-  $quantum_db_password               = $quantum_db_password,
-  $quantum_db_name                   = 'quantum',
-  $quantum_db_user                   = 'quantum',
-  # enable quantum services
-  $enable_dhcp_agent                 = $true,
-  $enable_l3_agent                   = $true,
-  $enable_metadata_agent             = $true,
-  # Metadata Configuration
-  $metadata_shared_secret            = 'secret',
-  # ovs config
-  $ovs_local_ip                      = $tunnel_ip,
-  $bridge_interface                  = $::external_interface,
-  $enable_ovs_agent                  = true,
-  # Keystone
-  $quantum_user_password             = $::quantum_user_password,
-  # horizon
-  $secret_key                        = 'super_secret',
-  # cinder
-  $cinder_user_password              = $::cinder_user_password,
-  $cinder_db_password                = $::cinder_db_password,
-  # Quantum quotas
-  $quantum_quota_network             = $::quantum_quota_network,
-  $quantum_quota_subnet              = $::quantum_quota_subnet,
-  $quantum_quota_port                = $::quantum_quota_port,
-  $quantum_quota_router              = $::quantum_quota_router,
-  $quantum_quota_floatingip          = $::quantum_quota_floatingip,
-  $quantum_quota_security_group      = $::quantum_quota_security_group,
-  $quantum_quota_security_group_rule = $::quantum_quota_security_group_rule,
-)
-{
-
-  class { 'openstack::controller':
-    public_address          => $controller_node_public,
-    # network
-    internal_address        => $controller_node_internal,
-    # by default it does not enable multi-host mode
-    multi_host              => $multi_host,
-    verbose                 => $verbose,
-    auto_assign_floating_ip => $auto_assign_floating_ip,
+  class { 'openstack-ha::controller':
+    # Galera
+    galera_monitor_password => $galera_monitor_password,
+    wsrep_sst_password      => $wsrep_sst_password,
+    galera_master_ip        => $galera_master_ip,
+    mysql_bind_address      => $internal_ip,
     mysql_root_password     => $mysql_root_password,
+    mysql_account_security  => false,
+    db_host                 => $controller_cluster_vip,
+    sql_idle_timeout        => '30',
+    # network
+#    public_address          => $public_ip,
+    public_address          => $controller_cluster_vip,
+#    internal_address        => $internal_ip,
+    internal_address        => $controller_cluster_vip,
+#    admin_address           => $admin_ip,
+    admin_address           => $controller_cluster_vip,
+    debug                   => $debug,
+    verbose                 => $verbose,
     admin_email             => $admin_email,
     admin_password          => $admin_password,
+    keystone_bind_address      => $internal_ip,
+    keystone_host           => $controller_cluster_vip,
     keystone_db_password    => $keystone_db_password,
     keystone_admin_token    => $keystone_admin_token,
+    swift                   => $keystone_swift_endpoint,
+    swift_user_password     => $::swift_password,
+    swift_public_address    => $::swiftproxy_cluster_vip,
+    glance_bind_address     => $internal_ip,
+    glance_api_servers      => "${controller_cluster_vip}:9292",
     glance_db_password      => $glance_db_password,
     glance_user_password    => $glance_user_password,
-
-    # TODO this needs to be added
-    glance_backend          => $glance_backend,
-
+    memcached_listen_ip     => $internal_ip,
+    cache_server_ip         => $controller_cluster_vip,
+    swift_store_user        => "${services_tenant}:${swift_user}",
+    swift_store_key         => $::swift_password,
+    swift_store_auth_address => "http://$controller_cluster_vip:5000/v2.0/",
+    # nova
+    enabled_apis            => 'ec2,osapi_compute',
+    memcached_servers       => ["${controller_cluster_vip}:11211"],
+    vncproxy_host           => '0.0.0.0',
+    glance_registry_host    => $controller_cluster_vip,
+    nova_bind_address      => $internal_ip,
+    nova_admin_tenant_name  => $services_tenant,
     nova_db_password        => $nova_db_password,
     nova_user_password      => $nova_user_password,
     rabbit_password         => $rabbit_password,
     rabbit_user             => $rabbit_user,
-    # TODO deprecated
-    #export_resources        => false,
-
-    ######### quantum variables #############
-    # need to set from a variable
-    # database
-    db_host                 => $db_host,
-    quantum_db_password     => $quantum_db_password,
-    quantum_db_name         => $quantum_db_name,
-    quantum_db_user         => $quantum_db_user,
-    # enable quantum services
-    enable_dhcp_agent       => $enable_dhcp_agent,
-    enable_l3_agent         => $enable_l3_agent,
-    enable_metadata_agent   => $enable_metadata_agent,
-    # Metadata Configuration
-    metadata_shared_secret  => $metadata_shared_secret,
-    # ovs config
-    ovs_local_ip            => $ovs_local_ip,
-    bridge_interface        => $bridge_interface,
-    enable_ovs_agent        => $enable_ovs_agent,
+#    rabbit_hosts            => [$controller_vip_hostname],
+    rabbit_hosts            => [$controller01_hostname, $controller02_hostname, $controller03_hostname],
+    rabbit_cluster_nodes    => [$controller01_hostname, $controller02_hostname, $controller03_hostname],
+    # quantum
+    quantum_bind_address      => $internal_ip,
+    quantum_auth_url    => "http://${controller_cluster_vip}:35357/v2.0",
+    quantum_db_password => $quantum_db_password,
+    network_vlan_ranges => "physnet1:${network_vlan_ranges}",
+    bridge_interface    => $external_interface,
+    enable_dhcp_agent      => true,
     # Keystone
-    quantum_user_password   => $quantum_user_password,
+    quantum_user_password => $quantum_user_password,
     # horizon
-    secret_key              => $secret_key,
+    secret_key           => $horizon_secret_key,
     # cinder
-    cinder_user_password    => $cinder_user_password,
-    cinder_db_password      => $cinder_db_password,
+    cinder_bind_address      => $internal_ip,
+    cinder_user_password => $cinder_user_password,
+    cinder_db_password   => $cinder_db_password,
   }
 
-  if ($::swift_proxy_address) { 
-    class { 'swift::keystone::auth':
-      auth_name        => $swift_user,
-      password         => $swift_password,
-      public_address   => $::swift_proxy_address,
-      admin_address    => $::swift_proxy_address,
-      internal_address => $::swift_proxy_address,
+  if ($::configure_network_interfaces) {
+    network_config { $::external_interface:
+      ensure    => 'present',
+      hotplug   => false,
+      family    => 'inet',
+      method    => 'manual',
+      onboot    => 'true',
+      notify    => Exec['network-restart'],
+      options   => {
+        'up'    => 'ifconfig $IFACE 0.0.0.0 up',
+        'down'  => 'ifconfig $IFACE 0.0.0.0 down'
+      }
+    }
+    # Changed from service to exec due to Ubuntu bug #440179
+    exec { 'network-restart':
+      command     => '/etc/init.d/networking restart',
+      path        => '/usr/bin:/usr/sbin:/bin:/sbin',
+      refreshonly => true
     }
   }
 
-  class { "naginator::control_target": }
+  if ($::enable_monitoring) {
+    class { "naginator::control_target": }
+  }
 
   class { "quantum::quota":
     quota_network             => $quantum_quota_network,
@@ -318,95 +293,72 @@ class ceph_mon (
 
 ### end ceph
 
+### Start HA Compute Nodes ###
 class compute(
   $internal_ip,
-  $tunnel_ip,
-  # keystone
-  $db_host                           = $::controller_node_internal,
-  $keystone_host                     = $::controller_node_internal,
-  $quantum_host                      = $::controller_node_internal,
-  $internal_address                  = $internal_ip,
-  $libvirt_type                      = $::libvirt_type,
-  $multi_host                        = $::multi_host,
-  # rabbit
-  $rabbit_host                       = $::controller_node_internal,
-  $rabbit_password                   = $::rabbit_password,
-  $rabbit_user                       = $::rabbit_user,
-  # nova
-  $nova_user_password                = $::nova_user_password,
-  $nova_db_password                  = $::nova_db_password,
-  $glance_api_servers                = "${::controller_node_internal}:9292",
-  $vncproxy_host                     = $::controller_node_public,
-  $vnc_enabled                       = true,
-  # cinder parameters
-  $cinder_db_password                = $::cinder_db_password,
-  $manage_volumes                    = true,
-  $volume_group                      = 'cinder-volumes',
-  $setup_test_volume                 = true,
-  # quantum config
-  $quantum	                         = true,
-  $quantum_user_password             = $::quantum_user_password,
-  # Quantum OVS
-  $enable_ovs_agent                  = true,
-  $ovs_local_ip                      = $tunnel_ip,
-  # Quantum L3 Agent
-  $enable_l3_agent                   = false,
-  $enable_dhcp_agent                 = false,
-  # Quantum quotas
-  $quantum_quota_network             = $::quantum_quota_network,
-  $quantum_quota_subnet              = $::quantum_quota_subnet,
-  $quantum_quota_port                = $::quantum_quota_port,
-  $quantum_quota_router              = $::quantum_quota_router,
-  $quantum_quota_floatingip          = $::quantum_quota_floatingip,
-  $quantum_quota_security_group      = $::quantum_quota_security_group,
-  $quantum_quota_security_group_rule = $::quantum_quota_security_group_rule,
-  # general
-  $enabled                           = true,
-  $verbose                           = $::verbose,
-)
-{
+) {
 
-  class { 'openstack::compute':
+  class { 'openstack-ha::compute':
+    # Database Information
+    db_host            => $controller_cluster_vip,
     # keystone
-    db_host                 => $db_host,
-    keystone_host           => $keystone_host,
-    quantum_host            => $quantum_host,
-    internal_address        => $internal_address,
-    libvirt_type            => $libvirt_type,
-    multi_host              => $multi_host,
+    keystone_host      => $controller_cluster_vip,
+    internal_address   => $internal_ip,
+    libvirt_type       => $libvirt_type,
     # rabbit
-    rabbit_host             => $rabbit_host,
-    rabbit_password         => $rabbit_password,
-    rabbit_user             => $rabbit_user,
+    rabbit_hosts       => [$controller01_hostname, $controller02_hostname, $controller03_hostname],
+#    rabbit_hosts       => [$controller_vip_hostname],
+    rabbit_password    => $rabbit_password,
+    rabbit_user        => $rabbit_user,
     # nova
-    nova_user_password      => $nova_user_password,
-    nova_db_password        => $nova_db_password,
-    glance_api_servers      => $glance_api_servers,
-    vncproxy_host           => $vncproxy_host,
-    vnc_enabled             => $vnc_enabled,
+    nova_user_password => $nova_user_password,
+    nova_db_password   => $nova_db_password,
+    libvirt_vif_driver => 'nova.virt.libvirt.vif.LibvirtHybridOVSBridgeDriver',
+    glance_api_servers => "${controller_cluster_vip}:9292",
+    vncproxy_host      => $controller_cluster_vip,
+    vncserver_listen   => '0.0.0.0',
+    memcached_servers     => ["${controller_cluster_vip}:11211"],
+    enabled_apis          => 'ec2,osapi_compute',
     # cinder parameters
-    cinder_db_password      => $cinder_db_password,
-    manage_volumes          => $manage_volumes,
-    volume_group            => $volume_group,
-    setup_test_volume       => $setup_test_volume,
+    cinder_db_password    => $cinder_db_password,
+    iscsi_ip_address      => $internal_ip,
     # quantum config
-    quantum	                => $quantum,
-    quantum_user_password   => $quantum_user_password,
+    quantum_host          => $controller_cluster_vip,
+    quantum_user_password => $quantum_user_password,
+    quantum_auth_url      => "http://${controller_cluster_vip}:35357/v2.0",
     # Quantum OVS
-    enable_ovs_agent        => $enable_ovs_agent,
-    ovs_local_ip            => $ovs_local_ip,
-    # Quantum L3 Agent
-    enable_l3_agent         => $enable_l3_agent,
-    enable_dhcp_agent       => $enable_dhcp_agent,
-    # Quantum Security Groups with OVS
-    libvirt_vif_driver      => $libvirt_vif_driver,
-    quantum_firewall_driver => $quantum_firewall_driver,
+#    network_vlan_ranges   => "physnet1:${network_vlan_ranges}",
+    bridge_interface      => $external_interface,
     # general
-    enabled                 => $enabled,
-    verbose                 => $verbose,
+    enabled               => true,
+    debug                 => $debug,
+    verbose               => $verbose,
   }
 
-  class { "naginator::compute_target": }
+  if ($::configure_network_interfaces) {
+    network_config { $::external_interface:
+      ensure    => 'present',
+      hotplug   => false,
+      family    => 'inet',
+      method    => 'manual',
+      onboot    => 'true',
+      notify    => Exec['network-restart'],
+      options   => {
+        'up'    => 'ifconfig $IFACE 0.0.0.0 up',
+        'down'  => 'ifconfig $IFACE 0.0.0.0 down'
+      }
+    }
+    # Changed from service to exec due to Ubuntu bug #440179
+    exec { 'network-restart':
+      command     => '/etc/init.d/networking restart',
+      path        => '/usr/bin:/usr/sbin:/bin:/sbin',
+      refreshonly => true
+    }
+  }
+
+  if ($::enable_monitoring) {
+    class { "naginator::compute_target": }
+  }
 
   class { "quantum::quota":
     quota_network             => $quantum_quota_network,
@@ -432,112 +384,115 @@ node master-node inherits "cobbler-node" {
   $build_node_fqdn = "${::build_node_name}.${::domain_name}"
 
   host { $build_node_fqdn:
-	  ip => $::cobbler_node_ip
+    ip => $::cobbler_node_ip
   }
 
   host { $::build_node_name:
-	  ip => $::cobbler_node_ip
+    ip => $::cobbler_node_ip
   }
 
   # Change the servers for your NTP environment
   # (Must be a reachable NTP Server by your build-node, i.e. ntp.esl.cisco.com)
   class { ntp:
-	  servers 	=> $::ntp_servers,
-	  ensure 		=> running,
-	  autoupdate 	=> true,
+    servers    => $::ntp_servers,
+    ensure     => running,
+    autoupdate => true,
   }
 
-  class { 'naginator': }
-
-  class { 'graphite':
-	  graphitehost 	=> $build_node_fqdn,
+  if ($::enable_monitoring) {
+    class { 'naginator': }
+    class { 'graphite':
+      graphitehost => $build_node_fqdn,
+    }
   }
 
-  class { 'coe::site_index': }
+# Temp remove since it relises on controller_hostname (not applicable for HA)
+# https://github.com/CiscoSystems/puppet-coe/blob/grizzly/templates/site_index.erb
+#  class { 'coe::site_index': }
 
   # set up a local apt cache.  Eventually this may become a local mirror/repo instead
   class { apt-cacher-ng:
-  	proxy 		=> $::proxy,
-  	avoid_if_range  => true, # Some proxies have issues with range headers
+    proxy           => $::proxy,
+    avoid_if_range  => true, # Some proxies have issues with range headers
                              # this stops us attempting to use them
                              # marginally less efficient with other proxies
   }
 
-  if ! $::default_gateway {
-    # Prefetch the pip packages and put them somewhere the openstack nodes can fetch them
-
-    file {  "/var/www":
-      ensure => 'directory',
-	  }
-
-    file {  "/var/www/packages":
-      ensure  => 'directory',
-      require => File['/var/www'],
-    }
-
-    if($::proxy) {
-      $proxy_pfx = "/usr/bin/env http_proxy=${::proxy} https_proxy=${::proxy} "
-    } else {
-      $proxy_pfx=""
-    }
-    exec { 'pip2pi':
-      # Can't use package provider because we're changing its behaviour to use the cache
-      command => "${proxy_pfx}/usr/bin/pip install pip2pi",
-      creates => "/usr/local/bin/pip2pi",
-      require => Package['python-pip'],
-    }
-    Package <| provider=='pip' |> {
-      require => Exec['pip-cache']
-    }
-    exec { 'pip-cache':
-      # All the packages that all nodes - build, compute and control - require from pip
-      command => "${proxy_pfx}/usr/local/bin/pip2pi /var/www/packages collectd xenapi django-tagging graphite-web carbon whisper",
-      creates => '/var/www/packages/simple', # It *does*, but you'll want to force a refresh if you change the line above
-      require => Exec['pip2pi'],
-    }
-  }
+#  if ! $::default_gateway {
+#    # Prefetch the pip packages and put them somewhere the openstack nodes can fetch them
+#
+#    file {  "/var/www":
+#      ensure => 'directory',
+#	  }
+#
+#    file {  "/var/www/packages":
+#      ensure  => 'directory',
+#      require => File['/var/www'],
+#    }
+#
+#    if($::proxy) {
+#      $proxy_pfx = "/usr/bin/env http_proxy=${::proxy} https_proxy=${::proxy} "
+#    } else {
+#      $proxy_pfx=""
+#    }
+#    exec { 'pip2pi':
+#      # Can't use package provider because we're changing its behaviour to use the cache
+#      command => "${proxy_pfx}/usr/bin/pip install pip2pi",
+#      creates => "/usr/local/bin/pip2pi",
+#      require => Package['python-pip'],
+#    }
+#    Package <| provider=='pip' |> {
+#      require => Exec['pip-cache']
+#    }
+#    exec { 'pip-cache':
+#      # All the packages that all nodes - build, compute and control - require from pip
+#      command => "${proxy_pfx}/usr/local/bin/pip2pi /var/www/packages collectd xenapi django-tagging graphite-web carbon whisper",
+#      creates => '/var/www/packages/simple', # It *does*, but you'll want to force a refresh if you change the line above
+#      require => Exec['pip2pi'],
+#    }
+#  }
 
   # set the right local puppet environment up.  This builds puppetmaster with storedconfigs (a nd a local mysql instance)
   class { puppet:
-	  run_master 		=> true,
-	  puppetmaster_address 	=> $build_node_fqdn, 
-	  certname 		=> $build_node_fqdn,
-	  mysql_password 		=> 'ubuntu',
+    run_master           => true,
+    puppetmaster_address => $build_node_fqdn, 
+    certname             => $build_node_fqdn,
+    mysql_password       => 'ubuntu',
   }<-
 
   file {'/etc/puppet/files':
-	  ensure => directory,
-	  owner => 'root',
-	  group => 'root',
-	  mode => '0755',
+    ensure => directory,
+    owner => 'root',
+    group => 'root',
+    mode => '0755',
   }
 
   file {'/etc/puppet/fileserver.conf':
-	  ensure => file,
-	  owner => 'root',
-	  group => 'root',
-	  mode => '0644',
-	  content => '
+    ensure => file,
+    owner => 'root',
+    group => 'root',
+    mode => '0644',
+    content => '
 
-# This file consists of arbitrarily named sections/modules
-# defining where files are served from and to whom
+    # This file consists of arbitrarily named sections/modules
+    # defining where files are served from and to whom
 
-# Define a section "files"
-# Adapt the allow/deny settings to your needs. Order
-# for allow/deny does not matter, allow always takes precedence
-# over deny
-[files]
-  path /etc/puppet/files
-  allow *
-#  allow *.example.com
-#  deny *.evil.example.com
-#  allow 192.168.0.0/24
+    # Define a section "files"
+    # Adapt the allow/deny settings to your needs. Order
+    # for allow/deny does not matter, allow always takes precedence
+    # over deny
+      [files]
+        path /etc/puppet/files
+        allow *
+    #  allow *.example.com
+    #  deny *.evil.example.com
+    #  allow 192.168.0.0/24
 
-[plugins]
-#  allow *.example.com
-#  deny *.evil.example.com
-#  allow 192.168.0.0/24
-',
-    }
+      [plugins]
+    #  allow *.example.com
+    #  deny *.evil.example.com
+    #  allow 192.168.0.0/24
+        ',
+  }
+
 }
-
