@@ -33,8 +33,10 @@ if ($::ipv6_ra == "") {
 }
 
 if ($::interface_bonding == 'true'){
+  $ifenslave='ifenslave-2.6'
   $bonding = "echo 'bonding' >> /target/etc/modules"
 } else {
+  $ifenslave=''
   $bonding = 'echo "no bonding configured"'
 }
  
@@ -47,7 +49,7 @@ $cobbler_node_fqdn 	        = "${::build_node_name}.${::domain_name}"
  cobbler::ubuntu::preseed { "cisco-preseed":
   admin_user 		=> $::admin_user,
   password_crypted 	=> $::password_crypted,
-  packages 		=> "openssh-server vim vlan lvm2 ntp puppet",
+  packages 		=> "openssh-server vim vlan lvm2 ntp puppet ${ifenslave}",
   ntp_server 		=> $::build_node_fqdn,
   late_command 		=> sprintf('
 sed -e "/logdir/ a pluginsync=true" -i /target/etc/puppet/puppet.conf ; \
