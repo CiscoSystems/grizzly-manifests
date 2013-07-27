@@ -378,6 +378,7 @@ class compute(
   $manage_volumes                    = true,
   $volume_group                      = 'cinder-volumes',
   $setup_test_volume                 = true,
+  $cinder_volume_driver              = $::cinder_storage_driver,
   # quantum config
   $quantum	                         = true,
   $quantum_user_password             = $::quantum_user_password,
@@ -424,6 +425,7 @@ class compute(
     manage_volumes          => $manage_volumes,
     volume_group            => $volume_group,
     setup_test_volume       => $setup_test_volume,
+    cinder_volume_driver    => $cinder_volume_driver,
     # quantum config
     quantum	                => $quantum,
     quantum_user_password   => $quantum_user_password,
