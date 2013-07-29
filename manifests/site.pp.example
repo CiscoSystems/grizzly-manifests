@@ -605,6 +605,12 @@ $quantum_firewall_driver = 'quantum.agent.linux.iptables_firewall.OVSHybridIptab
 # instead
 # $libvirt_vif_driver = 'nova.virt.libvirt.vif.LibvirtGenericVIFDriver'
 
+# Provider Stuff
+# Move and Document later
+$ovs_vlan_ranges = 'physnet1:1000:2000'
+$ovs_bridge_mappings = ['default::br-ex']
+$ovs_bridge_uplinks = ['br-ex:eth0']
+
 ### Puppet Parameters ###
 # These settings load other puppet components. They should not be changed.
 import 'cobbler-node'

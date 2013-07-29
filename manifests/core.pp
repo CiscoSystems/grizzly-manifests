@@ -194,6 +194,9 @@ class control(
   $ovs_local_ip                      = $tunnel_ip,
   $bridge_interface                  = $::external_interface,
   $enable_ovs_agent                  = true,
+  $ovs_vlan_ranges                   = $::ovs_vlan_ranges,
+  $ovs_bridge_mappings               = $::ovs_bridge_mappings,
+  $ovs_bridge_uplinks                = $::ovs_bridge_uplinks,
   # Keystone
   $quantum_user_password             = $::quantum_user_password,
   # horizon
@@ -256,6 +259,9 @@ class control(
     ovs_local_ip            => $ovs_local_ip,
     bridge_interface        => $bridge_interface,
     enable_ovs_agent        => $enable_ovs_agent,
+    network_vlan_ranges     => $ovs_vlan_ranges,
+    bridge_mappings         => $ovs_bridge_mappings,
+    bridge_uplinks          => $ovs_bridge_uplinks,
     # Keystone
     quantum_user_password   => $quantum_user_password,
     # horizon
@@ -385,6 +391,8 @@ class compute(
   # Quantum OVS
   $enable_ovs_agent                  = true,
   $ovs_local_ip                      = $tunnel_ip,
+  $ovs_bridge_mappings               = $::ovs_bridge_mappings,
+  $ovs_bridge_uplinks                = $::ovs_bridge_uplinks,
   # Quantum L3 Agent
   $enable_l3_agent                   = false,
   $enable_dhcp_agent                 = false,
@@ -432,6 +440,8 @@ class compute(
     # Quantum OVS
     enable_ovs_agent        => $enable_ovs_agent,
     ovs_local_ip            => $ovs_local_ip,
+    bridge_mappings         => $ovs_bridge_mappings,
+    bridge_uplinks          => $ovs_bridge_uplinks,
     # Quantum L3 Agent
     enable_l3_agent         => $enable_l3_agent,
     enable_dhcp_agent       => $enable_dhcp_agent,
