@@ -11,9 +11,8 @@ $ifconf
 
 auto <%= external_interface %>
 iface <%= external_interface %> inet static
-<% if @ovs_bridge_uplinks %>
-  up ip link set $IFACE promisc on
-  down ip link set $IFACE promisc off
+<% if @ovs_bridge_uplinks %>up ip link set <%= external_interface %> promisc on
+down ip link set <%= external_interface %> promisc off
 <% end -%>
   address 0.0.0.0
   netmask 255.255.255.255
