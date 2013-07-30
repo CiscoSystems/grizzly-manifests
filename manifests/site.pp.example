@@ -140,6 +140,23 @@ $public_interface        	= 'eth0'
 # (this is only required on the network/controller node)
 $external_interface	 	= 'eth1'
 
+# Uncomment and customize these next three variables to use a provider
+# network model
+# $ovs_vlan_ranges is used to name a physical network and indicate the
+# VLAN tag or # tags that should be associated with that network. The first
+# parameter is the network name, while the second parameter is the starting
+# tag # number and the third parameter is the ending tag number
+#$ovs_vlan_ranges = 'physnet1:1000:2000'
+# $ovs_bridge_uplinks is used to map an OVS bridge to a physical network
+# interface. The first parameter is the OVS external bridge name, and the
+# second parameter is the physical network interface which should be
+# associated with it
+#$ovs_bridge_uplinks = ['br-ex:eth0']
+# $ovs_bridge_mappings is used to map an OVS bridge to a physical network.
+# The first parameter is the physical network name and the second parameter
+# is the OVS external bridge name
+#$ovs_bridge_mappings = ['physnet1:br-ex']
+
 # Select the drive on which Ubuntu and OpenStack will be installed in each
 # node. The current assumption is that all nodes will be installed on the
 # same device name.
@@ -604,12 +621,6 @@ $quantum_firewall_driver = 'quantum.agent.linux.iptables_firewall.OVSHybridIptab
 # libvirt_vif_driver line above and uncomment the libvirt_vif_driver below
 # instead
 # $libvirt_vif_driver = 'nova.virt.libvirt.vif.LibvirtGenericVIFDriver'
-
-# Provider Stuff
-# Move and Document later
-$ovs_vlan_ranges = 'physnet1:1000:2000'
-$ovs_bridge_mappings = ['default:br-ex']
-$ovs_bridge_uplinks = ['br-ex:eth0']
 
 ### Puppet Parameters ###
 # These settings load other puppet components. They should not be changed.
