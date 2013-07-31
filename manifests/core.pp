@@ -178,6 +178,7 @@ class control(
 
   ######### quantum variables #############
   $core_plugin                       = $::quantum_core_plugin,
+  $cisco_vswitch_plugin              = $::cisco_vswitch_plugin,
   # need to set from a variable
   # database
   $db_host                           = $::controller_node_address,
@@ -296,7 +297,8 @@ class control(
       keystone_username => 'quantum',
       keystone_password => $quantum_user_password,
       keystone_auth_url => "http://${controller_node_public}:35357/v2.0/",
-      keystone_tenant   => 'services'
+      keystone_tenant   => 'services',
+      vswitch_plugin    => $cisco_vswitch_plugin
     }
   }
   

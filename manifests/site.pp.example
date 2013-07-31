@@ -180,6 +180,11 @@ $quantum_core_plugin = 'quantum.plugins.openvswitch.ovs_quantum_plugin.OVSQuantu
 #or the cisco plugin:
 #$quantum_core_plugin = 'quantum.plugins.cisco.network_plugin.PluginV2'
 
+# if using the cisco plugin, by default this will use OVS
+# to perform L2. To use the n1k plugin, change this from
+# undef to 'quantum.plugins.cisco.n1kv.n1kv_quantum_plugin.N1kvQuantumPluginV2'
+$cisco_vswitch_plugin = undef
+
 ########### Test variables ############
 # Variables used to populate test script:
 # /tmp/test_nova.sh
