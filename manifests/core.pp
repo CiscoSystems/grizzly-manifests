@@ -25,39 +25,70 @@ node base {
     if($::package_repo == 'cisco_repo') {
       apt::source { "cisco-openstack-mirror_grizzly":
         location => $::location,
-        release => "grizzly",
+        release => "grizzly-proposed",
         repos => "main",
-        key => "E8CC67053ED3B199",
+        key => "6B7A62576A4F98AD",
         key_content => '-----BEGIN PGP PUBLIC KEY BLOCK-----
 Version: GnuPG v1.4.11 (GNU/Linux)
 
-mQENBE/oXVkBCACcjAcV7lRGskECEHovgZ6a2robpBroQBW+tJds7B+qn/DslOAN
-1hm0UuGQsi8pNzHDE29FMO3yOhmkenDd1V/T6tHNXqhHvf55nL6anlzwMmq3syIS
-uqVjeMMXbZ4d+Rh0K/rI4TyRbUiI2DDLP+6wYeh1pTPwrleHm5FXBMDbU/OZ5vKZ
-67j99GaARYxHp8W/be8KRSoV9wU1WXr4+GA6K7ENe2A8PT+jH79Sr4kF4uKC3VxD
-BF5Z0yaLqr+1V2pHU3AfmybOCmoPYviOqpwj3FQ2PhtObLs+hq7zCviDTX2IxHBb
-Q3mGsD8wS9uyZcHN77maAzZlL5G794DEr1NLABEBAAG0NU9wZW5TdGFja0BDaXNj
-byBBUFQgcmVwbyA8b3BlbnN0YWNrLWJ1aWxkZEBjaXNjby5jb20+iQE4BBMBAgAi
-BQJP6F1ZAhsDBgsJCAcDAgYVCAIJCgsEFgIDAQIeAQIXgAAKCRDozGcFPtOxmXcK
-B/9WvQrBwxmIMV2M+VMBhQqtipvJeDX2Uv34Ytpsg2jldl0TS8XheGlUNZ5djxDy
-u3X0hKwRLeOppV09GVO3wGizNCV1EJjqQbCMkq6VSJjD1B/6Tg+3M/XmNaKHK3Op
-zSi+35OQ6xXc38DUOrigaCZUU40nGQeYUMRYzI+d3pPlNd0+nLndrE4rNNFB91dM
-BTeoyQMWd6tpTwz5MAi+I11tCIQAPCSG1qR52R3bog/0PlJzilxjkdShl1Cj0RmX
-7bHIMD66uC1FKCpbRaiPR8XmTPLv29ZTk1ABBzoynZyFDfliRwQi6TS20TuEj+ZH
-xq/T6MM6+rpdBVz62ek6/KBcuQENBE/oXVkBCACgzyyGvvHLx7g/Rpys1WdevYMH
-THBS24RMaDHqg7H7xe0fFzmiblWjV8V4Yy+heLLV5nTYBQLS43MFvFbnFvB3ygDI
-IdVjLVDXcPfcp+Np2PE8cJuDEE4seGU26UoJ2pPK/IHbnmGWYwXJBbik9YepD61c
-NJ5XMzMYI5z9/YNupeJoy8/8uxdxI/B66PL9QN8wKBk5js2OX8TtEjmEZSrZrIuM
-rVVXRU/1m732lhIyVVws4StRkpG+D15Dp98yDGjbCRREzZPeKHpvO/Uhn23hVyHe
-PIc+bu1mXMQ+N/3UjXtfUg27hmmgBDAjxUeSb1moFpeqLys2AAY+yXiHDv57ABEB
-AAGJAR8EGAECAAkFAk/oXVkCGwwACgkQ6MxnBT7TsZng+AgAnFogD90f3ByTVlNp
-Sb+HHd/cPqZ83RB9XUxRRnkIQmOozUjw8nq8I8eTT4t0Sa8G9q1fl14tXIJ9szzz
-BUIYyda/RYZszL9rHhucSfFIkpnp7ddfE9NDlnZUvavnnyRsWpIZa6hJq8hQEp92
-IQBF6R7wOws0A0oUmME25Rzam9qVbywOh9ZQvzYPpFaEmmjpCRDxJLB1DYu8lnC4
-h1jP1GXFUIQDbcznrR2MQDy5fNt678HcIqMwVp2CJz/2jrZlbSKfMckdpbiWNns/
-xKyLYs5m34d4a0it6wsMem3YCefSYBjyLGSd/kCI/CgOdGN1ZY1HSdLmmjiDkQPQ
-UcXHbA==
-=v6jg
+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
+ui5ouWe8Ig9ur+rOvOGMrsSa
+=HyLD
 -----END PGP PUBLIC KEY BLOCK-----',
         proxy => $::proxy,
       }
@@ -178,7 +209,6 @@ class control(
 
   ######### quantum variables #############
   $core_plugin                       = $::quantum_core_plugin,
-  $cisco_vswitch_plugin              = $::cisco_vswitch_plugin,
   # need to set from a variable
   # database
   $db_host                           = $::controller_node_address,
@@ -297,8 +327,7 @@ class control(
       keystone_username => 'quantum',
       keystone_password => $quantum_user_password,
       keystone_auth_url => "http://${controller_node_public}:35357/v2.0/",
-      keystone_tenant   => 'services',
-      vswitch_plugin    => $cisco_vswitch_plugin
+      keystone_tenant   => 'services'
     }
   }
   

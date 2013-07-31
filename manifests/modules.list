@@ -34,3 +34,5 @@ swift
 sysctl
 vswitch
 xinetd
+n1k-vsm
+n1k-vem
