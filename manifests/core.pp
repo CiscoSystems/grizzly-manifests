@@ -381,9 +381,9 @@ class compute(
   $volume_group                      = 'cinder-volumes',
   $setup_test_volume                 = true,
   $cinder_volume_driver              = $::cinder_storage_driver,
-  $cinder_rbd_user                   = 'volumes',
-  $cinder_rbd_pool                   = 'volumes',
-  $cinder_rbd_secret_uuid            = false,
+  $cinder_rbd_user                   = $::cinder_rbd_user,
+  $cinder_rbd_pool                   = $::cinder_rbd_pool,
+  $cinder_rbd_secret_uuid            = $::cinder_rbd_secret_uuid,
   # quantum config
   $quantum	                     = true,
   $quantum_user_password             = $::quantum_user_password,
@@ -431,8 +431,11 @@ class compute(
     volume_group            => $volume_group,
     setup_test_volume       => $setup_test_volume,
     cinder_volume_driver    => $cinder_volume_driver,
+    cinder_rbd_user         => $cinder_rbd_user,
+    cinder_rbd_pool         => $cinder_rbd_pool,
+    cinder_rbd_secret_uuid  => $cinder_rbd_secret_uuid,
     # quantum config
-    quantum	                => $quantum,
+    quantum	            => $quantum,
     quantum_user_password   => $quantum_user_password,
     # Quantum OVS
     enable_ovs_agent        => $enable_ovs_agent,

@@ -469,8 +469,12 @@ node 'compute-server01' inherits os_base {
 # ceph_public_network: the network mask of your public network.
 # ceph_release: specify the release codename to install the respective release.
 # cinder_rbd_user: the user configured in ceph to allow cinder rwx access to the volumes pool.
+#   This currently requires the name 'volumes'. Do not change it.
 # cinder_rbd_pool: the name of the pool in ceph for cinder to use for block device creation.
-# cinder_rbd_secret_uuid: the uuid secret to allow cinder to communicate with ceph.
+#   This currently requires the name 'volumes'. Do not change it.
+# cinder_rbd_secret_uuid: the uuid secret to allow cinder to communicate with ceph. 
+#   This MUST be left as the string 'REPLACEME'. The actual UUID is unique and is generated
+#   only after ceph is installed. It is injected during the puppet run.
 
 #$ceph_auth_type         = 'cephx'
 #$ceph_monitor_fsid      = 'e80afa94-a64c-486c-9e34-d55e85f26406'
@@ -482,11 +486,11 @@ node 'compute-server01' inherits os_base {
 #$ceph_release           = 'cuttlefish'
 #$cinder_rbd_user        = 'volumes'
 #$cinder_rbd_pool        = 'volumes'
-#$cinder_rbd_secret_uuid = ''
+#$cinder_rbd_secret_uuid = 'REPLACEME'
 
-# this global path needs to be uncommented for puppet-ceph to work.
-# uncomment and define the proxy server if your nodes don't have direct
-# access to the internet. this is needed to obtain the latest ceph packages..
+# This global path needs to be uncommented for puppet-ceph to work.
+# Uncomment and define the proxy server if your nodes don't have direct
+# access to the internet. This is due to apt needing to run a wget.
 #Exec {
 #  path        => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
 #  environment => "https_proxy=$::proxy",
