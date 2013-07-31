@@ -201,7 +201,7 @@ $cinder_controller_enabled     = true
 # Set to true to enable Cinder deployment to all compute nodes.
 $cinder_compute_enabled        = true
 
-# The cinder storage driver to use. Default is 'iscsi'.
+# The cinder storage driver to use Options are iscsi or rbd(ceph). Default is 'iscsi'.
 $cinder_storage_driver         = 'iscsi'
 
 
@@ -381,6 +381,11 @@ node 'compute-server01' inherits os_base {
     internal_ip => '192.168.242.21',
     tunnel_ip   => '192.168.242.21',
   }
+  if $::cinder_compute_enabled {
+    class { 'coe::ceph::compute':
+      poolname => $::cinder_rbd_pool,
+    }
+  }
 }
 
 ### Repeat as needed ###
@@ -462,12 +467,10 @@ node 'compute-server01' inherits os_base {
 # ceph_monitor_address: corresponds to the facter IP info. Change this to reflect your public interface.
 # ceph_cluster_network: the network mask of your cluster (management) network (can be identical to the public netmask).
 # ceph_public_network: the network mask of your public network.
-# ceph_public_interface: the name of your public interface.
-#   (todo: fix conflict when using the same interface specified in $::external_interface. this is due to our late_command.)
-# ceph_cluster_interface: the name of your public interface (can be identical to the public interface).
-#   (todo: fix conflict when using the same interface specified in $::external_interface. this is due to our late_command.)
 # ceph_release: specify the release codename to install the respective release.
-
+# cinder_rbd_user: the user configured in ceph to allow cinder rwx access to the volumes pool.
+# cinder_rbd_pool: the name of the pool in ceph for cinder to use for block device creation.
+# cinder_rbd_secret_uuid: the uuid secret to allow cinder to communicate with ceph.
 
 #$ceph_auth_type         = 'cephx'
 #$ceph_monitor_fsid      = 'e80afa94-a64c-486c-9e34-d55e85f26406'
@@ -476,16 +479,17 @@ node 'compute-server01' inherits os_base {
 #$ceph_monitor_address   = $::ipaddress
 #$ceph_cluster_network   = '192.168.242.0/24'
 #$ceph_public_network    = '192.168.242.0/24'
-#$ceph_public_interface  = 'eth2'
-#$ceph_cluster_interface = 'eth2'
 #$ceph_release           = 'cuttlefish'
+#$cinder_rbd_user        = 'volumes'
+#$cinder_rbd_pool        = 'volumes'
+#$cinder_rbd_secret_uuid = ''
 
 # this global path needs to be uncommented for puppet-ceph to work.
 # uncomment and define the proxy server if your nodes don't have direct
 # access to the internet. this is needed to obtain the latest ceph packages..
 #Exec {
 #  path        => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
-#  environment => 'https_proxy=http://proxy-rtp-1.cisco.com:8080',
+#  environment => "https_proxy=$::proxy",
 #}
 
 
