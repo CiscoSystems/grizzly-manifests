@@ -145,7 +145,7 @@ fi
 
 # define the public key to access the repo
 echo -e "\n\ndefine the public key to access the repo...\n\n"
-if ! run_cmd apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-keys '6B7A62576A4F98AD; then
+if ! run_cmd apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-keys '6B7A62576A4F98AD'; then
   echo "cant define the public key"
   exit 1
 fi
