@@ -1,0 +1,61 @@
+iplist:
+  alpha-control01:
+    name: alpha-control01
+    ip: 172.29.75.198
+    type: control
+  alpha-compute01:
+    name: alpha-compute01 
+    ip: 172.29.75.199
+    type: compute
+  alpha-compute02:
+    name: alpha-compute02
+    ip: 172.29.75.200
+    type: compute
+  alpha-compute03:
+    name: alpha-compute03
+    ip: 172.29.75.201
+    type: compute
+  alpha-compute04:
+    name: alpha-compute04
+    ip: 172.29.75.202
+    type: compute
+  alpha-compute05:
+    name: alpha-compute05
+    ip: 172.29.75.203
+    type: compute
+  alpha-compute06:
+    name: alpha-compute06
+    ip: 172.29.75.204
+    type: compute
+  alpha-compute07:
+    name: alpha-compute07
+    ip: 172.29.75.205
+    type: compute
+  alpha-compute08:
+    name: alpha-compute08
+    ip: 172.29.75.206
+    type: compute
+  alpha-storage01:
+    name: alpha-storage01
+    ip: 172.29.75.207
+    type: storage
+  alpha-storage02:
+    name: alpha-storage02
+    ip: 172.29.75.208
+    type: storage
+  alpha-storage03:
+    name: alpha-storage03
+    ip: 172.29.75.209
+    type: storage
+  alpha-storage-proxy01:
+    name: alpha-storage-procy01
+    ip: 172.29.75.210
+    type: storageproxy
+
+nodetypes:
+  build:
+  compute:
+  control:
+  storage:
+  storageproxy:
+  computeproxy:

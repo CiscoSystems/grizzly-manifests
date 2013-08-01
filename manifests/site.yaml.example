@@ -1,0 +1,29 @@
+common:
+  control: control
+  compute: compute
+  storage: storage
+  dns_server: 172.29.74.154
+  domain_name: ctocllab.cisco.com
+  ntp_server: 172.29.74.154
+  admin: localadmin
+  password: ubuntu
+  apt_location: http://openstack-repo.cisco.com/openstack/cisco
+  network: 172.29.75.192
+  netmask: 255.255.255.224
+  gateway: 172.29.75.193
+  sql_mask: 172.29.75.%
+  management_ip_range:
+    start: 172.29.75.198 
+    end: 172.29.75.220
+    gateway: 172.29.75.193
+    netmask: 255.255.255.224
+  public_range: 172.29.75.224/27
+  install_drive: /dev/sda
+nodes:
+  build:
+    name: alpha-build
+    power_id: 127.0.0.1
+    type: build
+    ip: 172.29.75.197
+    power_address: 127.0.0.1
+    mac: 00:25:b5:12:00:cf

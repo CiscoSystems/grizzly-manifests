@@ -1,0 +1,296 @@
+# vim: set tabstop=2:softtabstop=2:shiftwidth=2:noexpandtab
+# This document serves as template for deployment
+# basic multi-node openstack environments.
+# In this scenario Quantum is using OVS with GRE Tunnels
+# Swift is not included.
+
+########### Proxy Configuration ##########
+{% if common.proxy_server %}
+$proxy			= "http://{{ common.proxy_server }}:{{ common.proxy_port }}"
+{% endif %}
+########### package repo configuration ##########
+#
+# The package repos used to install openstack
+$package_repo = 'cisco_repo'
+# Alternatively, the upstream Ubuntu package from cloud archive can be used
+# $package_repo = 'cloud_archive'
+
+# $location 		= "ftp://ftpeng.cisco.com/openstack/cisco"
+# Alternate, uncomment this one, and comment out the one above.
+$location 		= "{{ common.apt_location }}"
+
+########### Build Node (Cobbler, Puppet Master, NTP) ######
+# Change the following to the host name you have given your build node
+$build_node_name        = "{{ nodes["build"].name }}"
+
+########### NTP Configuration ############
+# Change this to the location of a time server in your organization accessible to the build server
+# The build server will synchronize with this time server, and will in turn function as the time
+# server for your OpenStack nodes
+$company_ntp_server	= "{{ common.ntp_server }}"
+
+########### Build Node Cobbler Variables ############
+# Change these 5 parameters to define the IP address and other network settings of your build node
+# The cobbler node *must* have this IP configured and it *must* be on the same network as
+# the hosts to install
+$cobbler_node_ip 	= '{{ nodes["build"].ip }}'
+$node_subnet 		= '{{ common.network }}'
+$node_netmask 		= '{{ common.netmask }}'
+# This gateway is optional - if there's a gateway providing a default route, put it here
+# If not, comment it out
+$node_gateway 		= '{{ common.gateway }}'
+$domain_name 		= '{{ common.domain_name }}'
+$cobbler_proxy 		= "http://${cobbler_node_ip}:3142/"
+
+####### Preseed File Configuration #######
+$admin_user 		= '{{ common.admin }}'
+$password_crypted 	= '{{ common.password }}'
+$autostart_puppet       = true
+
+# If the setup uses the UCS B-series blades, enter the port on which the
+# ucsm accepts requests. By default the UCSM is enabled to accept requests
+# on port 443 (https). If https is disabled and only http is used, set
+# $ucsm_port = '80'
+$ucsm_port = '443'
+
+
+########### OpenStack Variables ############
+#{% for node in nodes["control"] %}
+$controller_node_address       = '{{ nodes["control"][node].ip }}'
+$controller_node_network       = '{{ common.network }}'
+$controller_hostname           = '{{ nodes["control"][node].name }}'
+$db_allowed_network            = '{{ common.sql_mask }}'
+$controller_node_public        = $controller_node_address
+$controller_node_internal      = $controller_node_address
+#{% endfor %}
+# Specify the address of the Swift proxy
+# If you have multiple Swift proxy nodes, this should be the address
+# of the VIP used to load-balance across the individual nodes. 
+# Uncommenting this variable will enable the keystone swift endpoint.
+# $swift_proxy_address           = '192.168.242.179'
+
+
+# Specify which interface in each node is the API Interface
+# This is also known as the Management Interface
+$public_interface    	= 'eth0'
+# Specify the interface used for external connectivity such as floating IPs (only in network/controller node)
+$external_interface	= 'eth1'
+
+# Select the drive on which Ubuntu and OpenStack will be installed in each node. Current assumption is
+# that all nodes will be installed on the same device name
+$install_drive           = '{{ common.install_drive }}'
+
+########### OpenStack Service Credentials ############
+$admin_email             = 'root@localhost'
+$admin_password          = 'Cisco123'
+$keystone_db_password    = 'keystone_db_pass'
+$keystone_admin_token    = 'keystone_admin_token'
+$mysql_root_password     = 'mysql_db_pass'
+$nova_user               = 'nova'
+$nova_db_password        = 'nova_pass'
+$nova_user_password      = 'nova_pass'
+$libvirt_type            = 'kvm'
+$glance_db_password      = 'glance_pass'
+$glance_user_password    = 'glance_pass'
+$glance_sql_connection   = "mysql://glance:${glance_db_password}@${controller_node_address}/glance"
+$cinder_user             = 'cinder'
+$cinder_user_password    = 'cinder_pass'
+$cinder_db_password      = 'cinder_pass'
+$quantum_user_password   = 'quantum_pass'
+$quantum_db_password     = 'quantum_pass'
+$rabbit_password         = 'openstack_rabbit_password'
+$rabbit_user             = 'openstack_rabbit_user'
+$swift_password          = 'openstack_swift_password'
+$swift_user              = 'openstack_swift_user'
+$swift_hash              = 'swift_secret'
+# Nova DB connection
+$sql_connection 	 = "mysql://${nova_user}:${nova_db_password}@${controller_node_address}/nova"
+# Glance backend configuration, supports 'file' or 'swift'.
+$glance_backend = 'file'
+# Quantum core plugin - use either OVS:
+$quantum_core_plugin = 'quantum.plugins.openvswitch.ovs_quantum_plugin.OVSQuantumPluginV2'
+#or the cisco plugin:
+#$quantum_core_plugin = 'quantum.plugins.cisco.network_plugin.PluginV2'
+
+########### Test variables ############
+# Variables used to populate test script:
+# /tmp/test_nova.sh
+#
+# Image to use for tests. Accepts 'kvm' or 'cirros'.
+$test_file_image_type = 'kvm'
+
+#### end shared variables #################
+
+# Storage Configuration
+# Set to true to enable Cinder services.
+$cinder_controller_enabled     = true
+
+# Set to true to enable Cinder deployment to all compute nodes.
+$cinder_compute_enabled        = true
+
+# The cinder storage driver to use. Default is 'iscsi'.
+$cinder_storage_driver         = 'iscsi'
+####### OpenStack Node Definitions #####
+
+node /build-node/ inherits master-node {
+
+#{% for node in nodes["control"] %}
+  cobbler_node { "{{ nodes['control'][node].name }}": 
+    node_type => "{{ nodes['control'][node].type }}",
+    mac => "{{ nodes['control'][node].mac1 }}",
+    ip => "{{ nodes['control'][node].ip }}",
+    power_address => "{{ nodes['control'][node].power_address }}",
+    power_id  => "{{ nodes['control'][node].power_id }}",
+    power_user => "{{ nodes['control'][node].power_user }}",
+    power_password  => "{{ nodes['control'][node].power_password }}",
+    power_type => "{{ nodes['control'][node].power_type }}"
+ }
+#{% endfor %}
+#{% for node in nodes["compute"] %}
+  cobbler_node { "{{ nodes['compute'][node].name }}": 
+    node_type => "{{ nodes['compute'][node].type }}",
+    mac => "{{ nodes['compute'][node].mac1 }}",
+    ip => "{{ nodes['compute'][node].ip }}",
+    power_address => "{{ nodes['compute'][node].power_address }}",
+    power_id  => "{{ nodes['compute'][node].power_id }}",
+    power_user => "{{ nodes['compute'][node].power_user }}",
+    power_password  => "{{ nodes['compute'][node].power_password }}",
+    power_type => "{{ nodes['compute'][node].power_type }}"
+ }
+#{% endfor %}
+
+# Begin swift proxy node
+#  cobbler_node { "swift-proxy01":
+#    node_type => "swift-proxy",
+#    mac => "11:22:33:aa:bb:cc",
+#    ip => "192.168.242.179",
+#    power_address  => "192.168.242.12"
+#  }
+
+
+# Begin swift storage node - gopis: for testing use storage tag.
+#{% for node in nodes["storage"] %}
+  cobbler_node { "{{ nodes['storage'][node].name }}":
+    node_type => "{{ nodes['storage'][node].type }}",
+    mac => "{{ nodes['storage'][node].mac1 }}",
+    ip => "{{ nodes['storage'][node].ip }}",
+    power_address => "{{ nodes['storage'][node].power_address }}",
+    power_id  => "{{ nodes['storage'][node].power_id }}",
+    power_user => "{{ nodes['storage'][node].power_user }}",
+    power_password  => "{{ nodes['storage'][node].power_password }}",
+    power_type => "{{ nodes['storage'][node].power_type }}"
+  }
+#{% endfor %}
+### End repeated nodes ###
+# Begin swift storage node
+#{% for node in nodes["swiftproxy"] %}
+  cobbler_node { "{{ nodes['swiftproxy'][node].name }}":
+    node_type => "{{ nodes['swiftproxy'][node].type }}",
+    mac => "{{ nodes['swiftproxy'][node].mac1 }}",
+    ip => "{{ nodes['swiftproxy'][node].ip }}",
+    power_address => "{{ nodes['swiftproxy'][node].power_address }}",
+    power_id  => "{{ nodes['swiftproxy'][node].power_id }}",
+    power_user => "{{ nodes['swiftproxy'][node].power_user }}",
+    power_password  => "{{ nodes['swiftproxy'][node].power_password }}",
+    power_type => "{{ nodes['swiftproxy'][node].power_type }}"
+  }
+#{% endfor %}
+### End repeated nodes ###
+}
+
+### Node types ###
+node {{ nodes["build"].name }} inherits build-node { }
+
+
+#{% for node in nodes["control"] %}
+node {{ nodes["control"][node].name }} inherits os_base { class { {{ nodes["control"][node].type }}: tunnel_ip => "${ipaddress}"} }
+#{% endfor %}
+#{% for node in nodes["compute"] %}
+node {{ nodes["compute"][node].name }} inherits os_base { class { {{ nodes["compute"][node].name }}: tunnel_ip => "${ipaddress}", internal_ip =>"${ipaddress}" } }
+#{% endfor %}
+
+#{% for node in nodes["swift"] %}
+node {{ nodes["swift"][node].name }} inherits os_base { class { 'openstack::swift::storage-node': swift_zone => {{ nodes["swift"][node].swift_zone }}, swift_local_net_ip => "${ipaddress}", storage_type => 'disk', storage_devices => {{ common.swift_storage_devices }}, swift_hash_suffix => {{ common.swift_storage_hash}} } }
+#{% endfor %}
+
+#{% for node in nodes["swiftproxy"] %}
+node {{ nodes["swiftproxy"][node].name }} inherits os_base { class { 'openstack::swift::proxy': swift_local_net_ip => "${ipaddress}", keystone_host => $controller_node_address, swift_user_password => $::admin_password, swift_admin_tenant  => 'admin', swift_admin_user => 'admin', swift_hash_suffix => {{ common.swift_storage_hash}} } }
+#{% endfor %}
+
+
+### End repeated nodes ###
+
+########################################################################
+### All parameters below this point likely do not need to be changed ###
+########################################################################
+
+### Advanced Users Configuration ###
+# These four settings typically do not need to be changed
+# In the default deployment, the build node functions as the DNS and static DHCP server for
+# the OpenStack nodes. These settings can be used if alternate configurations are needed
+$node_dns       = "${cobbler_node_ip}"
+$ip             = "${cobbler_node_ip}"
+$dns_service 	= "dnsmasq"
+$dhcp_service	= "dnsmasq"
+$time_zone      = "UTC"
+
+# Enable ipv6 router edvertisement.
+#$ipv6_ra = '1'
+
+# Adjust Quantum quotas
+# These are the default Quantum quotas for various network resources.
+# Adjust these values as necessary. Set a quota to '-1' to remove all
+# quotas for that resource. Also, keep in mind that Nova has separate
+# quotas which may also apply as well.
+#
+# Number of networks allowed per tenant
+$quantum_quota_network             = '10'
+# Number of subnets allowed per tenant
+$quantum_quota_subnet              = '10'
+# Number of ports allowed per tenant
+$quantum_quota_port                = '50'
+# Number of Quantum routers allowed per tenant
+$quantum_quota_router              = '10'
+# Number of floating IPs allowed per tenant
+$quantum_quota_floatingip          = '50'
+# Number of Quantum security groups allowed per tenant
+$quantum_quota_security_group      = '10'
+# Number of security rules allowed per security group
+$quantum_quota_security_group_rule = '100'
+
+# Configure the maximum number of times mysql-server will allow
+# a host to fail connecting before banning it.
+
+$max_connect_errors = '12'
+
+$expert_disk           = true
+$root_part_size        = 65536
+$var_part_size         = 1048576
+$enable_var            = true
+$enable_vol_space      = true
+
+# Select vif_driver and firewall_driver for quantum and quantum plugin
+# These two parameters can be changed if necessary to support more complex
+# network topologies as well as some Quantum plugins.
+# These default values are required for Quantum security groups to work
+# when using Quantum with OVS.
+$libvirt_vif_driver      = 'nova.virt.libvirt.vif.LibvirtHybridOVSBridgeDriver'
+$quantum_firewall_driver = 'quantum.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver'
+# If you don't want Quantum security groups when using OVS, comment out the
+# libvirt_vif_driver line above and uncomment the libvirt_vif_driver below
+# instead
+# $libvirt_vif_driver = 'nova.virt.libvirt.vif.LibvirtGenericVIFDriver'
+
+
+### Puppet Parameters ###
+# These settings load other puppet components. They should not be changed
+import 'cobbler-node'
+import 'core'
+
+## Define the default node, to capture any un-defined nodes that register
+## Simplifies debug when necessary.
+
+node default {
+  notify{"Default Node: Perhaps add a node definition to site.pp": }
+}
+
