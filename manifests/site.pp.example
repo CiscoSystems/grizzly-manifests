@@ -454,10 +454,12 @@ node 'compute-server01' inherits os_base {
 #   the cluster (management) interface can be the same as the public address if you have only
 #   one interface. It's recommended you have a separate management interface.
 #   This will offload replication and heartbeat from the public network
-# When reloading an OSD, the disk seems to retain some data that needs to be wiped clean. This must be done
-#   before running the puppet agent on a reloaded OSD node. First, format the filesystem. Then delete the partition,
-#   delete the partition table, then dd /dev/zero to the disk itself, for a reasonable count to clear any 
-#   remnant disk info.
+# When reloading an OSD, the disk seems to retain some data that needs to be wiped clean. Before reloading the node,
+#   you MUST remove the OSD from the running configuration. Instructions on doing so are located here:
+#   http://ceph.com/docs/master/rados/operations/add-or-rm-osds/#removing-osds-manual. Once complete, reinstall
+#   the node. Then, before running the puppet agent on a reloaded OSD node, format the filesystem to be used
+#   by the OSD. Then delete the partition, delete the partition table, then dd /dev/zero to the disk itself,
+#   for a reasonable count to clear any remnant disk info.
 # ceph MONs must be configured so a quorum can be obtained. You can have one mon, and three mons,
 #   but not two, since no quorum can be established. No even number of MONs should be used.
 
