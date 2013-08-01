@@ -11,10 +11,9 @@
 #  to the script, or the environmet variables can be pre-set before running the script locally.
 #
 
-# 
+#
 # set default tag to be retrieved
 CURRENT_TAG=g.0
-
 
 set -o errexit
 
@@ -45,11 +44,9 @@ export -f run_cmd
 # to emulate a git clone by tag command that doesn't exist
 function git_clone_tag () {
     if [ -z "$PROXY" ]; then
-        sudo git clone https://github.com/CiscoSystems/grizzly-manifests /root/cisco-grizzly-manifests
-        sudo bash -c "cd /root/cisco-grizzly-manifests && git checkout -q $CURRENT_TAG"
+        sudo git clone -b multi-node-n1k https://github.com/CiscoSystems/grizzly-manifests /root/cisco-grizzly-manifests
     else
-        sudo env https_proxy=$PROXY git clone https://github.com/CiscoSystems/grizzly-manifests /root/cisco-grizzly-manifests
-        sudo env https_proxy=$PROXY bash -c "cd /root/cisco-grizzly-manifests && git checkout -q $CURRENT_TAG"
+        sudo env https_proxy=$PROXY git clone -b multi-node-n1k https://github.com/CiscoSystems/grizzly-manifests /root/cisco-grizzly-manifests
     fi
 }
 export -f git_clone_tag
@@ -104,27 +101,17 @@ fi
 
 # Install prerequisite packages
 echo "Installing prerequisite apps: git, puppet, ipmitool..."
-if ! run_cmd apt-get $APT_CONFIG install -qym git puppet ipmitool; then
+if ! run_cmd apt-get $APT_CONFIG install -qym git puppet ipmitool genisoimage; then
   echo "Can't install prerequisites!..."
   exit 1
 fi
 
-# Grab the Cisco puppet global manifests (site.pp, etc.), try to update a previously downloaded set first
-echo "Cloning grizzly-manifests multi-node repository branch from github.com..."
-if [ -d /root/cisco-grizzly-manifests ] ; then
-	echo -e "Looks like perhaps you ran this script before? We'll try to update your cisco-grizzly-manifests directory, just in case..."
-	if ! git_fetch_tag ; then
-	   echo "That did not work.  Perhaps rename your cisco-grizzly-manifests directory, and try again?"
-	   exit 1
-    fi
-fi
-
 # Get a new set, as there was no previous download
 if [ ! -d /root/cisco-grizzly-manifests ] ; then
-	if ! git_clone_tag ; then
- 	  echo "Can't run git clone!"
-	  exit 1
-	fi
+        if ! git_clone_tag ; then
+          echo "Can't run git clone!"
+          exit 1
+        fi
 fi
 
 echo "Copying manifests examples to manifest dir..."
@@ -135,11 +122,11 @@ fi
 
 if [ -d /root/cisco-grizzly-manifests/templates ]
 then
-	echo "Copying templates to templates dir..."
-	if ! run_cmd cp -R /root/cisco-grizzly-manifests/templates/* /etc/puppet/templates/ ;then
-  		echo "Can't copy templates!!!"
-		exit 1
-	fi
+        echo "Copying templates to templates dir..."
+        if ! run_cmd cp -R /root/cisco-grizzly-manifests/templates/* /etc/puppet/templates/ ;then
+                echo "Can't copy templates!!!"
+                exit 1
+        fi
 fi
 
 # Update APT again, to capture any changes and updates driven by the newly loaded code
@@ -153,6 +140,13 @@ fi
 echo -e "\n\nUpdate packages...\n\n"
 if ! run_cmd apt-get $APT_CONFIG dist-upgrade -y; then
   echo "Can't update packages"
+  exit 1
+fi
+
+# define the public key to access the repo
+echo -e "\n\ndefine the public key to access the repo...\n\n"
+if ! run_cmd apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-keys '6B7A62576A4F98AD; then
+  echo "cant define the public key"
   exit 1
 fi
 
