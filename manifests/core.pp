@@ -311,10 +311,8 @@ class control(
   if $cisco_nexus_plugin == 'nexus' {
     $cisco_nexus_plugin_real = 'quantum.plugins.cisco.nexus.cisco_nexus_plugin_v2.NexusPlugin'
 
-    # this will fail if the controller doesn't have an internet connection
-    package { 'ncclient:'
-      provider => pip,
-      source   => 'git+https://github.com/CiscoSystems/ncclient.git'
+    package { 'python-ncclient':
+      ensure => installed,
     } ~> Service['quantum-server']
 
     # hack to make sure the directory is created
