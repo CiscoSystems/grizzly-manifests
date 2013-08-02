@@ -312,7 +312,7 @@ class control(
     $cisco_nexus_plugin_real = 'quantum.plugins.cisco.nexus.cisco_nexus_plugin_v2.NexusPlugin'
 
     # this will fail if the controller doesn't have an internet connection
-    package { 'ncclient:'
+    package { 'ncclient':
       provider => pip,
       source   => 'git+https://github.com/CiscoSystems/ncclient.git'
     } ~> Service['quantum-server']
