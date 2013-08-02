@@ -253,8 +253,11 @@ $cinder_controller_enabled     = true
 # Set to true to enable Cinder deployment to all compute nodes.
 $cinder_compute_enabled        = true
 
-# The cinder storage driver to use. Default is 'iscsi'.
+# The cinder storage driver to use Options are iscsi or rbd(ceph). Default is 'iscsi'.
 $cinder_storage_driver         = 'iscsi'
+
+# The cinder_ceph_enabled configures cinder to use rbd-backed volumes.
+# $cinder_ceph_enabled           = true
 
 
 ####### OpenStack Node Definitions #####
@@ -433,6 +436,11 @@ node 'compute-server01' inherits os_base {
     internal_ip => '192.168.242.21',
     tunnel_ip   => '192.168.242.21',
   }
+  if $::cinder_ceph_enabled {
+    class { 'coe::ceph::compute':
+      poolname => $::cinder_rbd_pool,
+    }
+  }
 }
 
 ### Repeat as needed ###
@@ -499,8 +507,14 @@ node 'compute-server01' inherits os_base {
 # For each OSD you need to specify the public address and the cluster address
 #   the public interface is used by the ceph client to access the service
 #   the cluster (management) interface can be the same as the public address if you have only
-#     one interface. It's recommended you have a separate management interface.
-#     This will offload replication and heartbeat from the public network
+#   one interface. It's recommended you have a separate management interface.
+#   This will offload replication and heartbeat from the public network
+# When reloading an OSD, the disk seems to retain some data that needs to be wiped clean. Before reloading the node,
+#   you MUST remove the OSD from the running configuration. Instructions on doing so are located here:
+#   http://ceph.com/docs/master/rados/operations/add-or-rm-osds/#removing-osds-manual. Once complete, reinstall
+#   the node. Then, before running the puppet agent on a reloaded OSD node, format the filesystem to be used
+#   by the OSD. Then delete the partition, delete the partition table, then dd /dev/zero to the disk itself,
+#   for a reasonable count to clear any remnant disk info.
 # ceph MONs must be configured so a quorum can be obtained. You can have one mon, and three mons,
 #   but not two, since no quorum can be established. No even number of MONs should be used.
 
@@ -514,12 +528,14 @@ node 'compute-server01' inherits os_base {
 # ceph_monitor_address: corresponds to the facter IP info. Change this to reflect your public interface.
 # ceph_cluster_network: the network mask of your cluster (management) network (can be identical to the public netmask).
 # ceph_public_network: the network mask of your public network.
-# ceph_public_interface: the name of your public interface.
-#   (todo: fix conflict when using the same interface specified in $::external_interface. this is due to our late_command.)
-# ceph_cluster_interface: the name of your public interface (can be identical to the public interface).
-#   (todo: fix conflict when using the same interface specified in $::external_interface. this is due to our late_command.)
 # ceph_release: specify the release codename to install the respective release.
-
+# cinder_rbd_user: the user configured in ceph to allow cinder rwx access to the volumes pool.
+#   This currently requires the name 'volumes'. Do not change it.
+# cinder_rbd_pool: the name of the pool in ceph for cinder to use for block device creation.
+#   This currently requires the name 'volumes'. Do not change it.
+# cinder_rbd_secret_uuid: the uuid secret to allow cinder to communicate with ceph. 
+#   This MUST be left as the string 'REPLACEME'. The actual UUID is unique and is generated
+#   only after ceph is installed. It is injected during the puppet run.
 
 #$ceph_auth_type         = 'cephx'
 #$ceph_monitor_fsid      = 'e80afa94-a64c-486c-9e34-d55e85f26406'
@@ -528,16 +544,17 @@ node 'compute-server01' inherits os_base {
 #$ceph_monitor_address   = $::ipaddress
 #$ceph_cluster_network   = '192.168.242.0/24'
 #$ceph_public_network    = '192.168.242.0/24'
-#$ceph_public_interface  = 'eth2'
-#$ceph_cluster_interface = 'eth2'
 #$ceph_release           = 'cuttlefish'
+#$cinder_rbd_user        = 'admin'
+#$cinder_rbd_pool        = 'volumes'
+#$cinder_rbd_secret_uuid = 'REPLACEME'
 
-# this global path needs to be uncommented for puppet-ceph to work.
-# uncomment and define the proxy server if your nodes don't have direct
-# access to the Internet. this is needed to obtain the latest ceph packages..
+# This global path needs to be uncommented for puppet-ceph to work.
+# Uncomment and define the proxy server if your nodes don't have direct
+# access to the internet. This is due to apt needing to run a wget.
 #Exec {
 #  path        => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
-#  environment => 'https_proxy=http://proxy-rtp-1.cisco.com:8080',
+#  environment => "https_proxy=$::proxy",
 #}
 
 
