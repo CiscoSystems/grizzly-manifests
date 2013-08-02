@@ -327,6 +327,11 @@ class control(
   }
 
   if $nexus_credentials {
+    file {'/var/lib/quantum/.ssh':
+      ensure => directory,
+      owner  => 'quantum',
+      require => Package['quantum-server']
+    } ->
     nexus_creds{ $nexus_credentials: }
   }
 
@@ -632,5 +637,11 @@ define nexus_creds {
   quantum_plugin_cisco_credentials {
     "${args[0]}/username": value => $args[1];
     "${args[0]}/password": value => $args[2];
+  }
+  exec {"${title}":
+    unless => "/bin/cat /var/lib/quantum/.ssh/known_hosts | /bin/grep ${args[0]}",
+    command => "/usr/bin/ssh-keyscan -t rsa ${args[0]} >> /var/lib/quantum/.ssh/known_hosts",
+    user    => 'quantum',
+    require => Package['quantum-server']
   }
 }
