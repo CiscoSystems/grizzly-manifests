@@ -136,7 +136,6 @@ node os_base inherits base {
 
   class { 'openstack::auth_file':
 	  admin_password       => $admin_password,
-	  keystone_admin_token => $keystone_admin_token,
 	  controller_node      => $controller_node_internal,
   }
 
