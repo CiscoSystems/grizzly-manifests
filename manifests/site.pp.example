@@ -177,9 +177,9 @@ $sql_connection 	 = "mysql://${nova_user}:${nova_db_password}@${controller_node_
 # Glance backend configuration, supports 'file' or 'swift'.
 $glance_backend = 'file'
 # Quantum core plugin - use either OVS:
-$quantum_core_plugin = 'quantum.plugins.openvswitch.ovs_quantum_plugin.OVSQuantumPluginV2'
+#$quantum_core_plugin = 'quantum.plugins.openvswitch.ovs_quantum_plugin.OVSQuantumPluginV2'
 #or the cisco plugin:
-#$quantum_core_plugin = 'quantum.plugins.cisco.network_plugin.PluginV2'
+$quantum_core_plugin = 'quantum.plugins.cisco.network_plugin.PluginV2'
 
 # if using the cisco plugin, by default this will use OVS
 # to perform L2. To use the n1k plugin, change this from
