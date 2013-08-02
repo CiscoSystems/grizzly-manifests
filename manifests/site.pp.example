@@ -490,7 +490,7 @@ node 'compute-server01' inherits os_base {
 #$ceph_cluster_network   = '192.168.242.0/24'
 #$ceph_public_network    = '192.168.242.0/24'
 #$ceph_release           = 'cuttlefish'
-#$cinder_rbd_user        = 'volumes'
+#$cinder_rbd_user        = 'admin'
 #$cinder_rbd_pool        = 'volumes'
 #$cinder_rbd_secret_uuid = 'REPLACEME'
 
