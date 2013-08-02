@@ -311,7 +311,7 @@ class control(
   if $cisco_nexus_plugin == 'nexus' {
     $cisco_nexus_plugin_real = 'quantum.plugins.cisco.nexus.cisco_nexus_plugin_v2.NexusPlugin'
 
-    package { 'ncclient':
+    package { 'python-ncclient':
       ensure => installed,
     } ~> Service['quantum-server']
 
