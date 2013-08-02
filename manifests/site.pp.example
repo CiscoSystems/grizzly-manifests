@@ -546,15 +546,9 @@ node 'compute-server01' inherits os_base {
 #$cinder_rbd_pool        = 'volumes'
 #$cinder_rbd_secret_uuid = 'REPLACEME'
 
-<<<<<<< HEAD
 # This global path needs to be uncommented for puppet-ceph to work.
 # Uncomment and define the proxy server if your nodes don't have direct
 # access to the internet. This is due to apt needing to run a wget.
-=======
-# this global path needs to be uncommented for puppet-ceph to work.
-# uncomment and define the proxy server if your nodes don't have direct
-# access to the Internet. this is needed to obtain the latest ceph packages..
->>>>>>> f4c4c62e889b139e5ed88f6ccf552449d82f5283
 #Exec {
 #  path        => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
 #  environment => "https_proxy=$::proxy",
