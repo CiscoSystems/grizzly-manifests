@@ -74,7 +74,7 @@ UcXHbA==
         required_packages => 'ubuntu-cloud-keyring',
       }
     } else {
-      fail("Unsupported package repo ${::package_repo}")
+        fail("Unsupported package repo ${::package_repo}")
     }
   }
   elsif ($osfamily == 'redhat') {
@@ -139,7 +139,6 @@ node os_base inherits base {
   # Configure your auth (openrc) file.
   class { 'openstack::auth_file':
     admin_password       => $admin_password,
-    keystone_admin_token => $keystone_admin_token,
     controller_node      => $controller_cluster_vip,
   }
 
@@ -150,79 +149,73 @@ node os_base inherits base {
 }
 
 class control(
-  $public_ip,
-  $internal_ip,
-  $admin_ip,
+  $ip_address,
   $galera_master_ip         = false,
   $keystone_swift_endpoint  = false
 ) {
 
   class { 'openstack-ha::controller':
     # Galera
-    galera_monitor_password => $galera_monitor_password,
-    wsrep_sst_password      => $wsrep_sst_password,
-    galera_master_ip        => $galera_master_ip,
-    mysql_bind_address      => $internal_ip,
-    mysql_root_password     => $mysql_root_password,
-    mysql_account_security  => false,
-    db_host                 => $controller_cluster_vip,
-    sql_idle_timeout        => '30',
-    # network
-#    public_address          => $public_ip,
-    public_address          => $controller_cluster_vip,
-#    internal_address        => $internal_ip,
-    internal_address        => $controller_cluster_vip,
-#    admin_address           => $admin_ip,
-    admin_address           => $controller_cluster_vip,
-    debug                   => $debug,
-    verbose                 => $verbose,
-    admin_email             => $admin_email,
-    admin_password          => $admin_password,
-    keystone_bind_address      => $internal_ip,
-    keystone_host           => $controller_cluster_vip,
-    keystone_db_password    => $keystone_db_password,
-    keystone_admin_token    => $keystone_admin_token,
-    swift                   => $keystone_swift_endpoint,
-    swift_user_password     => $::swift_password,
-    swift_public_address    => $::swiftproxy_cluster_vip,
-    glance_bind_address     => $internal_ip,
-    glance_api_servers      => "${controller_cluster_vip}:9292",
-    glance_db_password      => $glance_db_password,
-    glance_user_password    => $glance_user_password,
-    memcached_listen_ip     => $internal_ip,
-    cache_server_ip         => $controller_cluster_vip,
-    swift_store_user        => "${services_tenant}:${swift_user}",
-    swift_store_key         => $::swift_password,
+    galera_monitor_password  => $galera_monitor_password,
+    wsrep_sst_password       => $wsrep_sst_password,
+    galera_master_ip         => $galera_master_ip,
+    mysql_bind_address       => $ip_address,
+    mysql_root_password      => $mysql_root_password,
+    mysql_account_security   => false,
+    db_host                  => $controller_cluster_vip,
+    sql_idle_timeout         => '30',
+    # Networking
+    public_address           => $controller_cluster_vip,
+    debug                    => $debug,
+    verbose                  => $verbose,
+    admin_email              => $admin_email,
+    admin_password           => $admin_password,
+    keystone_bind_address    => $ip_address,
+    keystone_host            => $controller_cluster_vip,
+    keystone_db_password     => $keystone_db_password,
+    keystone_admin_token     => $keystone_admin_token,
+    swift                    => $keystone_swift_endpoint,
+    swift_user_password      => $::swift_password,
+    swift_public_address     => $::swiftproxy_cluster_vip,
+    glance_bind_address      => $ip_address,
+    glance_api_servers       => "${controller_cluster_vip}:9292",
+    glance_db_password       => $glance_db_password,
+    glance_user_password     => $glance_user_password,
+    memcached_listen_ip      => $ip_address,
+    cache_server_ip          => $controller_cluster_vip,
+    swift_store_user         => "${services_tenant}:${swift_user}",
+    swift_store_key          => $::swift_password,
     swift_store_auth_address => "http://$controller_cluster_vip:5000/v2.0/",
     # nova
-    enabled_apis            => 'ec2,osapi_compute',
-    memcached_servers       => ["${controller_cluster_vip}:11211"],
-    vncproxy_host           => '0.0.0.0',
-    glance_registry_host    => $controller_cluster_vip,
-    nova_bind_address      => $internal_ip,
-    nova_admin_tenant_name  => $services_tenant,
-    nova_db_password        => $nova_db_password,
-    nova_user_password      => $nova_user_password,
-    rabbit_password         => $rabbit_password,
-    rabbit_user             => $rabbit_user,
-#    rabbit_hosts            => [$controller_vip_hostname],
-    rabbit_hosts            => [$controller01_hostname, $controller02_hostname, $controller03_hostname],
-    rabbit_cluster_nodes    => [$controller01_hostname, $controller02_hostname, $controller03_hostname],
+    enabled_apis             => 'ec2,osapi_compute',
+#    memcached_servers        => ["${controller_cluster_vip}:11211"],
+    memcached_servers        => ["$controller01_ip:11211","${controller02_ip}:11211","${controller03_ip}:11211"],
+    vncproxy_host            => '0.0.0.0',
+    glance_registry_host     => $controller_cluster_vip,
+    nova_bind_address        => $ip_address,
+    nova_admin_tenant_name   => $services_tenant,
+    nova_db_password         => $nova_db_password,
+    nova_user_password       => $nova_user_password,
+    rabbit_password          => $rabbit_password,
+    rabbit_user              => $rabbit_user,
+#    rabbit_hosts             => [$controller_vip_hostname],
+    rabbit_hosts             => [$controller01_hostname, $controller02_hostname, $controller03_hostname],
+    rabbit_cluster_nodes     => [$controller01_hostname, $controller02_hostname, $controller03_hostname],
     # quantum
-    quantum_bind_address      => $internal_ip,
-    quantum_auth_url    => "http://${controller_cluster_vip}:35357/v2.0",
-    quantum_db_password => $quantum_db_password,
-    network_vlan_ranges => "physnet1:${network_vlan_ranges}",
-    bridge_interface    => $external_interface,
-    enable_dhcp_agent      => true,
+    quantum_bind_address     => $ip_address,
+    quantum_auth_url         => "http://${controller_cluster_vip}:35357/v2.0",
+    quantum_db_password      => $quantum_db_password,
+    network_vlan_ranges      => "physnet1:${vlan_ranges}",
+    bridge_interface         => $external_interface,
+    enable_dhcp_agent        => true,
     # Keystone
-    quantum_user_password => $quantum_user_password,
+    quantum_user_password    => $quantum_user_password,
     # horizon
-    secret_key           => $horizon_secret_key,
+    secret_key               => $horizon_secret_key,
     # cinder
-    cinder_bind_address      => $internal_ip,
-    cinder_user_password => $cinder_user_password,
-    cinder_db_password   => $cinder_db_password,
+    cinder_bind_address      => $ip_address,
+    cinder_user_password     => $cinder_user_password,
+    cinder_db_password       => $cinder_db_password,
   }
 
   if ($::configure_network_interfaces) {
@@ -230,12 +223,12 @@ class control(
       ensure    => 'present',
       hotplug   => false,
       family    => 'inet',
-      method    => 'manual',
+      method    => 'static',
       onboot    => 'true',
       notify    => Exec['network-restart'],
       options   => {
-        'up'    => 'ifconfig $IFACE 0.0.0.0 up',
-        'down'  => 'ifconfig $IFACE 0.0.0.0 down'
+        'up'    => 'ip link set $IFACE promisc on',
+        'down'  => 'ip link set $IFACE promisc off',
       }
     }
     # Changed from service to exec due to Ubuntu bug #440179
@@ -295,41 +288,41 @@ class ceph_mon (
 
 ### Start HA Compute Nodes ###
 class compute(
-  $internal_ip,
+  $ip_address,
 ) {
 
   class { 'openstack-ha::compute':
-    # Database Information
-    db_host            => $controller_cluster_vip,
-    # keystone
-    keystone_host      => $controller_cluster_vip,
-    internal_address   => $internal_ip,
-    libvirt_type       => $libvirt_type,
-    # rabbit
-    rabbit_hosts       => [$controller01_hostname, $controller02_hostname, $controller03_hostname],
-#    rabbit_hosts       => [$controller_vip_hostname],
-    rabbit_password    => $rabbit_password,
-    rabbit_user        => $rabbit_user,
-    # nova
-    nova_user_password => $nova_user_password,
-    nova_db_password   => $nova_db_password,
-    libvirt_vif_driver => 'nova.virt.libvirt.vif.LibvirtHybridOVSBridgeDriver',
-    glance_api_servers => "${controller_cluster_vip}:9292",
-    vncproxy_host      => $controller_cluster_vip,
-    vncserver_listen   => '0.0.0.0',
-    memcached_servers     => ["${controller_cluster_vip}:11211"],
+    # Networking
+    internal_address      => $ip_address,
+    # Database
+    db_host               => $controller_cluster_vip,
+    # Keystone
+    keystone_host         => $controller_cluster_vip,
+    # Rabbit
+    rabbit_hosts          => [$controller01_hostname, $controller02_hostname, $controller03_hostname],
+#    rabbit_hosts          => [$controller_vip_hostname],
+    rabbit_password       => $rabbit_password,
+    rabbit_user           => $rabbit_user,
+    # Nova
+    libvirt_type          => $libvirt_type,
+    nova_user_password    => $nova_user_password,
+    nova_db_password      => $nova_db_password,
+    libvirt_vif_driver    => 'nova.virt.libvirt.vif.LibvirtHybridOVSBridgeDriver',
+    glance_api_servers    => "${controller_cluster_vip}:9292",
+    vncproxy_host         => $controller_cluster_vip,
+    vncserver_listen      => '0.0.0.0',
+#    memcached_servers     => ["${controller_cluster_vip}:11211"],
+    memcached_servers     => ["$controller01_ip:11211","${controller02_ip}:11211","${controller03_ip}:11211"],
     enabled_apis          => 'ec2,osapi_compute',
-    # cinder parameters
+    # Cinder
     cinder_db_password    => $cinder_db_password,
-    iscsi_ip_address      => $internal_ip,
-    # quantum config
+    iscsi_ip_address      => $ip_address,
+    # Quantum
     quantum_host          => $controller_cluster_vip,
     quantum_user_password => $quantum_user_password,
     quantum_auth_url      => "http://${controller_cluster_vip}:35357/v2.0",
-    # Quantum OVS
-#    network_vlan_ranges   => "physnet1:${network_vlan_ranges}",
     bridge_interface      => $external_interface,
-    # general
+    # General
     enabled               => true,
     debug                 => $debug,
     verbose               => $verbose,
@@ -340,12 +333,12 @@ class compute(
       ensure    => 'present',
       hotplug   => false,
       family    => 'inet',
-      method    => 'manual',
+      method    => 'static',
       onboot    => 'true',
       notify    => Exec['network-restart'],
       options   => {
-        'up'    => 'ifconfig $IFACE 0.0.0.0 up',
-        'down'  => 'ifconfig $IFACE 0.0.0.0 down'
+        'up'    => 'ip link set $IFACE promisc on',
+        'down'  => 'ip link set $IFACE promisc off',
       }
     }
     # Changed from service to exec due to Ubuntu bug #440179
@@ -371,7 +364,6 @@ class compute(
   }
 
   class { "coe::quantum_log": }
-
 }
 
 
@@ -457,7 +449,7 @@ node master-node inherits "cobbler-node" {
     run_master           => true,
     puppetmaster_address => $build_node_fqdn, 
     certname             => $build_node_fqdn,
-    mysql_password       => 'ubuntu',
+    mysql_password       => $::puppet_mysql_password,
   }<-
 
   file {'/etc/puppet/files':
