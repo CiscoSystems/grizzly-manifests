@@ -256,6 +256,9 @@ $cinder_compute_enabled        = true
 # The cinder storage driver to use Options are iscsi or rbd(ceph). Default is 'iscsi'.
 $cinder_storage_driver         = 'iscsi'
 
+# The cinder_ceph_enabled configures cinder to use rbd-backed volumes.
+# $cinder_ceph_enabled           = true
+
 
 ####### OpenStack Node Definitions #####
 # This section is used to define the hardware parameters of the nodes
@@ -433,7 +436,7 @@ node 'compute-server01' inherits os_base {
     internal_ip => '192.168.242.21',
     tunnel_ip   => '192.168.242.21',
   }
-  if $::cinder_compute_enabled {
+  if $::cinder_ceph_enabled {
     class { 'coe::ceph::compute':
       poolname => $::cinder_rbd_pool,
     }
