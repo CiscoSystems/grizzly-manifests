@@ -350,7 +350,13 @@ class control(
   }
   
   class { "coe::quantum_log": }
-  
+ 
+  if $::glance_ceph_enabled {
+    class { 'coe::ceph::control':
+      glance_store_user => $::glance_ceph_user,
+      glance_store_pool => $::glance_ceph_pool,
+    }
+  }
 }
 
 ### begin cinder standalone nodes
