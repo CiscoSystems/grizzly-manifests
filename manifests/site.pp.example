@@ -189,9 +189,7 @@ $swift_user              = 'openstack_swift_user'
 $swift_hash              = 'swift_secret'
 # Nova DB connection
 $sql_connection          = "mysql://${nova_user}:${nova_db_password}@${controller_node_address}/nova"
-# Glance backend configuration, supports 'file' or 'swift'. If you are using RBD as the backend
-#   you do not need to change this. It's the default in glance::backend::rbd and not user
-#   configurable.
+# Glance backend configuration, supports 'file', 'swift', or 'rbd'.
 $glance_backend      = 'file'
 
 # Set this option to true to user RBD-backed glance. This will store your glance images in
