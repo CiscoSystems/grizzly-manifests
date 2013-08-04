@@ -167,6 +167,8 @@ class control(
 
   # TODO this needs to be added
   $glance_backend                    = $::glance_backend,
+  $rbd_store_user                    = $::glance_ceph_user,
+  $rbd_store_pool                    = $::glance_ceph_pool,
 
   $nova_db_password                  = $::nova_db_password,
   $nova_user_password                = $::nova_user_password,
@@ -238,8 +240,10 @@ class control(
     glance_db_password      => $glance_db_password,
     glance_user_password    => $glance_user_password,
 
-    # TODO this needs to be added
     glance_backend          => $glance_backend,
+    rbd_store_user          => $rbd_store_user,
+    rbd_store_pool          => $rbd_store_pool,
+
 
     nova_db_password        => $nova_db_password,
     nova_user_password      => $nova_user_password,
@@ -354,6 +358,7 @@ class control(
   if $::glance_ceph_enabled {
     class { 'coe::ceph::control': }
   }
+
 }
 
 ### begin cinder standalone nodes
