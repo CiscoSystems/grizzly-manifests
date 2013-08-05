@@ -298,7 +298,6 @@ node 'build-node' inherits master-node {
 # mode or 'ucs' for C-series or B-series UCS devices managed by UCSM.
 
   cobbler_node { 'control-server':
-    node_type      => 'control',
     mac            => '00:11:22:33:44:55',
     ip             => '192.168.242.10',
     power_address  => '192.168.242.110',
@@ -316,7 +315,6 @@ node 'build-node' inherits master-node {
 
 # Begin compute node
   cobbler_node { 'compute-server01':
-    node_type      => 'compute',
     mac            => '11:22:33:44:55:66',
     ip             => '192.168.242.21',
     power_address  => '192.168.242.121',
@@ -328,7 +326,6 @@ node 'build-node' inherits master-node {
 # Example with UCS blade power_address with a sub-group (in UCSM), and
 # a ServiceProfile for power_id.
 #  cobbler_node { "compute-server01":
-#    node_type => "compute",
 #    mac => "11:22:33:44:66:77",
 #    ip => "192.168.242.21",
 #    power_address  => "192.168.242.121:org-cisco",
@@ -343,7 +340,6 @@ node 'build-node' inherits master-node {
 # it is automatically installed on all compute nodes. The below definition
 # allows the addition of cinder volume only nodes.
 # cobbler_node { "cinder-storage1":
-# node_type => "cinder-storage",
 # mac => "11:22:33:44:55:66",
 # ip => "192.168.242.22",
 # power_address => "192.168.242.122",
@@ -368,7 +364,6 @@ node 'build-node' inherits master-node {
 
 # Begin swift proxy node
 #  cobbler_node { "swift-proxy01":
-#    node_type => "swift-proxy",
 #    mac => "11:22:33:aa:bb:cc",
 #    ip => "192.168.242.179",
 #    power_address  => "192.168.242.12"
@@ -384,7 +379,6 @@ node 'build-node' inherits master-node {
 
 # Begin swift storage node
 #  cobbler_node { "swift-storage01":
-#    node_type => "swift-storage",
 #    mac => "11:22:33:cc:bb:aa",
 #    ip => "192.168.242.180",
 #    power_address  => "192.168.242.13"
@@ -399,7 +393,6 @@ node 'build-node' inherits master-node {
 ### you will need to add a node type for each additional mon node
 ### eg ceph-mon02, etc. This is due to their unique id requirements
 #  cobbler_node { "ceph-mon01":
-#    node_type     => "ceph-mon01",
 #    mac           => "11:22:33:cc:bb:aa",
 #    ip            => "192.168.242.180",
 #    power_address => "192.168.242.13",
@@ -408,7 +401,6 @@ node 'build-node' inherits master-node {
 ### this block define ceph osd nodes
 ### add a new entry for each node
 #  cobbler_node { "ceph-osd01":
-#    node_type     => "ceph-osd01",
 #    mac           => "11:22:33:cc:bb:aa",
 #    ip            => "192.168.242.181",
 #    power_address => "192.168.242.14",
