@@ -219,11 +219,19 @@ class control(
   $quantum_quota_security_group_rule = $::quantum_quota_security_group_rule,
 )
 {
+
   if $core_plugin == 'cisco' {
      $core_plugin_real = 'quantum.plugins.cisco.network_plugin.PluginV2'
   } else {
      $core_plugin_real = 'quantum.plugins.openvswitch.ovs_quantum_plugin.OVSQuantumPluginV2'
   }
+
+  if ($::tenant_network_type) == 'gre' {
+    $ovs_enable_tunneling_real = true
+  } else {
+    $ovs_enable_tunneling_real = false
+  }
+
   class { 'openstack::controller':
     public_address          => $controller_node_public,
     # network
@@ -267,6 +275,7 @@ class control(
     # Metadata Configuration
     metadata_shared_secret  => $metadata_shared_secret,
     # ovs config
+    ovs_enable_tunneling    => $ovs_enable_tunneling_real,
     ovs_local_ip            => $ovs_local_ip,
     bridge_interface        => $bridge_interface,
     enable_ovs_agent        => $enable_ovs_agent,
@@ -467,6 +476,12 @@ class compute(
 )
 {
 
+  if ($::tenant_network_type) == 'gre' {
+    $ovs_enable_tunneling_real = true
+  } else {
+    $ovs_enable_tunneling_real = false
+  }
+
   class { 'openstack::compute':
     # keystone
     db_host                 => $db_host,
@@ -499,6 +514,7 @@ class compute(
     quantum_user_password   => $quantum_user_password,
     # Quantum OVS
     enable_ovs_agent        => $enable_ovs_agent,
+    ovs_enable_tunneling    => $ovs_enable_tunneling_real,
     ovs_local_ip            => $ovs_local_ip,
     bridge_mappings         => $ovs_bridge_mappings,
     bridge_uplinks          => $ovs_bridge_uplinks,
