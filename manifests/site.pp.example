@@ -439,6 +439,24 @@ node 'control-server' inherits os_base {
   class { 'control':
     tunnel_ip   => '192.168.242.10',
   }
+
+  # If you want to run ceph mon0 on your controller node, uncomment the 
+  #   following block. Be sure to read all additional ceph-related 
+  #   instruction in this file.
+  # only mon0 should export the admin keys.
+  # This means the following if statement is not needed on the additional
+  #  mon nodes.
+  #  if !empty($::ceph_admin_key) {
+  #  @@ceph::key { 'admin':
+  #    secret       => $::ceph_admin_key,
+  #    keyring_path => '/etc/ceph/keyring',
+  #  }
+  #  }
+
+  # each MON needs a unique id, you can start at 0 and increment as needed.
+  #  class {'ceph_mon': id => 0 }
+  #  class { 'ceph::apt::ceph': release => $::ceph_release }
+
 }
 
 # Change compute-server01 to the host name of your first compute node.
