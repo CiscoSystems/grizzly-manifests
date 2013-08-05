@@ -204,6 +204,10 @@ $glance_backend      = 'file'
 #   class declarations.
 # $controller_has_mon = true
 
+# If you are using compute hosts as ceph OSD servers then you
+#   need to set this to true
+# $osd_on_compute = true
+
 ###### Quantum plugins #######
 # Use either OVS (the default) or Cisco quantum plugin:
 # $quantum_core_plugin = 'ovs'
