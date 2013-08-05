@@ -357,7 +357,8 @@ class control(
 
   if ($::glance_ceph_enabled) and ($::controller_has_mon) {
     class { 'coe::ceph::glance': }
-  elseif ($::glance_ceph_enabled) and (!$::controller_has_mon)
+  }
+  elsif ($::glance_ceph_enabled) and (!$::controller_has_mon) {
     class { 'coe::ceph::control': }
   }
 
