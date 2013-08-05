@@ -13,7 +13,7 @@
 
 # 
 # set default tag to be retrieved
-CURRENT_TAG=g.0
+CURRENT_TAG=g.1
 
 
 set -o errexit
@@ -25,7 +25,7 @@ usage: $0 options
 OPTIONS:
   -h           Show this message
   -p           http proxy i.e. -p http://username:password@host:port/
-  -t           release tag i.e. -t g.0
+  -t           release tag i.e. -t g.1
 EOF
 }
 export -f usage
