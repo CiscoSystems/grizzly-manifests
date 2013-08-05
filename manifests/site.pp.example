@@ -198,6 +198,12 @@ $glance_backend      = 'file'
 # $glance_ceph_user    = 'admin'
 # $glance_ceph_pool    = 'images'
 
+# If you are using a controller node as a ceph MON node then you
+#   need to also set this to true to enable glance on ceph.
+#   Also ensure that the controller node stanze contains the mon
+#   class declarations.
+# $controller_has_mon = true
+
 ###### Quantum plugins #######
 # Use either OVS (the default) or Cisco quantum plugin:
 # $quantum_core_plugin = 'ovs'
