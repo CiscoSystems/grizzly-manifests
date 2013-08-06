@@ -242,6 +242,12 @@ class control(
     $security_group_api_real      = 'quantum'
   }
 
+  if ($::swift_proxy_address) {
+    $swift_real = true
+  } else {
+    $swift_real = false
+  }
+
   class { 'openstack::controller':
     public_address          => $controller_node_public,
     # network
@@ -300,16 +306,12 @@ class control(
     # cinder
     cinder_user_password    => $cinder_user_password,
     cinder_db_password      => $cinder_db_password,
-  }
-
-  if ($::swift_proxy_address) { 
-    class { 'swift::keystone::auth':
-      auth_name        => $swift_user,
-      password         => $swift_password,
-      public_address   => $::swift_proxy_address,
-      admin_address    => $::swift_proxy_address,
-      internal_address => $::swift_proxy_address,
-    }
+    # swift
+    swift                   => $swift_real,
+    swift_store_user        => "services:swift",
+    swift_store_key         => $::swift_password,
+    swift_user_password     => $::swift_password,
+    swift_public_address    => $::swift_proxy_address,
   }
 
   class { "naginator::control_target": }

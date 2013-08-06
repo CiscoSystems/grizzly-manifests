@@ -184,8 +184,7 @@ $quantum_user_password   = 'quantum_pass'
 $quantum_db_password     = 'quantum_pass'
 $rabbit_password         = 'openstack_rabbit_password'
 $rabbit_user             = 'openstack_rabbit_user'
-$swift_password          = 'openstack_swift_password'
-$swift_user              = 'openstack_swift_user'
+$swift_password          = 'swift_pass'
 $swift_hash              = 'swift_secret'
 # Nova DB connection
 $sql_connection          = "mysql://${nova_user}:${nova_db_password}@${controller_node_address}/nova"
@@ -364,9 +363,9 @@ node 'build-node' inherits master-node {
 
 # Begin swift proxy node
 #  cobbler_node { "swift-proxy01":
-#    mac => "11:22:33:aa:bb:cc",
-#    ip => "192.168.242.179",
-#    power_address  => "192.168.242.12"
+#    mac            => "A4:4C:11:13:3D:07",
+#    ip             => "192.168.242.61",
+#    power_address  => "192.168.242.161"
 #  }
 
 # This block defines the first swift storage server. Replace "swift-storage01"
@@ -379,9 +378,21 @@ node 'build-node' inherits master-node {
 
 # Begin swift storage node
 #  cobbler_node { "swift-storage01":
-#    mac => "11:22:33:cc:bb:aa",
-#    ip => "192.168.242.180",
-#    power_address  => "192.168.242.13"
+#    mac            => "A4:4C:11:13:BA:17",
+#    ip             => "192.168.242.71",
+#    power_address  => "192.168.242.171",
+#  }
+#
+#  cobbler_node { "swift-storage02":
+#    mac            => "A4:4C:11:13:BC:56",
+#    ip             => "192.168.242.72",
+#    power_address  => "192.168.242.172",
+#  }
+#
+#  cobbler_node { "swift-storage03":
+#    mac            => "A4:4C:11:13:B9:8D",
+#    ip             => "192.168.242.73",
+#    power_address  => "192.168.242.173"
 #  }
 
 ### Repeat as needed ###
@@ -527,27 +538,49 @@ node 'compute-server01' inherits os_base {
 # address of your control node.
 #node 'swift-proxy01' inherits os_base {
 #  class {'openstack::swift::proxy':
-#    swift_local_net_ip  => $swift_proxy_address,
-#    keystone_host       => $controller_node_address,
-#    swift_user_password => $admin_password,
-#    swift_admin_tenant  => 'admin',
-#    swift_admin_user    => 'admin',
-#    swift_hash_suffix   => $swift_hash,
+#    swift_local_net_ip     => $swift_proxy_address,
+#    keystone_host          => $controller_node_address,
+#    swift_user_password    => $swift_password,
+#    swift_hash_suffix      => $swift_hash,
+#    swift_memcache_servers => ["${swift_proxy_address}:11211"],
+#    memcached_listen_ip    => $swift_proxy_address,
 #  }
 #}
 
 # Swift Storage
 # Modify the swift_local_net_ip parameter to match the IP address of
-# your first Swift storage node.  Modify the storage_devices parameter
+# your Swift storage nodes.  Modify the storage_devices parameter
 # to set the list of disk devices to be formatted with XFS and used
-# for Swift storage.
+# for Swift storage.  Our deployment model requires a minimum of 3 
+# storage nodes, but it is recommended to use at least 5 storage nodes
+# (to support 5 zones) for production deployments.
 #node 'swift-storage01' inherits os_base {
 #  class {'openstack::swift::storage-node':
-#    swift_zone => '1',
-#    swift_local_net_ip => '192.168.242.180',
-#    storage_type => 'disk',
-#    storage_devices => ['sdb','sdc','sdd'],
-#    swift_hash_suffix => $swift_hash,
+#    swift_zone         => '1',
+#    swift_local_net_ip => '192.168.242.71',
+#    storage_type       => 'disk',
+#    storage_devices    => ['sdb','sdc','sdd'],
+#    swift_hash_suffix  => $swift_hash,
+#  }
+#}
+
+#node 'swift-storage02' inherits os_base {
+#  class {'openstack::swift::storage-node':
+#    swift_zone         => '2',
+#    swift_local_net_ip => '192.168.242.72',
+#    storage_type       => 'disk',
+#    storage_devices    => ['sdb','sdc','sdd'],
+#    swift_hash_suffix  => $swift_hash,
+#  }
+#}
+
+#node 'swift-storage03' inherits os_base {
+#  class {'openstack::swift::storage-node':
+#    swift_zone         => '3',
+#    swift_local_net_ip => '192.168.242.73',
+#    storage_type       => 'disk',
+#    storage_devices    => ['sdb','sdc','sdd'],
+#    swift_hash_suffix  => $swift_hash,
 #  }
 #}
 
