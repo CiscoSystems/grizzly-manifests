@@ -19,5 +19,9 @@ sudo cobbler system poweron --name="$1" >/dev/null
 #Changed cert clean to clean node so node is removed from stored configs db
 echo "Cleaning up puppet and ssh records for $1"
 sudo puppet node clean "$1"."$domain" >/dev/null
+# ... for the running user:
+ssh-keygen -R "$1" >/dev/null 2>&1
+ssh-keygen -R `host "$1" | awk '{print \$4}'` > /dev/null 2>&1
+# ... and for root:
 sudo ssh-keygen -R "$1" >/dev/null 2>&1
 sudo ssh-keygen -R `host "$1" | awk '{print \$4}'` > /dev/null 2>&1
