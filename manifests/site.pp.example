@@ -179,12 +179,13 @@ $glance_backend = 'file'
 # Quantum core plugin - use either OVS:
 #$quantum_core_plugin = 'quantum.plugins.openvswitch.ovs_quantum_plugin.OVSQuantumPluginV2'
 #or the cisco plugin:
-$quantum_core_plugin = 'quantum.plugins.cisco.network_plugin.PluginV2'
+$quantum_core_plugin = 'cisco'
 
 # if using the cisco plugin, by default this will use OVS
 # to perform L2. To use the n1k plugin, change this from
 # undef to 'quantum.plugins.cisco.n1kv.n1kv_quantum_plugin.N1kvQuantumPluginV2'
-$cisco_vswitch_plugin = 'quantum.plugins.cisco.n1kv.n1kv_quantum_plugin.N1kvQuantumPluginV2'
+#$cisco_vswitch_plugin = 'quantum.plugins.cisco.n1kv.n1kv_quantum_plugin.N1kvQuantumPluginV2'
+$cisco_vswitch_plugin = 'n1k'
 
 ########### Test variables ############
 # Variables used to populate test script:
@@ -385,7 +386,7 @@ node 'control-server' inherits os_base {
 
   quantum_plugin_cisco {
     'N1KV:<vsm_ip>/username' : value => 'admin';
-    'N1KV: <vsm_ip>/password' : value => 'Sfish123';
+    'N1KV:<vsm_ip>/password' : value => 'Sfish123';
   }
 
  quantum_plugin_cisco {
