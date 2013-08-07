@@ -167,7 +167,6 @@ node os_base inherits base {
 
   class { 'openstack::auth_file':
 	  admin_password       => $admin_password,
-	  keystone_admin_token => $keystone_admin_token,
 	  controller_node      => $controller_node_internal,
   }
 
@@ -199,6 +198,8 @@ class control(
 
   # TODO this needs to be added
   $glance_backend                    = $::glance_backend,
+  $rbd_store_user                    = $::glance_ceph_user,
+  $rbd_store_pool                    = $::glance_ceph_pool,
 
   $nova_db_password                  = $::nova_db_password,
   $nova_user_password                = $::nova_user_password,
@@ -209,6 +210,9 @@ class control(
 
   ######### quantum variables #############
   $core_plugin                       = $::quantum_core_plugin,
+  $cisco_vswitch_plugin              = $::cisco_vswitch_plugin,
+  $cisco_nexus_plugin                = $::cisco_nexus_plugin,
+  $nexus_credentials                 = $::nexus_credentials,
   # need to set from a variable
   # database
   $db_host                           = $::controller_node_address,
@@ -225,6 +229,10 @@ class control(
   $ovs_local_ip                      = $tunnel_ip,
   $bridge_interface                  = $::external_interface,
   $enable_ovs_agent                  = true,
+  $ovs_vlan_ranges                   = $::ovs_vlan_ranges,
+  $ovs_bridge_mappings               = $::ovs_bridge_mappings,
+  $ovs_bridge_uplinks                = $::ovs_bridge_uplinks,
+  $tenant_network_type               = $::tenant_network_type,
   # Keystone
   $quantum_user_password             = $::quantum_user_password,
   # horizon
@@ -242,7 +250,11 @@ class control(
   $quantum_quota_security_group_rule = $::quantum_quota_security_group_rule,
 )
 {
-
+  if $core_plugin == 'cisco' {
+     $core_plugin_real = 'quantum.plugins.cisco.network_plugin.PluginV2'
+  } else {
+     $core_plugin_real = 'quantum.plugins.openvswitch.ovs_quantum_plugin.OVSQuantumPluginV2'
+  }
   class { 'openstack::controller':
     public_address          => $controller_node_public,
     # network
@@ -259,8 +271,10 @@ class control(
     glance_db_password      => $glance_db_password,
     glance_user_password    => $glance_user_password,
 
-    # TODO this needs to be added
     glance_backend          => $glance_backend,
+    rbd_store_user          => $rbd_store_user,
+    rbd_store_pool          => $rbd_store_pool,
+
 
     nova_db_password        => $nova_db_password,
     nova_user_password      => $nova_user_password,
@@ -270,7 +284,7 @@ class control(
     #export_resources        => false,
 
     ######### quantum variables #############
-    quantum_core_plugin             => $core_plugin,
+    quantum_core_plugin     => $core_plugin_real,
     # need to set from a variable
     # database
     db_host                 => $db_host,
@@ -287,6 +301,10 @@ class control(
     ovs_local_ip            => $ovs_local_ip,
     bridge_interface        => $bridge_interface,
     enable_ovs_agent        => $enable_ovs_agent,
+    network_vlan_ranges     => $ovs_vlan_ranges,
+    bridge_mappings         => $ovs_bridge_mappings,
+    bridge_uplinks          => $ovs_bridge_uplinks,
+    tenant_network_type     => $tenant_network_type,
     # Keystone
     quantum_user_password   => $quantum_user_password,
     # horizon
@@ -318,7 +336,40 @@ class control(
     quota_security_group_rule => $quantum_quota_security_group_rule,
   }
 
-  if $core_plugin == 'quantum.plugins.cisco.network_plugin.PluginV2' {
+  if $cisco_vswitch_plugin == 'n1k' {
+    $cisco_vswitch_plugin_real = 'quantum.plugins.cisco.n1kv.n1kv_quantum_plugin.N1kvQuantumPluginV2'
+  } else {
+    $cisco_vswitch_plugin_real = 'quantum.plugins.openvswitch.ovs_quantum_plugin.OVSQuantumPluginV2'
+  }
+
+  if $cisco_nexus_plugin == 'nexus' {
+    $cisco_nexus_plugin_real = 'quantum.plugins.cisco.nexus.cisco_nexus_plugin_v2.NexusPlugin'
+
+    package { 'python-ncclient':
+      ensure => installed,
+    } ~> Service['quantum-server']
+
+    # hack to make sure the directory is created
+    Quantum_plugin_cisco<||> ->
+    file {'/etc/quantum/plugins/cisco/nexus.ini':
+      owner => 'root',
+      group => 'root',
+      content => template('nexus.ini.erb')
+    } ~> Service['quantum-server']
+  } else {
+    $cisco_nexus_plugin_real = undef
+  }
+
+  if $nexus_credentials {
+    file {'/var/lib/quantum/.ssh':
+      ensure => directory,
+      owner  => 'quantum',
+      require => Package['quantum-server']
+    } ->
+    nexus_creds{ $nexus_credentials: }
+  }
+
+  if $core_plugin == 'cisco' {
     class { 'quantum::plugins::cisco':
       database_name => $quantum_db_name,
       database_user => $quantum_db_user,
@@ -327,12 +378,21 @@ class control(
       keystone_username => 'quantum',
       keystone_password => $quantum_user_password,
       keystone_auth_url => "http://${controller_node_public}:35357/v2.0/",
-      keystone_tenant   => 'services'
+      keystone_tenant   => 'services',
+      vswitch_plugin    => $cisco_vswitch_plugin_real,
+      nexus_plugin      => $cisco_nexus_plugin_real
     }
   }
   
   class { "coe::quantum_log": }
-  
+
+  if ($::glance_ceph_enabled) and ($::controller_has_mon) {
+    class { 'coe::ceph::glance': }
+  }
+  elsif ($::glance_ceph_enabled) and (!$::controller_has_mon) {
+    class { 'coe::ceph::control': }
+  }
+
 }
 
 ### begin cinder standalone nodes
@@ -410,12 +470,17 @@ class compute(
   $volume_group                      = 'cinder-volumes',
   $setup_test_volume                 = true,
   $cinder_volume_driver              = $::cinder_storage_driver,
+  $cinder_rbd_user                   = $::cinder_rbd_user,
+  $cinder_rbd_pool                   = $::cinder_rbd_pool,
+  $cinder_rbd_secret_uuid            = $::cinder_rbd_secret_uuid,
   # quantum config
-  $quantum	                         = true,
+  $quantum	                     = true,
   $quantum_user_password             = $::quantum_user_password,
   # Quantum OVS
   $enable_ovs_agent                  = true,
   $ovs_local_ip                      = $tunnel_ip,
+  $ovs_bridge_mappings               = $::ovs_bridge_mappings,
+  $ovs_bridge_uplinks                = $::ovs_bridge_uplinks,
   # Quantum L3 Agent
   $enable_l3_agent                   = false,
   $enable_dhcp_agent                 = false,
@@ -457,12 +522,17 @@ class compute(
     volume_group            => $volume_group,
     setup_test_volume       => $setup_test_volume,
     cinder_volume_driver    => $cinder_volume_driver,
+    cinder_rbd_user         => $cinder_rbd_user,
+    cinder_rbd_pool         => $cinder_rbd_pool,
+    cinder_rbd_secret_uuid  => $cinder_rbd_secret_uuid,
     # quantum config
-    quantum	                => $quantum,
+    quantum	            => $quantum,
     quantum_user_password   => $quantum_user_password,
     # Quantum OVS
     enable_ovs_agent        => $enable_ovs_agent,
     ovs_local_ip            => $ovs_local_ip,
+    bridge_mappings         => $ovs_bridge_mappings,
+    bridge_uplinks          => $ovs_bridge_uplinks,
     # Quantum L3 Agent
     enable_l3_agent         => $enable_l3_agent,
     enable_dhcp_agent       => $enable_dhcp_agent,
@@ -609,3 +679,16 @@ node master-node inherits "cobbler-node" {
     }
 }
 
+define nexus_creds {
+  $args = split($title, '/')
+  quantum_plugin_cisco_credentials {
+    "${args[0]}/username": value => $args[1];
+    "${args[0]}/password": value => $args[2];
+  }
+  exec {"${title}":
+    unless => "/bin/cat /var/lib/quantum/.ssh/known_hosts | /bin/grep ${args[0]}",
+    command => "/usr/bin/ssh-keyscan -t rsa ${args[0]} >> /var/lib/quantum/.ssh/known_hosts",
+    user    => 'quantum',
+    require => Package['quantum-server']
+  }
+}
