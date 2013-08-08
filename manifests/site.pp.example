@@ -418,9 +418,7 @@ node 'build-node' inherits master-node {
 # interface for compute nodes.
 # In this example, eth0 is both the public and private interface for the
 # controller.
-# tunnel_ip allows you to create a network specifically for GRE tunneled
-# traffic between compute and network nodes. Generally, you will want to
-# use "ip" from the OpenStack node definitions above.
+# Generally, you will want to use "ip" from the OpenStack node definitions above.
 # This sets the IP for the private interface of compute and network nodes.
 
 # Change build_server to the host name of your build node.
@@ -436,7 +434,6 @@ node build-server inherits build-node { }
 # default, all agents will run on the control node.
 node 'control-server' inherits os_base {
   class { 'control':
-    tunnel_ip             => '192.168.242.10',
     #enable_dhcp_agent     => false,
     #enable_l3_agent       => false,
     #enable_metadata_agent => false,
@@ -470,7 +467,6 @@ node 'control-server' inherits os_base {
 node 'compute-server01' inherits os_base {
   class { 'compute':
     internal_ip        => '192.168.242.21',
-    tunnel_ip          => '192.168.242.21',
     #enable_dhcp_agent => true,
     #enable_l3_agent   => true,
   }
