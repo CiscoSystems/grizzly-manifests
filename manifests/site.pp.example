@@ -468,6 +468,11 @@ node 'compute-server01' inherits os_base {
       poolname => $::cinder_rbd_pool,
     }
   }
+
+  # If you want to run a Quantum dhcp agent on this node, uncomment
+  # the line below.  Add this line to each compute node definition
+  # on which you want to run a dhcp agent.
+  #class {'quantum::agents::dhcp': }
 }
 
 ### Repeat as needed ###
