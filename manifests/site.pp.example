@@ -462,8 +462,8 @@ node 'control-server' inherits os_base {
 # 'enable_dhcp_agent => true' line below.
 node 'compute-server01' inherits os_base {
   class { 'compute':
-    internal_ip => '192.168.242.21',
-    tunnel_ip   => '192.168.242.21',
+    internal_ip        => '192.168.242.21',
+    tunnel_ip          => '192.168.242.21',
     #enable_dhcp_agent => true,
   }
   if $::cinder_ceph_enabled {
