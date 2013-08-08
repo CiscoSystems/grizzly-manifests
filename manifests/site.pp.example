@@ -458,21 +458,19 @@ node 'control-server' inherits os_base {
 # Change compute-server01 to the host name of your first compute node.
 # Note that the hostname should be in all lowercase letters due to a
 # limitation of Puppet (refer to http://projects.puppetlabs.com/issues/1168).
+# If you want to run a dhcp agent on the compute node, uncomment the
+# 'enable_dhcp_agent => true' line below.
 node 'compute-server01' inherits os_base {
   class { 'compute':
     internal_ip => '192.168.242.21',
     tunnel_ip   => '192.168.242.21',
+    #enable_dhcp_agent => true,
   }
   if $::cinder_ceph_enabled {
     class { 'coe::ceph::compute':
       poolname => $::cinder_rbd_pool,
     }
   }
-
-  # If you want to run a Quantum dhcp agent on this node, uncomment
-  # the line below.  Add this line to each compute node definition
-  # on which you want to run a dhcp agent.
-  #class {'quantum::agents::dhcp': }
 }
 
 ### Repeat as needed ###
