@@ -24,10 +24,10 @@ node base {
 
     if($::package_repo == 'cisco_repo') {
       apt::source { "cisco-openstack-mirror_grizzly":
-        location => "$::location/cisco",
-        release => "grizzly-proposed",
-        repos => "main",
-        key => "E8CC67053ED3B199",
+        location    => "$::location/cisco",
+        release     => "grizzly-proposed",
+        repos       => "main",
+        key         => "E8CC67053ED3B199",
         key_content => '-----BEGIN PGP PUBLIC KEY BLOCK-----
 Version: GnuPG v1.4.11 (GNU/Linux)
 
@@ -59,19 +59,19 @@ xKyLYs5m34d4a0it6wsMem3YCefSYBjyLGSd/kCI/CgOdGN1ZY1HSdLmmjiDkQPQ
 UcXHbA==
 =v6jg
 -----END PGP PUBLIC KEY BLOCK-----',
-        proxy => $::proxy,
+        proxy       => $::proxy,
       }
 
       apt::source { "cisco_supplemental-openstack-mirror_grizzly":
-        location => "$::location/cisco_supplemental",
-        release => "grizzly-proposed",
-        repos => "main",
-        key => "E8CC67053ED3B199",
-        proxy => $::proxy,
+        location    => "$::location/cisco_supplemental",
+        release     => "grizzly-proposed",
+        repos       => "main",
+        key         => "E8CC67053ED3B199",
+        proxy       => $::proxy,
       }
 
       apt::pin { "cisco":
-        priority => '990',
+        priority   => '990',
         originator => 'Cisco'
       }
     } elsif($::package_repo == 'cloud_archive') {
@@ -87,7 +87,7 @@ UcXHbA==
   }
   elsif ($osfamily == 'redhat') {
     yumrepo { 'cisco-openstack-mirror':
-      descr     => "Cisco Openstack Repository",
+      descr    => "Cisco Openstack Repository",
       baseurl  => $::location,
       gpgcheck => "0", #TODO(prad): Add gpg key
       enabled  => "1";
