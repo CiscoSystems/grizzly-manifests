@@ -2,7 +2,7 @@
 # You will likely also want to change the IP addresses, domain name, and perhaps
 # even the proxy address
 
-define cobbler_node($node_type, $mac, $ip, $power_address, $power_id = undef,
+define cobbler_node($mac, $ip, $power_address, $power_id = undef, $preseed,
   $power_user = 'admin', $power_password = 'password', $power_type = 'ipmitool' ) {
 cobbler::node { $name:
     mac            => $mac,
@@ -20,7 +20,7 @@ cobbler::node { $name:
     profile        => "precise-x86_64-auto",
     domain         => $::domain_name,
     node_type      => $node_type,
-    preseed        => "cisco-preseed",
+    preseed        => $preseed,
   }
 }
 
@@ -62,7 +62,6 @@ $cobbler_node_fqdn 	        = "${::build_node_name}.${::domain_name}"
   autostart_puppet      => $::autostart_puppet,
   time_zone             => $::time_zone
  }
-
 
 class { cobbler: 
   node_subnet      => $::node_subnet, 

@@ -93,26 +93,26 @@ UcXHbA==
   # Ensure that the pip packages are fetched appropriately when we're using an
   # install where there's no direct connection to the net from the openstack
   # nodes
-#  if ! $::default_gateway {
-#    Package <| provider=='pip' |> {
-#      install_options => "--index-url=http://${build_node_name}/packages/simple/",
-#    }
-#  } else {
-#    if($::proxy) {
-#      Package <| provider=='pip' |> {
-#        # TODO(ijw): untested
-#        install_options => "--proxy=$::proxy"
-#      }
-#    }
-#  }
+  if ! $::default_gateway {
+    Package <| provider=='pip' |> {
+      install_options => "--index-url=http://${build_node_name}/packages/simple/",
+    }
+  } else {
+    if($::proxy) {
+      Package <| provider=='pip' |> {
+        # TODO(ijw): untested
+        install_options => "--proxy=$::proxy"
+      }
+    }
+  }
   # (the equivalent work for apt is done by the cobbler boot, which sets this up as
   # a part of the installation.)
 
 
-#  # /etc/hosts entries for the controller nodes
-#  host { $::controller_hostname:
-#	  ip => $::controller_node_internal
-#  }
+  # /etc/hosts entries for the controller nodes
+  host { $::controller_hostname:
+	  ip => $::controller_node_internal
+  }
 
   if ($::enable_monitoring) {
     class { 'collectd':
@@ -410,39 +410,39 @@ node master-node inherits "cobbler-node" {
                              # marginally less efficient with other proxies
   }
 
-#  if ! $::default_gateway {
-#    # Prefetch the pip packages and put them somewhere the openstack nodes can fetch them
-#
-#    file {  "/var/www":
-#      ensure => 'directory',
-#	  }
-#
-#    file {  "/var/www/packages":
-#      ensure  => 'directory',
-#      require => File['/var/www'],
-#    }
-#
-#    if($::proxy) {
-#      $proxy_pfx = "/usr/bin/env http_proxy=${::proxy} https_proxy=${::proxy} "
-#    } else {
-#      $proxy_pfx=""
-#    }
-#    exec { 'pip2pi':
-#      # Can't use package provider because we're changing its behaviour to use the cache
-#      command => "${proxy_pfx}/usr/bin/pip install pip2pi",
-#      creates => "/usr/local/bin/pip2pi",
-#      require => Package['python-pip'],
-#    }
-#    Package <| provider=='pip' |> {
-#      require => Exec['pip-cache']
-#    }
-#    exec { 'pip-cache':
-#      # All the packages that all nodes - build, compute and control - require from pip
-#      command => "${proxy_pfx}/usr/local/bin/pip2pi /var/www/packages collectd xenapi django-tagging graphite-web carbon whisper",
-#      creates => '/var/www/packages/simple', # It *does*, but you'll want to force a refresh if you change the line above
-#      require => Exec['pip2pi'],
-#    }
-#  }
+  if ! $::default_gateway {
+    # Prefetch the pip packages and put them somewhere the openstack nodes can fetch them
+
+    file {  "/var/www":
+      ensure => 'directory',
+	  }
+
+    file {  "/var/www/packages":
+      ensure  => 'directory',
+      require => File['/var/www'],
+    }
+
+    if($::proxy) {
+      $proxy_pfx = "/usr/bin/env http_proxy=${::proxy} https_proxy=${::proxy} "
+    } else {
+      $proxy_pfx=""
+    }
+    exec { 'pip2pi':
+      # Can't use package provider because we're changing its behaviour to use the cache
+      command => "${proxy_pfx}/usr/bin/pip install pip2pi",
+      creates => "/usr/local/bin/pip2pi",
+      require => Package['python-pip'],
+    }
+    Package <| provider=='pip' |> {
+      require => Exec['pip-cache']
+    }
+    exec { 'pip-cache':
+      # All the packages that all nodes - build, compute and control - require from pip
+      command => "${proxy_pfx}/usr/local/bin/pip2pi /var/www/packages collectd xenapi django-tagging graphite-web carbon whisper",
+      creates => '/var/www/packages/simple', # It *does*, but you'll want to force a refresh if you change the line above
+      require => Exec['pip2pi'],
+    }
+  }
 
   # set the right local puppet environment up.  This builds puppetmaster with storedconfigs (a nd a local mysql instance)
   class { puppet:
