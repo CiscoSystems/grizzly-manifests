@@ -24,7 +24,7 @@ node base {
 
     if($::package_repo == 'cisco_repo') {
       apt::source { "cisco-openstack-mirror_grizzly":
-        location => $::location,
+        location => "$::location/cisco",
         release => "grizzly-proposed",
         repos => "main",
         key => "E8CC67053ED3B199",
@@ -59,6 +59,14 @@ xKyLYs5m34d4a0it6wsMem3YCefSYBjyLGSd/kCI/CgOdGN1ZY1HSdLmmjiDkQPQ
 UcXHbA==
 =v6jg
 -----END PGP PUBLIC KEY BLOCK-----',
+        proxy => $::proxy,
+      }
+
+      apt::source { "cisco_supplemental-openstack-mirror_grizzly":
+        location => "$::location/cisco_supplemental",
+        release => "grizzly-proposed",
+        repos => "main",
+        key => "E8CC67053ED3B199",
         proxy => $::proxy,
       }
 
