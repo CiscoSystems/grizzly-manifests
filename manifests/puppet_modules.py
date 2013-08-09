@@ -26,10 +26,10 @@ import subprocess
 #-------- Default Constants ---------------------
 
 ## ----- global variables that can be configurable via cmdline.
-REPO_NAME = "grizzly"
+REPO_NAME = "grizzly-proposed"
 APT_REPO_URL = "ftp://ftpeng.cisco.com/openstack/cisco"
 # uncomment this line if you prefer to use http
-# APT_REPO_URL = "http://128.107.252.163/openstack/cisco"
+# APT_REPO_URL = "http://openstack-repo.cisco.com/openstack/cisco"
 
 ## ------- Other Constants --------------------------
 MODULE_FILE = "modules.list"
@@ -101,8 +101,8 @@ def setup_apt_sources():
     return """
 # cisco-openstack-mirror_grizzly
 deb %(repo_url)s %(repo_name)s main
-deb-src %(repo_url)s %(repo_name)s main""" % {'repo_url': APT_REPO_URL,
-                                              'repo_name': REPO_NAME}
+deb-src %(repo_url)s %(repo_name)s main
+""" % {'repo_url': APT_REPO_URL, 'repo_name': REPO_NAME}
 
 
 def override_globals(options):
