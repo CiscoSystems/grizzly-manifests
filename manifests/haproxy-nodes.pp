@@ -71,7 +71,7 @@ node /slb01/ inherits base {
     listening_service => 'galera_cluster',
     ports             => '3306',
     server_names      => [$::controller01_hostname, $::controller02_hostname, $::controller03_hostname],
-    ipaddresses       => [$::controller01_mgt_ip, $::controller02_mgt_ip, $::controller03_mgt_ip],
+    ipaddresses       => [$::controller01_ip, $::controller02_ip, $::controller03_ip],
     # Note: Checking port 9200 due to health_check script.
     options           => 'check port 9200 inter 2000 rise 2 fall 5',
   }
@@ -90,7 +90,7 @@ node /slb01/ inherits base {
 #    listening_service => 'rabbit_cluster',
 #    ports             => '5672',
 #    server_names      => [$::controller01_hostname, $::controller02_hostname, $::controller03_hostname],
-#    ipaddresses       => [$::controller01_mgt_ip, $::controller02_mgt_ip, $::controller03_mgt_ip],
+#    ipaddresses       => [$::controller01_ip, $::controller02_ip, $::controller03_ip],
 #    options           => 'check inter 2000 rise 2 fall 5',
 #  }
 
@@ -112,7 +112,7 @@ node /slb01/ inherits base {
     listening_service => 'keystone_public_internal_cluster',
     ports             => '5000',
     server_names      => [$::controller01_hostname, $::controller02_hostname, $::controller03_hostname],
-    ipaddresses       => [$::controller01_mgt_ip, $::controller02_mgt_ip, $::controller03_mgt_ip],
+    ipaddresses       => [$::controller01_ip, $::controller02_ip, $::controller03_ip],
     options           => 'check inter 2000 rise 2 fall 5',
     define_cookies    => true
   }
@@ -135,7 +135,7 @@ node /slb01/ inherits base {
     listening_service => 'keystone_admin_cluster',
     ports             => '35357',
     server_names      => [$::controller01_hostname, $::controller02_hostname, $::controller03_hostname],
-    ipaddresses       => [$::controller01_mgt_ip, $::controller02_mgt_ip, $::controller03_mgt_ip],
+    ipaddresses       => [$::controller01_ip, $::controller02_ip, $::controller03_ip],
     options           => 'check inter 2000 rise 2 fall 5',
     define_cookies    => true
   }
@@ -156,7 +156,7 @@ node /slb01/ inherits base {
     listening_service => 'nova_ec2_api_cluster',
     ports             => '8773',
     server_names      => [$::controller01_hostname, $::controller02_hostname, $::controller03_hostname],
-    ipaddresses       => [$::controller01_mgt_ip, $::controller02_mgt_ip, $::controller03_mgt_ip],
+    ipaddresses       => [$::controller01_ip, $::controller02_ip, $::controller03_ip],
     options           => 'check inter 2000 rise 2 fall 5',
     define_cookies    => true
   }
@@ -177,7 +177,7 @@ node /slb01/ inherits base {
     listening_service => 'nova_osapi_cluster',
     ports             => '8774',
     server_names      => [$::controller01_hostname, $::controller02_hostname, $::controller03_hostname],
-    ipaddresses       => [$::controller01_mgt_ip, $::controller02_mgt_ip, $::controller03_mgt_ip],
+    ipaddresses       => [$::controller01_ip, $::controller02_ip, $::controller03_ip],
     options           => 'check inter 2000 rise 2 fall 5',
     define_cookies    => true
   }
@@ -199,7 +199,7 @@ node /slb01/ inherits base {
     listening_service => 'nova_metadata_api_cluster',
     ports             => '8775',
     server_names      => [$::controller01_hostname, $::controller02_hostname, $::controller03_hostname],
-    ipaddresses       => [$::controller01_mgt_ip, $::controller02_mgt_ip, $::controller03_mgt_ip],
+    ipaddresses       => [$::controller01_ip, $::controller02_ip, $::controller03_ip],
     options           => 'check inter 2000 rise 2 fall 5',
     define_cookies    => true
   }
@@ -220,7 +220,7 @@ node /slb01/ inherits base {
     listening_service => 'cinder_api_cluster',
     ports             => '8776',
     server_names      => [$::controller01_hostname, $::controller02_hostname, $::controller03_hostname],
-    ipaddresses       => [$::controller01_mgt_ip, $::controller02_mgt_ip, $::controller03_mgt_ip],
+    ipaddresses       => [$::controller01_ip, $::controller02_ip, $::controller03_ip],
     options           => 'check inter 2000 rise 2 fall 5',
     define_cookies    => true
   }
@@ -239,7 +239,7 @@ node /slb01/ inherits base {
     listening_service => 'glance_registry_cluster',
     ports             => '9191',
     server_names      => [$::controller01_hostname, $::controller02_hostname, $::controller03_hostname],
-    ipaddresses       => [$::controller01_mgt_ip, $::controller02_mgt_ip, $::controller03_mgt_ip],
+    ipaddresses       => [$::controller01_ip, $::controller02_ip, $::controller03_ip],
     options           => 'check inter 2000 rise 2 fall 5',
     define_cookies    => true
   }
@@ -262,7 +262,7 @@ node /slb01/ inherits base {
     listening_service => 'glance_api_cluster',
     ports             => '9292',
     server_names      => [$::controller01_hostname, $::controller02_hostname, $::controller03_hostname],
-    ipaddresses       => [$::controller01_mgt_ip, $::controller02_mgt_ip, $::controller03_mgt_ip],
+    ipaddresses       => [$::controller01_ip, $::controller02_ip, $::controller03_ip],
     options           => 'check inter 2000 rise 2 fall 5',
 #    define_cookies    => true
   }
@@ -287,7 +287,7 @@ node /slb01/ inherits base {
     listening_service => 'dashboard_cluster',
     ports             => '80',
     server_names      => [$::controller01_hostname, $::controller02_hostname, $::controller03_hostname],
-    ipaddresses       => [$::controller01_mgt_ip, $::controller02_mgt_ip, $::controller03_mgt_ip],
+    ipaddresses       => [$::controller01_ip, $::controller02_ip, $::controller03_ip],
     options           => 'check inter 2000 rise 2 fall 5',
     define_cookies    => true
   }
@@ -318,7 +318,7 @@ node /slb01/ inherits base {
     listening_service => 'novnc_cluster',
     ports             => '6080',
     server_names      => [$::controller01_hostname, $::controller02_hostname, $::controller03_hostname],
-    ipaddresses       => [$::controller01_mgt_ip, $::controller02_mgt_ip, $::controller03_mgt_ip],
+    ipaddresses       => [$::controller01_ip, $::controller02_ip, $::controller03_ip],
     options           => 'check inter 2000 rise 2 fall 5',
   }
 
@@ -327,7 +327,7 @@ node /slb01/ inherits base {
 #    listening_service => 'spice_cluster',
 #    ports             => '6082',
 #    server_names      => [$::controller01_hostname, $::controller02_hostname, $::controller03_hostname],
-#    ipaddresses       => [$::controller01_mgt_ip, $::controller02_mgt_ip, $::controller03_mgt_ip],
+#    ipaddresses       => [$::controller01_ip, $::controller02_ip, $::controller03_ip],
 #    options           => 'check inter 2000 rise 2 fall 5',
 #  }
 
@@ -345,7 +345,7 @@ node /slb01/ inherits base {
     listening_service => 'nova_memcached_cluster',
     ports             => '11211',
     server_names      => [$::controller01_hostname, $::controller02_hostname, $::controller03_hostname],
-    ipaddresses       => [$::controller01_mgt_ip, $::controller02_mgt_ip, $::controller03_mgt_ip],
+    ipaddresses       => [$::controller01_ip, $::controller02_ip, $::controller03_ip],
     options           => 'check inter 2000 rise 2 fall 5',
   }
 
@@ -383,7 +383,7 @@ node /slb01/ inherits base {
     listening_service => 'quantum_api_cluster',
     ports             => '9696',
     server_names      => [$::controller01_hostname, $::controller02_hostname, $::controller03_hostname],
-    ipaddresses       => [$::controller01_mgt_ip, $::controller02_mgt_ip, $::controller03_mgt_ip],
+    ipaddresses       => [$::controller01_ip, $::controller02_ip, $::controller03_ip],
     options           => 'check inter 2000 rise 2 fall 5',
     define_cookies    => true
   }
@@ -478,7 +478,7 @@ node /slb02/ inherits base {
     listening_service => 'galera_cluster',
     ports             => '3306',
     server_names      => [$::controller01_hostname, $::controller02_hostname, $::controller03_hostname],
-    ipaddresses       => [$::controller01_mgt_ip, $::controller02_mgt_ip, $::controller03_mgt_ip],
+    ipaddresses       => [$::controller01_ip, $::controller02_ip, $::controller03_ip],
     # Note: Checking port 9200 due to health_check script.
     options           => 'check port 9200 inter 2000 rise 2 fall 5',
   }
@@ -497,7 +497,7 @@ node /slb02/ inherits base {
 #    listening_service => 'rabbit_cluster',
 #    ports             => '5672',
 #    server_names      => [$::controller01_hostname, $::controller02_hostname, $::controller03_hostname],
-#    ipaddresses       => [$::controller01_mgt_ip, $::controller02_mgt_ip, $::controller03_mgt_ip],
+#    ipaddresses       => [$::controller01_ip, $::controller02_ip, $::controller03_ip],
 #    options           => 'check inter 2000 rise 2 fall 5',
 #  }
 
@@ -519,7 +519,7 @@ node /slb02/ inherits base {
     listening_service => 'keystone_public_internal_cluster',
     ports             => '5000',
     server_names      => [$::controller01_hostname, $::controller02_hostname, $::controller03_hostname],
-    ipaddresses       => [$::controller01_mgt_ip, $::controller02_mgt_ip, $::controller03_mgt_ip],
+    ipaddresses       => [$::controller01_ip, $::controller02_ip, $::controller03_ip],
     options           => 'check inter 2000 rise 2 fall 5',
 #    define_cookies    => true
   }
@@ -542,7 +542,7 @@ node /slb02/ inherits base {
     listening_service => 'keystone_admin_cluster',
     ports             => '35357',
     server_names      => [$::controller01_hostname, $::controller02_hostname, $::controller03_hostname],
-    ipaddresses       => [$::controller01_mgt_ip, $::controller02_mgt_ip, $::controller03_mgt_ip],
+    ipaddresses       => [$::controller01_ip, $::controller02_ip, $::controller03_ip],
     options           => 'check inter 2000 rise 2 fall 5',
 #    define_cookies    => true
   }
@@ -563,7 +563,7 @@ node /slb02/ inherits base {
     listening_service => 'nova_ec2_api_cluster',
     ports             => '8773',
     server_names      => [$::controller01_hostname, $::controller02_hostname, $::controller03_hostname],
-    ipaddresses       => [$::controller01_mgt_ip, $::controller02_mgt_ip, $::controller03_mgt_ip],
+    ipaddresses       => [$::controller01_ip, $::controller02_ip, $::controller03_ip],
     options           => 'check inter 2000 rise 2 fall 5',
     define_cookies    => true
   }
@@ -584,7 +584,7 @@ node /slb02/ inherits base {
     listening_service => 'nova_osapi_cluster',
     ports             => '8774',
     server_names      => [$::controller01_hostname, $::controller02_hostname, $::controller03_hostname],
-    ipaddresses       => [$::controller01_mgt_ip, $::controller02_mgt_ip, $::controller03_mgt_ip],
+    ipaddresses       => [$::controller01_ip, $::controller02_ip, $::controller03_ip],
     options           => 'check inter 2000 rise 2 fall 5',
     define_cookies    => true
   }
@@ -606,7 +606,7 @@ node /slb02/ inherits base {
     listening_service => 'nova_metadata_api_cluster',
     ports             => '8775',
     server_names      => [$::controller01_hostname, $::controller02_hostname, $::controller03_hostname],
-    ipaddresses       => [$::controller01_mgt_ip, $::controller02_mgt_ip, $::controller03_mgt_ip],
+    ipaddresses       => [$::controller01_ip, $::controller02_ip, $::controller03_ip],
     options           => 'check inter 2000 rise 2 fall 5',
     define_cookies    => true
   }
@@ -627,7 +627,7 @@ node /slb02/ inherits base {
     listening_service => 'cinder_api_cluster',
     ports             => '8776',
     server_names      => [$::controller01_hostname, $::controller02_hostname, $::controller03_hostname],
-    ipaddresses       => [$::controller01_mgt_ip, $::controller02_mgt_ip, $::controller03_mgt_ip],
+    ipaddresses       => [$::controller01_ip, $::controller02_ip, $::controller03_ip],
     options           => 'check inter 2000 rise 2 fall 5',
     define_cookies    => true
   }
@@ -646,7 +646,7 @@ node /slb02/ inherits base {
     listening_service => 'glance_registry_cluster',
     ports             => '9191',
     server_names      => [$::controller01_hostname, $::controller02_hostname, $::controller03_hostname],
-    ipaddresses       => [$::controller01_mgt_ip, $::controller02_mgt_ip, $::controller03_mgt_ip],
+    ipaddresses       => [$::controller01_ip, $::controller02_ip, $::controller03_ip],
     options           => 'check inter 2000 rise 2 fall 5',
     define_cookies    => true
   }
@@ -669,7 +669,7 @@ node /slb02/ inherits base {
     listening_service => 'glance_api_cluster',
     ports             => '9292',
     server_names      => [$::controller01_hostname, $::controller02_hostname, $::controller03_hostname],
-    ipaddresses       => [$::controller01_mgt_ip, $::controller02_mgt_ip, $::controller03_mgt_ip],
+    ipaddresses       => [$::controller01_ip, $::controller02_ip, $::controller03_ip],
     options           => 'check inter 2000 rise 2 fall 5',
 #    define_cookies    => true
   }
@@ -694,7 +694,7 @@ node /slb02/ inherits base {
     listening_service => 'dashboard_cluster',
     ports             => '80',
     server_names      => [$::controller01_hostname, $::controller02_hostname, $::controller03_hostname],
-    ipaddresses       => [$::controller01_mgt_ip, $::controller02_mgt_ip, $::controller03_mgt_ip],
+    ipaddresses       => [$::controller01_ip, $::controller02_ip, $::controller03_ip],
     options           => 'check inter 2000 rise 2 fall 5',
     define_cookies    => true
   }
@@ -725,7 +725,7 @@ node /slb02/ inherits base {
     listening_service => 'novnc_cluster',
     ports             => '6080',
     server_names      => [$::controller01_hostname, $::controller02_hostname, $::controller03_hostname],
-    ipaddresses       => [$::controller01_mgt_ip, $::controller02_mgt_ip, $::controller03_mgt_ip],
+    ipaddresses       => [$::controller01_ip, $::controller02_ip, $::controller03_ip],
     options           => 'check inter 2000 rise 2 fall 5',
   }
 
@@ -734,7 +734,7 @@ node /slb02/ inherits base {
 #    listening_service => 'spice_cluster',
 #    ports             => '6082',
 #    server_names      => [$::controller01_hostname, $::controller02_hostname, $::controller03_hostname],
-#    ipaddresses       => [$::controller01_mgt_ip, $::controller02_mgt_ip, $::controller03_mgt_ip],
+#    ipaddresses       => [$::controller01_ip, $::controller02_ip, $::controller03_ip],
 #    options           => 'check inter 2000 rise 2 fall 5',
 #  }
 
@@ -752,7 +752,7 @@ node /slb02/ inherits base {
     listening_service => 'nova_memcached_cluster',
     ports             => '11211',
     server_names      => [$::controller01_hostname, $::controller02_hostname, $::controller03_hostname],
-    ipaddresses       => [$::controller01_mgt_ip, $::controller02_mgt_ip, $::controller03_mgt_ip],
+    ipaddresses       => [$::controller01_ip, $::controller02_ip, $::controller03_ip],
     options           => 'check inter 2000 rise 2 fall 5',
   }
 
@@ -790,7 +790,7 @@ node /slb02/ inherits base {
     listening_service => 'quantum_api_cluster',
     ports             => '9696',
     server_names      => [$::controller01_hostname, $::controller02_hostname, $::controller03_hostname],
-    ipaddresses       => [$::controller01_mgt_ip, $::controller02_mgt_ip, $::controller03_mgt_ip],
+    ipaddresses       => [$::controller01_ip, $::controller02_ip, $::controller03_ip],
     options           => 'check inter 2000 rise 2 fall 5',
     define_cookies    => true
   }

@@ -288,33 +288,21 @@ node 'build-node' inherits master-node {
 # mode or 'ucs' for C-series or B-series UCS devices managed by UCSM.
 
   cobbler_node { "control01":
-    node_type      => "control",
     mac            => "A4:4C:11:13:8B:D2",
     ip             => $controller01_ip,
     power_address  => "192.168.220.2",
-    power_user     => "admin",
-    power_password => "password",
-    power_type     => "ipmitool",
   }
 
   cobbler_node { "control02":
-    node_type      => "control",
     mac            => "A4:4C:11:13:8B:1A",
     ip             => $controller02_ip,
     power_address  => "192.168.220.3",
-    power_user     => "admin",
-    power_password => "password",
-    power_type     => "ipmitool",
   }
 
   cobbler_node { "control03":
-    node_type      => "control",
     mac            => "A4:4C:11:13:5E:5C",
     ip             => $controller03_ip,
     power_address  => "192.168.220.13",
-    power_user     => "admin",
-    power_password => "password",
-    power_type     => "ipmitool",
   }
 
 # This block defines the first compute server. Replace "compute-server01" 
@@ -325,33 +313,21 @@ node 'build-node' inherits master-node {
 # Change the "ip" to the IP address of your first OpenStack compute node.
 
   cobbler_node { "compute01":
-    node_type      => "compute",
     mac            => "A4:4C:11:13:52:80",
     ip             => "192.168.220.51",
     power_address  => "192.168.220.4",
-    power_user     => "admin",
-    power_password => "password",
-    power_type     => "ipmitool",
   }
 
   cobbler_node { "compute02":
-    node_type      => "compute",
     mac            => "A4:4C:11:13:A7:F1",
     ip             => "192.168.220.52",
     power_address  => "192.168.220.5",
-    power_user     => "admin",
-    power_password => "password",
-    power_type     => "ipmitool",
   }
 
   cobbler_node { "compute03":
-    node_type      => "load-balancer",
     mac            => "A4:4C:11:13:43:DB",
     ip             => "192.168.220.53",
     power_address  => "192.168.220.6",
-    power_user     => "admin",
-    power_password => "password",
-    power_type     => "ipmitool",
   }
 
 # Example with UCS blade power_address with a sub-group (in UCSM), and 
@@ -369,24 +345,16 @@ node 'build-node' inherits master-node {
 # End compute node
 
 # Begin Load Balancer Nodes
-  cobbler_node { "swift01":
-    node_type      => "load-balancer",
+  cobbler_node { "slb01":
     mac            => "A4:4C:11:13:BA:17",
     ip             => "192.168.220.71",
     power_address  => "192.168.220.10",
-    power_user     => "admin",
-    power_password => "password",
-    power_type     => "ipmitool",
   }
 
-  cobbler_node { "swift02":
-    node_type      => "load-balancer",
+  cobbler_node { "slb02":
     mac            => "A4:4C:11:13:BC:56",
     ip             => "192.168.220.72",
     power_address  => "192.168.220.11",
-    power_user     => "admin",
-    power_password => "password",
-    power_type     => "ipmitool",
   }
 
 ### Repeat as needed ###
@@ -403,23 +371,15 @@ node 'build-node' inherits master-node {
 # OpenStack swift proxy node.
 
   cobbler_node { "swiftproxy01":
-    node_type      => "swift-proxy",
     mac            => "A4:4C:11:13:3D:07",
     ip             => "192.168.220.61",
     power_address  => "192.168.220.7",
-    power_user     => "admin",
-    power_password => "password",
-    power_type     => "ipmitool",
   }
 
   cobbler_node { "swiftproxy02":
-    node_type      => "swift-proxy",
     mac            => "A4:4C:11:13:44:93",
     ip             => "192.168.220.62",
     power_address  => "192.168.220.8",
-    power_user     => "admin",
-    power_password => "password",
-    power_type     => "ipmitool",
   }
 
 # This block defines the first swift storage server. Replace "swift-storage01"
@@ -435,9 +395,6 @@ node 'build-node' inherits master-node {
     mac            => "A4:4C:11:13:B9:81",
     ip             => "192.168.220.71",
     power_address  => "192.168.220.10",
-    power_user     => "admin",
-    power_password => "password",
-    power_type     => "ipmitool",
   }
 
   cobbler_node { "swift02":
@@ -445,9 +402,6 @@ node 'build-node' inherits master-node {
     mac            => "A4:4C:11:13:B9:82",
     ip             => "192.168.220.72",
     power_address  => "192.168.220.11",
-    power_user     => "admin",
-    power_password => "password",
-    power_type     => "ipmitool",
   }
 
   cobbler_node { "swift03":
@@ -455,9 +409,6 @@ node 'build-node' inherits master-node {
     mac            => "A4:4C:11:13:B9:8D",
     ip             => "192.168.220.73",
     power_address  => "192.168.220.12",
-    power_user     => "admin",
-    power_password => "password",
-    power_type     => "ipmitool",
   }
 
 ### Repeat as needed ###
@@ -509,7 +460,7 @@ node build-os inherits build-node { }
 # Change control-server to the host name of your control node.  Note that the
 # hostname should be in all lowercase letters due to a limitation of Puppet
 # (refer to http://projects.puppetlabs.com/issues/1168).
-node /control01/ inherits os_base {
+node 'control01' inherits os_base {
 
   class { 'control':
     # Addressing and interface information
@@ -526,7 +477,7 @@ node /control01/ inherits os_base {
 }
 
 # Change control_server to the host name of your control node
-node /control02/ inherits os_base {
+node 'control02' inherits os_base {
 
   class { 'control':
     # Addressing and interface information
@@ -540,7 +491,7 @@ node /control02/ inherits os_base {
 }
 
 # Change control_server to the host name of your control node
-node /control03/ inherits os_base {
+node 'control03' inherits os_base {
 
   class { 'control':
     # Addressing and interface information
@@ -557,21 +508,21 @@ node /control03/ inherits os_base {
 # Note that the hostname should be in all lowercase letters due to a
 # limitation of Puppet (refer to http://projects.puppetlabs.com/issues/1168).
 # Change compute_server01 to the host name of your first compute node
-node /compute01/ inherits os_base {
+node 'compute01' inherits os_base {
 
   class { compute:
     ip_address => '192.168.220.51',
   }
 }
 
-node /compute02/ inherits os_base {
+node 'compute02' inherits os_base {
 
   class { compute:
     ip_address => '192.168.220.52',
   }
 }
 
-node /compute03/ inherits os_base {
+node 'compute03' inherits os_base {
 
   class { compute:
     ip_address => '192.168.220.53',
@@ -617,7 +568,7 @@ node 'swiftproxy01' inherits os_base {
     memcached_listen_ip    => $swiftproxy01_local_net_ip,
     keystone_host          => $controller_cluster_vip,
     swift_admin_user       => $swift_user,
-    swift_user_password    => $admin_password,
+    swift_user_password    => $swift_password,
     swift_hash_suffix      => $swift_hash,
   }
 }
@@ -686,8 +637,6 @@ node 'swift01' inherits os_base {
     storage_devices    => ['sdb','sdc','sdd','sde','sdf'],
     byte_size          => '2048',
     swift_hash_suffix  => $swift_hash,
-    # Change to false after ring is established.
-    collect_ringsync   => true,
   }
 
 node 'swift02' inherits os_base {
@@ -716,8 +665,6 @@ node 'swift02' inherits os_base {
     storage_devices    => ['sdb','sdc','sdd','sde','sdf'],
     byte_size          => '2048',
     swift_hash_suffix  => $swift_hash,
-    # Change to false after ring is established.
-    collect_ringsync   => true,
   }
 
 node 'swift03' inherits os_base {
@@ -746,8 +693,6 @@ node 'swift03' inherits os_base {
     storage_devices    => ['sdb','sdc','sdd','sde','sdf'],
     byte_size          => '2048',
     swift_hash_suffix  => $swift_hash,
-    # Change to false after ring is established.
-    collect_ringsync   => true,
   }
 }
 

@@ -223,12 +223,12 @@ class control(
       ensure    => 'present',
       hotplug   => false,
       family    => 'inet',
-      method    => 'static',
+      method    => 'manual',
       onboot    => 'true',
       notify    => Exec['network-restart'],
       options   => {
-        'up'    => 'ip link set $IFACE promisc on',
-        'down'  => 'ip link set $IFACE promisc off',
+        'up'    => 'ifconfig $IFACE 0.0.0.0 up',
+        'down'  => 'ifconfig $IFACE 0.0.0.0 down',
       }
     }
     # Changed from service to exec due to Ubuntu bug #440179
@@ -333,12 +333,12 @@ class compute(
       ensure    => 'present',
       hotplug   => false,
       family    => 'inet',
-      method    => 'static',
+      method    => 'manual',
       onboot    => 'true',
       notify    => Exec['network-restart'],
       options   => {
-        'up'    => 'ip link set $IFACE promisc on',
-        'down'  => 'ip link set $IFACE promisc off',
+        'up'    => 'ifconfig $IFACE 0.0.0.0 up',
+        'down'  => 'ifconfig $IFACE 0.0.0.0 down',
       }
     }
     # Changed from service to exec due to Ubuntu bug #440179
