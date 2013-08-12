@@ -197,9 +197,9 @@ class control(
   $quantum_db_name                   = 'quantum',
   $quantum_db_user                   = 'quantum',
   # enable quantum services
-  $enable_dhcp_agent                 = $true,
-  $enable_l3_agent                   = $true,
-  $enable_metadata_agent             = $true,
+  $enable_dhcp_agent                 = true,
+  $enable_l3_agent                   = true,
+  $enable_metadata_agent             = true,
   # Metadata Configuration
   $metadata_shared_secret            = 'secret',
   # ovs config
@@ -539,7 +539,7 @@ class compute(
 
 class network (
   internal_ip,
-  tunnel_ip,
+  tunnel_ip             = $internal_ip,
   quantum_user_password = $::quantum_user_password,
   enable_ovs_agent      = $::enable_ovs_agent,
   enable_l3_agent       = $::enable_l3_agent,

@@ -490,7 +490,6 @@ node 'compute-server01' inherits os_base {
 #  class { 'network':
 #    enable_dhcp_agent => true,
 #    enable_l3_agent   => true,
-#    tunnel_ip         => '2.6.1.5',
 #    internal_ip       => '2.6.1.5',
 #  }
 #}
