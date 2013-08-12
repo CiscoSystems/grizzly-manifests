@@ -321,6 +321,7 @@ node 'build-node' inherits master-node {
     power_user     => 'admin',
     power_password => 'password',
     power_type     => 'ipmitool',
+    force_config_drive => true
   }
 
 # Example with UCS blade power_address with a sub-group (in UCSM), and
@@ -333,6 +334,7 @@ node 'build-node' inherits master-node {
 #    power_type => 'ucs',
 #    power_user => 'admin',
 #    power_password => 'password'
+#    force_config_drive => true
 #  }
 # End compute node
 
