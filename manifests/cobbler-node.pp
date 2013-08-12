@@ -19,7 +19,6 @@ cobbler::node { $name:
     # These parameters typically should not be changed
     profile        => "precise-x86_64-auto",
     domain         => $::domain_name,
-    node_type      => $node_type,
     preseed        => $preseed,
   }
 }
