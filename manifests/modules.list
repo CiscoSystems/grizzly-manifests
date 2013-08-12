@@ -1,7 +1,6 @@
 apache
 apt
 apt-cacher-ng
-augeas
 boolean
 ceph
 cinder
