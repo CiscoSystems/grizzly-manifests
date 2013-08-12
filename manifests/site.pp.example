@@ -573,11 +573,6 @@ node kvm-host-2 {
           pktinterface => ['tap2', '00:02:4d:72:40:03', 'br0']
      }
 }
-  if $::cinder_ceph_enabled {
-    class { 'coe::ceph::compute':
-      poolname => $::cinder_rbd_pool,
-    }
-  }
 
 ### Repeat as needed ###
 # Copy the compute-server01 line above and paste a copy here for each
