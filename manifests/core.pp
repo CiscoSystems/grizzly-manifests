@@ -256,9 +256,9 @@ class control(
      $core_plugin_real = 'quantum.plugins.openvswitch.ovs_quantum_plugin.OVSQuantumPluginV2'
   }
   if $cisco_vswitch_plugin == 'n1k' { 
-    security_group_api      => 'nova', 
+    $security_group_api = 'nova'
   } else {
-    security_group_api      => 'quantum',
+    $security_group_api = 'quantum'
   }
   class { 'openstack::controller':
     public_address          => $controller_node_public,
