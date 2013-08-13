@@ -255,6 +255,11 @@ class control(
   } else {
      $core_plugin_real = 'quantum.plugins.openvswitch.ovs_quantum_plugin.OVSQuantumPluginV2'
   }
+  if $cisco_vswitch_plugin == 'n1k' { 
+    security_group_api      => 'nova', 
+  } else {
+    security_group_api      => 'quantum',
+  }
   class { 'openstack::controller':
     public_address          => $controller_node_public,
     # network
@@ -280,6 +285,7 @@ class control(
     nova_user_password      => $nova_user_password,
     rabbit_password         => $rabbit_password,
     rabbit_user             => $rabbit_user,
+    security_group_api      => 'quantum',
     # TODO deprecated
     #export_resources        => false,
 
