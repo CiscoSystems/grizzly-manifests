@@ -159,11 +159,13 @@ node os_base inherits base {
 class allinone (
   $tunnel_ip                         = $::ipaddress,
   $public_address                    = $::controller_node_public,
+  $public_interface                  = $::public_interface,
   # network
   $internal_address                  = $::controller_node_internal,
   # by default it does not enable multi-host mode
   $verbose                           = $::verbose,
   $mysql_root_password               = $::mysql_root_password,
+  $vncproxy_host                     = $::controller_node_public,
   $admin_email                       = $::admin_email,
   $admin_password                    = $::admin_password,
   $keystone_db_password              = $::keystone_db_password,
@@ -202,8 +204,8 @@ class allinone (
   $metadata_shared_secret            = 'secret',
   # ovs config
   $ovs_local_ip                      = $::ipaddress,
-  #$bridge_interface                  = $::external_interface,
-  $bridge_interface                  = $::public_interface,
+  $bridge_interface                  = $::external_interface,
+  #$bridge_interface                  = $::public_interface,
   $enable_ovs_agent                  = true,
   $ovs_vlan_ranges                   = $::ovs_vlan_ranges,
   $ovs_bridge_mappings               = $::ovs_bridge_mappings,
@@ -233,7 +235,7 @@ class allinone (
   }
 
   class { 'openstack::all':
-    public_address           => $public_address
+    public_address           => $public_address,
     public_interface         => $public_interface,
     internal_address         => $internal_address,
     bridge_interface         => $bridge_interface,
@@ -258,7 +260,8 @@ class allinone (
     ovs_local_ip             => $tunnel_ip,
     nova_db_password         => $nova_db_password,
     nova_user_password       => $nova_user_password,
-    secret_key               => $horizon_secret_key,
+    secret_key               => $secret_key,
+    vncproxy_host            => $vncproxy_host,
     libvirt_type             => $libvirt_type,
   }
 
@@ -337,7 +340,6 @@ class allinone (
   elsif ($::glance_ceph_enabled) and (!$::controller_has_mon) {
     class { 'coe::ceph::control': }
   }
-
 }
 
 class control(
@@ -445,8 +447,7 @@ class control(
     glance_backend          => $glance_backend,
     rbd_store_user          => $rbd_store_user,
     rbd_store_pool          => $rbd_store_pool,
-
-
+    #Nova
     nova_db_password        => $nova_db_password,
     nova_user_password      => $nova_user_password,
     rabbit_password         => $rabbit_password,
