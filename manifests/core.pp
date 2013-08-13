@@ -237,9 +237,9 @@ class control(
   # if n1k, set security group api to nova.The default
   # firewall_driver is NoopFirewallDriver in puppet-nova.
   # this should disable security groups.
-    security_group_api      => 'nova',
+    security_group_api      = 'nova',
   } else {
-    security_group_api      => 'quantum',
+    security_group_api      = 'quantum',
   }
 
   class { 'openstack::controller':
