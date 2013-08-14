@@ -101,7 +101,7 @@ UcXHbA==
   # Ensure that the pip packages are fetched appropriately when we're using an
   # install where there's no direct connection to the net from the openstack
   # nodes
-  if ! $::default_gateway {
+  if ! $::node_gateway {
     Package <| provider=='pip' |> {
       install_options => "--index-url=http://${build_node_name}/packages/simple/",
     }
@@ -578,7 +578,7 @@ node master-node inherits "cobbler-node" {
                              # marginally less efficient with other proxies
   }
 
-  if ! $::default_gateway {
+  if ! $::node_gateway {
     # Prefetch the pip packages and put them somewhere the openstack nodes can fetch them
 
     file {  "/var/www":
