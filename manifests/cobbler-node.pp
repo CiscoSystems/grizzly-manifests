@@ -44,6 +44,23 @@ $interfaces_file=regsubst(template("interfaces.erb"), '$', "\\n\\", "G")
 ####### Shared Variables from Site.pp #######
 $cobbler_node_fqdn 	        = "${::build_node_name}.${::domain_name}"
 
+####### Set up to load custom kernel #######
+if $::load_kernel_pkg {
+  $kernel_cmd = "in-target /usr/bin/apt-get install -y $::load_kernel_pkg ; \\
+export kernel_ver=`echo '$::load_kernel_pkg'|/bin/sed 's/linux-image-//'` ; \\
+export prev_starts_at=`grep -n Previous /target/boot/grub/grub.cfg | /target/usr/bin/cut -f1 -d:` ; \\
+export kern_starts_at=`grep -n \"Ubuntu, with Linux \$kernel_ver'\" /target/boot/grub/grub.cfg|/target/usr/bin/cut -f1 -d:` ; \\
+if [ \"\$prev_starts_at\" ] && [ \"\$prev_starts_at\" -lt \"\$kern_starts_at\" ] ; \\
+then \\
+in-target /bin/sed -i \"/GRUB_DEFAULT=/ s/[0-9]/\\\"Previous Linux versions>Ubuntu, with Linux \$kernel_ver\\\"/\" /etc/default/grub ; \\
+else \\
+in-target /bin/sed -i \"/GRUB_DEFAULT=/ s/[0-9]/\\\"Ubuntu, with Linux \$kernel_ver\\\"/\" /etc/default/grub ; \\
+fi ; \\
+in-target /usr/sbin/update-grub ; "
+} else {
+  $kernel_cmd = ''
+}
+
 ####### Preseed File Configuration #######
  cobbler::ubuntu::preseed { "cisco-preseed":
   admin_user 		=> $::admin_user,
@@ -64,8 +81,9 @@ ifconf="`tail +11 </etc/network/interfaces`" ; \
 echo -e "%s
 " > /target/etc/network/interfaces ; \
 sed -e "s/^[ ]*//" -i /target/etc/network/interfaces ; \
+%s \
 ', $cobbler_node_fqdn, $cobbler_node_fqdn, $bonding,
-   $ra,$ra,$ra,$ra, $interfaces_file),
+   $ra,$ra,$ra,$ra, $interfaces_file, $kernel_cmd),
   proxy 		=> "http://${cobbler_node_fqdn}:3142/",
   expert_disk 		=> $::expert_disk,
   diskpart 		=> [$::install_drive],
