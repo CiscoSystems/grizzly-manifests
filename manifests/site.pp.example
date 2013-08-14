@@ -261,15 +261,14 @@ node 'build-node' inherits master-node {
 # Standalone cinder storage nodes. If cinder is enabled above,
 # it is automatically installed on all compute nodes. The below definition
 # allows the addition of cinder volume only nodes.
-# cobbler_node { "cinder-storage1":
-# node_type => "cinder-storage",
-# mac => "11:22:33:44:55:66",
-# ip => "192.168.242.22",
-# power_address => "192.168.242.122",
-# power_user => "admin",
-# power_password => "password",
-# power_type => "ipmitool"
-# }
+#  cobbler_node { "cinder-storage1":
+#    mac => "11:22:33:44:55:66",
+#    ip => "192.168.242.22",
+#    power_address => "192.168.242.122",
+#    power_user => "admin",
+#    power_password => "password",
+#    power_type => "ipmitool"
+#  }
  
 
 ### Repeat as needed ###
@@ -386,8 +385,8 @@ node 'compute-server01' inherits os_base {
 #node 'cinder-volume01' inherits os_base {
 #  class { 'cinder_node': }
   # the volume class can be changed to different drivers (eg iscsi, rbd)
-  # if you are targeting multiple backends using different driver on different
-  # hosts, you will need to explicitly define your storage nodes
+  # you can only use one type per host. Be mindful of this f you use 
+  # different backends on different cinder-volume nodes.
 
   # if you are using iscsi as your storage type, uncomment the following class
   #   and use a facter readable address for the interface that iscsi should use
@@ -395,7 +394,28 @@ node 'compute-server01' inherits os_base {
   #class { 'cinder::volume::iscsi':
   #  iscsi_ip_address => $::ipaddress,
   #}
-#}
+
+  # if you are using rbd, uncommend the following ceph classes
+  #class { 'ceph::conf':
+  #  fsid            => $::ceph_monitor_fsid,
+  #  auth_type       => $::ceph_auth_type,
+  #  cluster_network => $::ceph_cluster_network,
+  #  public_network  => $::ceph_public_network,
+  #}
+  #class { 'ceph::osd':
+  #  public_address  => '2.5.1.5',
+  #  cluster_address => '2.5.1.5',
+  #}
+  # Specify the disk devices to use for OSD here.
+  # Add a new entry for each device on the node that ceph should consume.
+  # puppet agent will need to run four times for the device to be formatted,
+  #   and for the OSD to be added to the crushmap.
+  #ceph::osd::device { '/dev/sdb': }
+  #ceph::osd::device { '/dev/sdc': }
+  #ceph::osd::device { '/dev/sdd': }
+  #class { 'ceph::apt::ceph': release => $::ceph_release }
+
+}
 
 # Swift Proxy
 # Adjust the value of swift_local_net_ip to match the IP address
