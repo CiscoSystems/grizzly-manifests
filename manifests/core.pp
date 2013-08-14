@@ -538,24 +538,24 @@ class compute(
 }
 
 class network (
-  internal_ip,
-  tunnel_ip             = $internal_ip,
-  quantum_user_password = $::quantum_user_password,
-  enable_ovs_agent      = $::enable_ovs_agent,
-  enable_l3_agent       = $::enable_l3_agent,
-  enable_dhcp_agent     = $::enable_dhcp_agent,
-  quantum_auth_url      = "http://$::controller_node_internal:35357/v2.0",
-  keystone_host         = $::controller_node_internal,
-  quantum_host          = $::controller_node_internal,
-  ovs_local_ip          = $tunnel_ip,
-  bridge_mappings       = $::ovs_bridge_mappings,
-  bridge_uplinks        = $::ovs_bridge_uplinks,
-  rabbit_password       = $::rabbit_password,
-  rabbit_host           = $::controller_node_internal,
-  rabbit_user           = $::rabbit_user,
-  db_host               = $::controller_node_address,
-  verbose               = $::verbose,
-  enabled               = true
+  $internal_ip,
+  $tunnel_ip             = $internal_ip,
+  $quantum_user_password = $::quantum_user_password,
+  $enable_ovs_agent      = $::enable_ovs_agent,
+  $enable_l3_agent       = $::enable_l3_agent,
+  $enable_dhcp_agent     = $::enable_dhcp_agent,
+  $quantum_auth_url      = "http://$::controller_node_internal:35357/v2.0",
+  $keystone_host         = $::controller_node_internal,
+  $quantum_host          = $::controller_node_internal,
+  $ovs_local_ip          = $tunnel_ip,
+  $bridge_mappings       = $::ovs_bridge_mappings,
+  $bridge_uplinks        = $::ovs_bridge_uplinks,
+  $rabbit_password       = $::rabbit_password,
+  $rabbit_host           = $::controller_node_internal,
+  $rabbit_user           = $::rabbit_user,
+  $db_host               = $::controller_node_address,
+  $verbose               = $::verbose,
+  $enabled               = true
 ) {
 
   # Use $internal_address for $ovs_local_ip if the latter
