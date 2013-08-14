@@ -430,10 +430,16 @@ node build-server inherits build-node { }
 
 # Change control-server to the host name of your control node.  Note that the
 # hostname should be in all lowercase letters due to a limitation of Puppet
-# (refer to http://projects.puppetlabs.com/issues/1168).
+# (refer to http://projects.puppetlabs.com/issues/1168).  If you wish
+# to disable the L3, DHCP, or metadata agents on the control node,
+# uncomment the appropriate parameters in the node definition below.  By
+# default, all agents will run on the control node.
 node 'control-server' inherits os_base {
   class { 'control':
-    tunnel_ip   => '192.168.242.10',
+    tunnel_ip             => '192.168.242.10',
+    #enable_dhcp_agent     => false,
+    #enable_l3_agent       => false,
+    #enable_metadata_agent => false,
   }
 
   # If you want to run ceph mon0 on your controller node, uncomment the 
@@ -459,12 +465,15 @@ node 'control-server' inherits os_base {
 # Note that the hostname should be in all lowercase letters due to a
 # limitation of Puppet (refer to http://projects.puppetlabs.com/issues/1168).
 # If you want to run a dhcp agent on the compute node, uncomment the
-# 'enable_dhcp_agent => true' line below.
+# 'enable_dhcp_agent => true' line below.  If you want to run an L3
+# agent on the compute node, uncomment the 'enable_l3_agent => true" line
+# below.
 node 'compute-server01' inherits os_base {
   class { 'compute':
     internal_ip        => '192.168.242.21',
     tunnel_ip          => '192.168.242.21',
     #enable_dhcp_agent => true,
+    #enable_l3_agent   => true,
   }
   if $::cinder_ceph_enabled {
     class { 'coe::ceph::compute':
@@ -478,6 +487,21 @@ node 'compute-server01' inherits os_base {
 # additional OpenStack node in your cluster. Be sure to replace the
 # 'compute-server01' parameter with the correct host name for each
 # additional node.
+
+# Uncomment the node definiton below to create a standalone
+# network node.  Standalone network nodes provide Quantum services
+# such as L3 and/or DHCP agents, but do not run nova-compute and
+# therefore do not house instances.  They are often employed when
+# for scalability reasons when you want to be able to dedicate
+# a node's full resources to providing networking functions or
+# want to split networking functions across nodes.
+#node 'network01' inherits os_base {
+#  class { 'network':
+#    enable_dhcp_agent => true,
+#    enable_l3_agent   => true,
+#    internal_ip       => '2.6.1.5',
+#  }
+#}
 
 # Defining cinder storage nodes is only necessary if you want to run
 # cinder volume servers aside from those already on the compute nodes. To
