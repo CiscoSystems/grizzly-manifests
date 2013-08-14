@@ -666,11 +666,12 @@ node 'compute-server01' inherits os_base {
 # In the default deployment, the build node functions as the DNS and static
 # DHCP server for the OpenStack nodes. These settings can be used if
 # alternate configurations are needed.
-$node_dns       = "${cobbler_node_ip}"
-$ip             = "${cobbler_node_ip}"
-$dns_service    = 'dnsmasq'
-$dhcp_service   = 'dnsmasq'
-$time_zone      = 'UTC'
+$node_dns           = "${cobbler_node_ip}"
+$ip                 = "${cobbler_node_ip}"
+$dns_service        = 'dnsmasq'
+$dhcp_service       = 'dnsmasq'
+$time_zone          = 'UTC'
+$force_config_drive = false
 
 # Enable network interface bonding. This will only enable the bonding module
 # in the OS. It won't actually bond any interfaces. Edit the networking
