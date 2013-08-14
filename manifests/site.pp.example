@@ -403,8 +403,8 @@ node 'compute-server01' inherits os_base {
   #  public_network  => $::ceph_public_network,
   #}
   #class { 'ceph::osd':
-  #  public_address  => '2.5.1.5',
-  #  cluster_address => '2.5.1.5',
+  #  public_address  => '192.168.242.22',
+  #  cluster_address => '192.168.242.22',
   #}
   # Specify the disk devices to use for OSD here.
   # Add a new entry for each device on the node that ceph should consume.
