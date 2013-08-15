@@ -470,6 +470,7 @@ class compute(
   $ovs_local_ip                      = $tunnel_ip,
   $ovs_bridge_mappings               = $::ovs_bridge_mappings,
   $ovs_bridge_uplinks                = $::ovs_bridge_uplinks,
+  $cisco_vswitch_plugin              = $::cisco_vswitch_plugin,
   # Quantum L3 Agent
   $enable_l3_agent                   = false,
   $enable_dhcp_agent                 = false,
@@ -486,6 +487,15 @@ class compute(
   $verbose                           = $::verbose,
 )
 {
+
+  if $cisco_vswitch_plugin == 'n1k' {
+  # if n1k, set security group api to nova.The default
+  # firewall_driver is NoopFirewallDriver in puppet-nova.
+  # this should disable security groups.
+    $security_group_api_real     = 'nova'
+  } else {
+    $security_group_api_real      = 'quantum'
+  }
 
   class { 'openstack::compute':
     # keystone
@@ -523,6 +533,7 @@ class compute(
     ovs_local_ip            => $ovs_local_ip,
     bridge_mappings         => $ovs_bridge_mappings,
     bridge_uplinks          => $ovs_bridge_uplinks,
+    security_group_api      => $security_group_api_real,
     # Quantum L3 Agent
     enable_l3_agent         => $enable_l3_agent,
     enable_dhcp_agent       => $enable_dhcp_agent,
