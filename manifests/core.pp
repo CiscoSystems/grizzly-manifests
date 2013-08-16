@@ -218,6 +218,7 @@ class allinone (
   # cinder
   $cinder_user_password              = $::cinder_user_password,
   $cinder_db_password                = $::cinder_db_password,
+  $volume_group                      = $::hostname,
   # Quantum quotas
   $quantum_quota_network             = $::quantum_quota_network,
   $quantum_quota_subnet              = $::quantum_quota_subnet,
