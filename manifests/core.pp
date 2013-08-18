@@ -90,11 +90,19 @@ CkWUPQXo13dTVL6EohCr1Pr07glSpm1TzD43FbGiW1ESL9apzLnLMKHSzc3OdO1M
 ui5ouWe8Ig9ur+rOvOGMrsSa
 =HyLD
 -----END PGP PUBLIC KEY BLOCK-----',
-        proxy => $::proxy,
+        proxy       => $::proxy,
+      }
+
+      apt::source { "cisco_supplemental-openstack-mirror_grizzly":
+        location    => "$::location/cisco_supplemental",
+        release     => "grizzly-proposed",
+        repos       => "main",
+        key         => "E8CC67053ED3B199",
+        proxy       => $::proxy,
       }
 
       apt::pin { "cisco":
-        priority => '990',
+        priority   => '990',
         originator => 'Cisco'
       }
     } elsif($::package_repo == 'cloud_archive') {
@@ -110,7 +118,7 @@ ui5ouWe8Ig9ur+rOvOGMrsSa
   }
   elsif ($osfamily == 'redhat') {
     yumrepo { 'cisco-openstack-mirror':
-      descr     => "Cisco Openstack Repository",
+      descr    => "Cisco Openstack Repository",
       baseurl  => $::location,
       gpgcheck => "0", #TODO(prad): Add gpg key
       enabled  => "1";

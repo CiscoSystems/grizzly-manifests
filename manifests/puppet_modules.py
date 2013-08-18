@@ -101,8 +101,8 @@ def setup_apt_sources():
     return """
 # cisco-openstack-mirror_grizzly
 deb %(repo_url)s %(repo_name)s main
-deb-src %(repo_url)s %(repo_name)s main""" % {'repo_url': APT_REPO_URL,
-                                              'repo_name': REPO_NAME}
+deb-src %(repo_url)s %(repo_name)s main
+""" % {'repo_url': APT_REPO_URL, 'repo_name': REPO_NAME}
 
 
 def override_globals(options):
