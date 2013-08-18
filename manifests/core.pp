@@ -285,7 +285,7 @@ class control(
     nova_user_password      => $nova_user_password,
     rabbit_password         => $rabbit_password,
     rabbit_user             => $rabbit_user,
-    security_group_api      => $security_group_api,
+    security_group_api      => 'quantum',
     # TODO deprecated
     #export_resources        => false,
 
