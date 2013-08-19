@@ -581,8 +581,8 @@ node 'compute-server01' inherits os_base {
 # ceph_auth_type: you can specify cephx or none, but please don't actually 
 # use none.
 #
-# ceph_monitor_fsid: ceph needs a cluster fsid. you can generate this on the
-# CLI by running 'uuidgen -r'
+# ceph_monitor_fsid: ceph needs a cluster fsid.
+# If you change this your ceph installation will break.
 #
 # ceph_monitor_secret: mon hosts need a secret. This must be generated on
 # a host with ceph already installed.  Create one by running 
@@ -599,6 +599,8 @@ node 'compute-server01' inherits os_base {
 # ceph_public_network: the network mask of your public network.
 #
 # ceph_release: specify the release codename to install the respective release.
+# dumpling is the latest, but you cannot use this is you want ceph-backed glance.
+# This is due to a bug in ceph that will be resolved in the next dumpling point release.
 #
 # cinder_rbd_user: the user configured in ceph to allow cinder rwx access
 # to the volumes pool.  This currently requires the name 'volumes'. Do not
@@ -609,9 +611,7 @@ node 'compute-server01' inherits os_base {
 # not change it.
 #
 # cinder_rbd_secret_uuid: the uuid secret to allow cinder to communicate
-# with ceph.  This MUST be left as the string 'REPLACEME'. The actual UUID 
-# is unique and is generated only after ceph is installed. It is injected
-# during the puppet run.
+# with ceph. If you change this your ceph installation will break.
 
 #$ceph_auth_type         = 'cephx'
 #$ceph_monitor_fsid      = 'e80afa94-a64c-486c-9e34-d55e85f26406'
@@ -623,7 +623,7 @@ node 'compute-server01' inherits os_base {
 #$ceph_release           = 'cuttlefish'
 #$cinder_rbd_user        = 'admin'
 #$cinder_rbd_pool        = 'volumes'
-#$cinder_rbd_secret_uuid = 'REPLACEME'
+#$cinder_rbd_secret_uuid = 'e80afa94-a64c-486c-9e34-d55e85f26406'
 
 # This global path needs to be uncommented for puppet-ceph to work.
 # Uncomment and define the proxy server if your nodes don't have direct
