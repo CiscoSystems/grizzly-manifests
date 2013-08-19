@@ -405,8 +405,6 @@ class cinder_node() {
 
 ### begin ceph ###
 class ceph_common (
-  $fsid,
-  $auth_type = $::ceph_auth_type,
 ) {
   class { 'ceph::conf':
     fsid            => $::ceph_monitor_fsid,
