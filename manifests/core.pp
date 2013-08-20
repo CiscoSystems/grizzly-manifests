@@ -190,7 +190,7 @@ node os_base inherits base {
 }
 
 class control(
-  $tunnel_ip,
+  $tunnel_ip                         = $::controller_node_internal,
   $public_address                    = $::controller_node_public,
   # network
   $internal_address                  = $::controller_node_internal,
@@ -467,7 +467,7 @@ class ceph_mon (
 
 class compute(
   $internal_ip,
-  $tunnel_ip,
+  $tunnel_ip                         = $internal_ip,
   # keystone
   $db_host                           = $::controller_node_internal,
   $keystone_host                     = $::controller_node_internal,
