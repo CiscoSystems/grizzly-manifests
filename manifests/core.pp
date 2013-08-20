@@ -24,10 +24,11 @@ node base {
 
     if($::package_repo == 'cisco_repo') {
       apt::source { "cisco-openstack-mirror_grizzly":
-        location => $::location,
-        release => "grizzly-proposed",
-        repos => "main",
-        key => "6B7A62576A4F98AD",
+        location    => "$::location/cisco",
+        release     => "grizzly-proposed",
+        repos       => "main",
+        key         => "E8CC67053ED3B199",
+        proxy       => $::proxy,
         key_content => '-----BEGIN PGP PUBLIC KEY BLOCK-----
 Version: GnuPG v1.4.11 (GNU/Linux)
 
@@ -90,7 +91,6 @@ CkWUPQXo13dTVL6EohCr1Pr07glSpm1TzD43FbGiW1ESL9apzLnLMKHSzc3OdO1M
 ui5ouWe8Ig9ur+rOvOGMrsSa
 =HyLD
 -----END PGP PUBLIC KEY BLOCK-----',
-        proxy       => $::proxy,
       }
 
       #apt::source { "cisco_supplemental-openstack-mirror_grizzly":
@@ -132,7 +132,7 @@ ui5ouWe8Ig9ur+rOvOGMrsSa
   # Ensure that the pip packages are fetched appropriately when we're using an
   # install where there's no direct connection to the net from the openstack
   # nodes
-  if ! $::default_gateway {
+  if ! $::node_gateway {
     Package <| provider=='pip' |> {
       install_options => "--index-url=http://${build_node_name}/packages/simple/",
     }
@@ -188,7 +188,7 @@ node os_base inherits base {
 }
 
 class control(
-  $tunnel_ip,
+  $tunnel_ip                         = $::controller_node_internal,
   $public_address                    = $::controller_node_public,
   # network
   $internal_address                  = $::controller_node_internal,
@@ -228,9 +228,9 @@ class control(
   $quantum_db_name                   = 'quantum',
   $quantum_db_user                   = 'quantum',
   # enable quantum services
-  $enable_dhcp_agent                 = $true,
-  $enable_l3_agent                   = $true,
-  $enable_metadata_agent             = $true,
+  $enable_dhcp_agent                 = true,
+  $enable_l3_agent                   = true,
+  $enable_metadata_agent             = true,
   # Metadata Configuration
   $metadata_shared_secret            = 'secret',
   # ovs config
@@ -263,6 +263,16 @@ class control(
   } else {
      $core_plugin_real = 'quantum.plugins.openvswitch.ovs_quantum_plugin.OVSQuantumPluginV2'
   }
+  
+  if $cisco_vswitch_plugin == 'n1k' {
+  # if n1k, set security group api to nova.The default
+  # firewall_driver is NoopFirewallDriver in puppet-nova.
+  # this should disable security groups.
+    $security_group_api_real     = 'nova'
+  } else {
+    $security_group_api_real      = 'quantum'
+  }
+
   class { 'openstack::controller':
     public_address          => $controller_node_public,
     # network
@@ -288,6 +298,7 @@ class control(
     nova_user_password      => $nova_user_password,
     rabbit_password         => $rabbit_password,
     rabbit_user             => $rabbit_user,
+    security_group_api      => $security_group_api_real,
     # TODO deprecated
     #export_resources        => false,
 
@@ -454,7 +465,7 @@ class ceph_mon (
 
 class compute(
   $internal_ip,
-  $tunnel_ip,
+  $tunnel_ip                         = $internal_ip,
   # keystone
   $db_host                           = $::controller_node_internal,
   $keystone_host                     = $::controller_node_internal,
@@ -472,6 +483,7 @@ class compute(
   $glance_api_servers                = "${::controller_node_internal}:9292",
   $vncproxy_host                     = $::controller_node_public,
   $vnc_enabled                       = true,
+  $force_config_drive                = $::force_config_drive,
   # cinder parameters
   $cinder_db_password                = $::cinder_db_password,
   $manage_volumes                    = true,
@@ -489,6 +501,7 @@ class compute(
   $ovs_local_ip                      = $tunnel_ip,
   $ovs_bridge_mappings               = $::ovs_bridge_mappings,
   $ovs_bridge_uplinks                = $::ovs_bridge_uplinks,
+  $cisco_vswitch_plugin              = $::cisco_vswitch_plugin,
   # Quantum L3 Agent
   $enable_l3_agent                   = false,
   $enable_dhcp_agent                 = false,
@@ -505,6 +518,15 @@ class compute(
   $verbose                           = $::verbose,
 )
 {
+
+  if $cisco_vswitch_plugin == 'n1k' {
+  # if n1k, set security group api to nova.The default
+  # firewall_driver is NoopFirewallDriver in puppet-nova.
+  # this should disable security groups.
+    $security_group_api_real     = 'nova'
+  } else {
+    $security_group_api_real      = 'quantum'
+  }
 
   class { 'openstack::compute':
     # keystone
@@ -524,6 +546,7 @@ class compute(
     glance_api_servers      => $glance_api_servers,
     vncproxy_host           => $vncproxy_host,
     vnc_enabled             => $vnc_enabled,
+    force_config_drive      => $force_config_drive,
     # cinder parameters
     cinder_db_password      => $cinder_db_password,
     manage_volumes          => $manage_volumes,
@@ -541,6 +564,7 @@ class compute(
     ovs_local_ip            => $ovs_local_ip,
     bridge_mappings         => $ovs_bridge_mappings,
     bridge_uplinks          => $ovs_bridge_uplinks,
+    security_group_api      => $security_group_api_real,
     # Quantum L3 Agent
     enable_l3_agent         => $enable_l3_agent,
     enable_dhcp_agent       => $enable_dhcp_agent,
@@ -568,6 +592,54 @@ class compute(
 
 }
 
+class network (
+  $internal_ip,
+  $tunnel_ip             = $internal_ip,
+  $quantum_user_password = $::quantum_user_password,
+  $enable_ovs_agent      = $::enable_ovs_agent,
+  $enable_l3_agent       = $::enable_l3_agent,
+  $enable_dhcp_agent     = $::enable_dhcp_agent,
+  $quantum_auth_url      = "http://$::controller_node_internal:35357/v2.0",
+  $keystone_host         = $::controller_node_internal,
+  $quantum_host          = $::controller_node_internal,
+  $ovs_local_ip          = $tunnel_ip,
+  $bridge_mappings       = $::ovs_bridge_mappings,
+  $bridge_uplinks        = $::ovs_bridge_uplinks,
+  $rabbit_password       = $::rabbit_password,
+  $rabbit_host           = $::controller_node_internal,
+  $rabbit_user           = $::rabbit_user,
+  $db_host               = $::controller_node_address,
+  $verbose               = $::verbose,
+  $enabled               = true
+) {
+
+  # Use $internal_address for $ovs_local_ip if the latter
+  # isn't actually specified.
+  if $ovs_local_ip {
+    $ovs_local_ip_real = $ovs_local_ip
+  } else {
+    $ovs_local_ip_real = $internal_address
+  }
+
+  class { 'openstack::quantum':
+    user_password     => $quantum_user_password,
+    enable_ovs_agent  => $enable_ovs_agent,
+    enable_l3_agent   => $enable_l3_agent,
+    enable_dhcp_agent => $enable_dhcp_agent,
+    auth_url          => $quantum_auth_url,
+    keystone_host     => $keystone_host,
+    ovs_local_ip      => $ovs_local_ip_real,
+    bridge_mappings   => $ovs_bridge_mappings,
+    bridge_uplinks    => $ovs_bridge_uplinks,
+    rabbit_password   => $rabbit_password,
+    rabbit_host       => $rabbit_host,
+    rabbit_user       => $rabbit_user,
+    db_host           => $db_host,
+    verbose           => $verbose,
+    enabled           => $enabled,
+    enable_server     => false,
+  }
+}
 
 ########### Definition of the Build Node #######################
 #
@@ -609,7 +681,7 @@ node master-node inherits "cobbler-node" {
                              # marginally less efficient with other proxies
   }
 
-  if ! $::default_gateway {
+  if ! $::node_gateway {
     # Prefetch the pip packages and put them somewhere the openstack nodes can fetch them
 
     file {  "/var/www":

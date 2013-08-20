@@ -23,6 +23,19 @@ $package_repo = 'cisco_repo'
 #$location		= "http://openstack-repo.cisco.com/openstack/cisco"
 $location               = "http://apt.ctocllab.cisco.com/repos/n1k-test"
 
+# Cisco also maintains a supplemental repository of packages that aren't
+# core to OpenStack itself and are not provided by operating system vendors.
+# The supplemental repository is provided as a convenience for those wishing
+# to reduce the count of repositories needed to bring up a cloud with 
+# particular features (such as Ceph or highly available databases).
+# If you want to use the supplemental, uncomment one of the two lines
+# below.  If you have a local cache or mirror of the supplemental repo, change
+# the $supplemental_repo variable to the URL of your mirror.  If you don't 
+# need the supplemental repo and prefer not to configure it at all, simply
+# comment out the line below.
+$supplemental_repo = 'ftp://ftpeng.cisco.com/openstack/cisco_supplemental'
+#$supplemental_repo = 'http://openstack-repo.cisco.com/openstack/cisco_supplemental'
+
 ########### Build Node (Cobbler, Puppet Master, NTP) ######
 # Change the following to the host name you have given your build node.
 # This name should be in all lower case letters due to a Puppet limitation
@@ -430,9 +443,7 @@ node 'build-node' inherits master-node {
 # interface for compute nodes.
 # In this example, eth0 is both the public and private interface for the
 # controller.
-# tunnel_ip allows you to create a network specifically for GRE tunneled
-# traffic between compute and network nodes. Generally, you will want to
-# use "ip" from the OpenStack node definitions above.
+# Generally, you will want to use "ip" from the OpenStack node definitions above.
 # This sets the IP for the private interface of compute and network nodes.
 
 # Change build_server to the host name of your build node.
@@ -442,10 +453,15 @@ node build-server inherits build-node { }
 
 # Change control-server to the host name of your control node.  Note that the
 # hostname should be in all lowercase letters due to a limitation of Puppet
-# (refer to http://projects.puppetlabs.com/issues/1168).
+# (refer to http://projects.puppetlabs.com/issues/1168).  If you wish
+# to disable the L3, DHCP, or metadata agents on the control node,
+# uncomment the appropriate parameters in the node definition below.  By
+# default, all agents will run on the control node.
 node 'control-server' inherits os_base {
   class { 'control':
-    tunnel_ip   => '192.168.242.10',
+    #enable_dhcp_agent     => false,
+    #enable_l3_agent       => false,
+    #enable_metadata_agent => false,
   }
 
   quantum_plugin_cisco {
@@ -478,7 +494,6 @@ node 'control-server' inherits os_base {
 
   # each MON needs a unique id, you can start at 0 and increment as needed.
   #  class {'ceph_mon': id => 0 }
-  #  class { 'ceph::apt::ceph': release => $::ceph_release }
 
 }
 
@@ -486,12 +501,14 @@ node 'control-server' inherits os_base {
 # Note that the hostname should be in all lowercase letters due to a
 # limitation of Puppet (refer to http://projects.puppetlabs.com/issues/1168).
 # If you want to run a dhcp agent on the compute node, uncomment the
-# 'enable_dhcp_agent => true' line below.
+# 'enable_dhcp_agent => true' line below.  If you want to run an L3
+# agent on the compute node, uncomment the 'enable_l3_agent => true" line
+# below.
 node 'compute-server01' inherits os_base {
   class { 'compute':
     internal_ip        => '192.168.242.21',
-    tunnel_ip          => '192.168.242.21',
     #enable_dhcp_agent => true,
+    #enable_l3_agent   => true,
   }
 
   class {"n1k-vem":
@@ -574,6 +591,21 @@ node kvm-host-2 {
 # additional OpenStack node in your cluster. Be sure to replace the
 # 'compute-server01' parameter with the correct host name for each
 # additional node.
+
+# Uncomment the node definiton below to create a standalone
+# network node.  Standalone network nodes provide Quantum services
+# such as L3 and/or DHCP agents, but do not run nova-compute and
+# therefore do not house instances.  They are often employed when
+# for scalability reasons when you want to be able to dedicate
+# a node's full resources to providing networking functions or
+# want to split networking functions across nodes.
+#node 'network01' inherits os_base {
+#  class { 'network':
+#    enable_dhcp_agent => true,
+#    enable_l3_agent   => true,
+#    internal_ip       => '2.6.1.5',
+#  }
+#}
 
 # Defining cinder storage nodes is only necessary if you want to run
 # cinder volume servers aside from those already on the compute nodes. To
@@ -719,13 +751,11 @@ node kvm-host-2 {
 
   # each MON needs a unique id, you can start at 0 and increment as needed.
 #  class {'ceph_mon': id => 0 }
-#  class { 'ceph::apt::ceph': release => $::ceph_release }
 #}
 
 # Model each additional MON after the following. Remember to increment the id.
 # node 'ceph-mon02' inherits os_base {
 #  class { 'ceph_mon': id => 1 }
-#  class { 'ceph::apt::ceph': release => $::ceph_release }
 #}
 
 # This is the OSD node definition example. You will need to specify the
@@ -747,7 +777,6 @@ node kvm-host-2 {
   # puppet agent will need to run four times for the device to be formatted,
   #   and for the OSD to be added to the crushmap.
 #  ceph::osd::device { '/dev/sdd': }
-#  class { 'ceph::apt::ceph': release => $::ceph_release }
 #}
 
 
@@ -762,11 +791,12 @@ node kvm-host-2 {
 # In the default deployment, the build node functions as the DNS and static
 # DHCP server for the OpenStack nodes. These settings can be used if
 # alternate configurations are needed.
-$node_dns       = "${cobbler_node_ip}"
-$ip             = "${cobbler_node_ip}"
-$dns_service    = 'dnsmasq'
-$dhcp_service   = 'dnsmasq'
-$time_zone      = 'UTC'
+$node_dns           = "${cobbler_node_ip}"
+$ip                 = "${cobbler_node_ip}"
+$dns_service        = 'dnsmasq'
+$dhcp_service       = 'dnsmasq'
+$time_zone          = 'UTC'
+$force_config_drive = false
 
 # Enable network interface bonding. This will only enable the bonding module
 # in the OS. It won't actually bond any interfaces. Edit the networking
@@ -828,6 +858,13 @@ $enable_vol_space      = true
 # libvirt_vif_driver line above and uncomment the libvirt_vif_driver below
 # instead
 $libvirt_vif_driver = 'nova.virt.libvirt.vif.LibvirtGenericVIFDriver'
+
+# If you want to ensure that a specific Ubuntu kernel version is installed
+# and that it is the default GRUB boot selection when nodes boot for the
+# first time, uncomment the line below and enter the name of the
+# linux-image package you want to load.  Note that this feature has only
+# been tested with Ubuntu's generic kernel images.
+#$load_kernel_pkg = 'linux-image-3.2.0-51-generic'
 
 ### Puppet Parameters ###
 # These settings load other puppet components. They should not be changed.
