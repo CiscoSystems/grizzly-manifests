@@ -93,13 +93,13 @@ ui5ouWe8Ig9ur+rOvOGMrsSa
         proxy       => $::proxy,
       }
 
-      apt::source { "cisco_supplemental-openstack-mirror_grizzly":
-        location    => "$::location/cisco_supplemental",
-        release     => "grizzly-proposed",
-        repos       => "main",
-        key         => "E8CC67053ED3B199",
-        proxy       => $::proxy,
-      }
+      #apt::source { "cisco_supplemental-openstack-mirror_grizzly":
+      #  location    => "$::location/cisco_supplemental",
+      #  release     => "grizzly-proposed",
+      #  repos       => "main",
+      #  key         => "E8CC67053ED3B199",
+      #  proxy       => $::proxy,
+      #}
 
       apt::pin { "cisco":
         priority   => '990',
