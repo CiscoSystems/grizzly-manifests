@@ -22,6 +22,19 @@ $location = 'ftp://ftpeng.cisco.com/openstack'
 # Alternate, uncomment this one, and comment out the one above.
 #$location = 'http://openstack-repo.cisco.com/openstack'
 
+# Cisco also maintains a supplemental repository of packages that aren't
+# core to OpenStack itself and are not provided by operating system vendors.
+# The supplemental repository is provided as a convenience for those wishing
+# to reduce the count of repositories needed to bring up a cloud with 
+# particular features (such as Ceph or highly available databases).
+# If you want to use the supplemental, uncomment one of the two lines
+# below.  If you have a local cache or mirror of the supplemental repo, change
+# the $supplemental_repo variable to the URL of your mirror.  If you don't 
+# need the supplemental repo and prefer not to configure it at all, simply
+# comment out the line below.
+$supplemental_repo = 'ftp://ftpeng.cisco.com/openstack/cisco_supplemental'
+#$supplemental_repo = 'http://openstack-repo.cisco.com/openstack/cisco_supplemental'
+
 ########### Build Node (Cobbler, Puppet Master, NTP) ######
 # Change the following to the host name you have given your build node.
 # This name should be in all lower case letters due to a Puppet limitation
