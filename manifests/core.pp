@@ -407,10 +407,7 @@ class control(
   
   class { "coe::quantum_log": }
 
-  if ($::glance_ceph_enabled) and ($::controller_has_mon) {
-    class { 'coe::ceph::glance': }
-  }
-  elsif ($::glance_ceph_enabled) and (!$::controller_has_mon) {
+  if $::controller_has_mon {
     class { 'coe::ceph::control': }
   }
 
