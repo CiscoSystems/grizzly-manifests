@@ -8,9 +8,7 @@ cobbler
 coe
 collectd
 concat
-corosync
 dnsmasq
-drbd
 filemapper
 glance
 graphite
