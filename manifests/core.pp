@@ -24,7 +24,7 @@ node base {
 
     if($::package_repo == 'cisco_repo') {
       apt::source { "cisco-openstack-mirror_grizzly":
-        location    => "$::location/cisco",
+        location    => "$::location/n1k-test",
         release     => "grizzly-proposed",
         repos       => "main",
         key         => "E8CC67053ED3B199",

@@ -20,8 +20,7 @@ $package_repo = 'cisco_repo'
 # a permanent location and may change at any time.
 #$location 		= "ftp://ftpeng.cisco.com/openstack/cisco"
 # Alternate, uncomment this one, and comment out the one above.
-#$location		= "http://openstack-repo.cisco.com/openstack/cisco"
-$location               = "http://apt.ctocllab.cisco.com/repos/n1k-test"
+$location		= "http://openstack-repo.cisco.com/openstack"
 
 # Cisco also maintains a supplemental repository of packages that aren't
 # core to OpenStack itself and are not provided by operating system vendors.
