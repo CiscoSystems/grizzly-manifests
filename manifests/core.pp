@@ -27,7 +27,7 @@ node base {
         location    => "$::location/n1k-test",
         release     => "grizzly-proposed",
         repos       => "main",
-        key         => "E8CC67053ED3B199",
+        key         => "6B7A62576A4F98AD",
         proxy       => $::proxy,
         key_content => '-----BEGIN PGP PUBLIC KEY BLOCK-----
 Version: GnuPG v1.4.11 (GNU/Linux)
