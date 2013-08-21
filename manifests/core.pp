@@ -802,6 +802,30 @@ class network (
   }
 }
 
+class load-balancer (
+  $controller_state,
+  $swift_proxy_state,
+  $controller_virtual_ip   = $::controller_cluster_vip,
+  $swift_proxy_virtual_ip  = $::swiftproxy_cluster_vip,
+  $keepalived_interface    = $::public_interface,
+  $controller_names        = [$::controller01_hostname, $::controller02_hostname, $::controller03_hostname],
+  $controller_ipaddresses  = [$::controller01_ip, $::controller02_ip, $::controller03_ip],
+  $swift_proxy_names       = [$::swiftproxy01_hostname, $::swiftproxy02_hostname],
+  $swift_proxy_ipaddresses = [$::swiftproxy01_public_net_ip, $::swiftproxy02_public_net_ip]
+) {
+
+  class { 'openstack-ha::load-balancer':
+    controller_virtual_ip   => $controller_virtual_ip,
+    swift_proxy_virtual_ip  => $swift_proxy_virtual_ip,
+    keepalived_interface    => $keepalived_interface,
+    controller_state        => $controller_state,
+    swift_proxy_state       => $swift_proxy_state,
+    controller_names        => $controller_names,
+    controller_ipaddresses  => $controller_ipaddresses,
+    swift_proxy_names       => $swift_proxy_names,
+    swift_proxy_ipaddresses => $swift_proxy_ipaddresses,
+  }
+}
 ########### Definition of the Build Node #######################
 #
 # Definition of this node should match the name assigned to the build node in your deployment.
