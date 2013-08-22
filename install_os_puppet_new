@@ -92,6 +92,13 @@ do
   esac
 done
 
+# define the public key to access the repo
+echo -e "\n\ndefine the public key to access the repo...\n\n"
+if ! run_cmd apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-keys '6B7A62576A4F98AD'; then
+  echo "cant define the public key"
+  exit 1
+fi
+
 # Make sure the apt repository list is up to date
 echo -e "\n\nUpdate apt repository...\n\n"
 if ! run_cmd apt-get $APT_CONFIG update; then
@@ -140,13 +147,6 @@ fi
 echo -e "\n\nUpdate packages...\n\n"
 if ! run_cmd apt-get $APT_CONFIG dist-upgrade -y; then
   echo "Can't update packages"
-  exit 1
-fi
-
-# define the public key to access the repo
-echo -e "\n\ndefine the public key to access the repo...\n\n"
-if ! run_cmd apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-keys '6B7A62576A4F98AD'; then
-  echo "cant define the public key"
   exit 1
 fi
 
