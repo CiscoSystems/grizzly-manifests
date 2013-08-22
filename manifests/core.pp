@@ -880,8 +880,7 @@ node master-node inherits "cobbler-node" {
     }
     exec { 'pip-cache':
       # All the packages that all nodes - build, compute and control - require from pip
-      command => "${proxy_pfx}/usr/local/bin/pip2pi /var/www/packages collectd xenapi django-tagging 
-                  graphite-web carbon whisper anyjson amqp==0.9.4 kombu==2.4.7",
+      command => "${proxy_pfx}/usr/local/bin/pip2pi /var/www/packages collectd xenapi django-tagging graphite-web carbon whisper anyjson==0.3.3 amqp==0.9.4 kombu==2.4.7",
       creates => '/var/www/packages/simple', # It *does*, but you'll want to force a refresh if you change the line above
       require => Exec['pip2pi'],
     }
