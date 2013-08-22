@@ -284,6 +284,12 @@ $ctrlmac       = "00:02:3d:72:40:00"
 $hostmgmtint   = "eth2"
 $uplinkint     = "eth3"
 
+
+#GW related shared variables
+
+$gwimage         = "/home/n1kv/tonic_407_GW.iso"
+
+
 #### end shared variables #################
 
 # Storage Configuration
@@ -478,6 +484,43 @@ node 'control-server' inherits os_base {
    'CISCO_N1K/POLL_DURATION' : value => '10';
    'DATABASE/sql_connection' : value => 'mysql://quantum:<quantum-db-pass>@127.0.0.1/quantum?charset=utf8';
  }
+#add vxlangw definitions
+ vxlangw { 'vxlangw1':
+         vsmip => $vsmip,
+         domainid => $domainid,
+         gw_name => 'vxlangw1',
+         gw_role => 'primary',
+         gw_isoimage => $::gwimage,
+         gw_domainid => $::domainid,
+         gw_adminpasswd => 'N1k12345',
+         gw_primgmtip => '72.1.51.105',
+         gw_secmgmtip => '72.1.51.106',
+         gw_mgmtnetmask => '255.255.255.0',
+         gw_mgmtgateway => '72.1.51.254',
+         vsmprimac => $::ctrlmac,
+         vsmstdbymac => '00:50:56:a3:8a:e9',
+         uplinkppname => 'sys-uplink',
+         vsmencapppname => 'vxlanencap',
+  }
+
+  vxlangw { 'vxlangw2':
+         vsmip => $vsmip,
+         domainid => $domainid,
+         gw_name => 'vxlangw2',
+         gw_role => 'secondary',
+         gw_isoimage => $::gwimage,
+         gw_domainid => '132',
+         gw_adminpasswd => 'N1k12345',
+         gw_primgmtip => '72.1.51.105',
+         gw_secmgmtip => '72.1.51.106',
+         gw_mgmtnetmask => '255.255.255.0',
+         gw_mgmtgateway => '72.1.51.254',
+         vsmprimac => '00:50:77:a3:8a:e9',
+         vsmstdbymac => '00:50:56:a3:8a:e9',
+         uplinkppname => 'sys-uplink',
+         vsmencapppname => 'vxlanencap',
+  }
+
   # If you want to run ceph mon0 on your controller node, uncomment the 
   #   following block. Be sure to read all additional ceph-related 
   #   instruction in this file.
