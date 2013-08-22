@@ -23,6 +23,7 @@ memcached
 mysql
 network
 naginator
+network
 nova
 ntp
 openstack
