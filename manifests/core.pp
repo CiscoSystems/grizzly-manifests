@@ -101,6 +101,10 @@ UcXHbA==
 =v6jg
 -----END PGP PUBLIC KEY BLOCK-----',
         }
+        apt::pin { "cisco_supplemental":
+          priority   => '990',
+          originator => 'Cisco_Supplemental'
+        }
       }
 
       apt::pin { "cisco":
