@@ -282,7 +282,7 @@ $vsmip         = "62.1.151.102"
 $domainid      = "111"
 $ctrlmac       = "00:02:3d:72:40:00"
 $hostmgmtint   = "eth2"
-$uplinkint     = "eth3"
+$uplinkint     = "eth3:sys-uplink"
 
 #### end shared variables #################
 
