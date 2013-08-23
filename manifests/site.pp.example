@@ -529,13 +529,6 @@ node 'compute-server01' inherits os_base {
   #  public_address  => '192.168.242.22',
   #  cluster_address => '192.168.242.22',
   #}
-  # Specify the disk devices to use for OSD here.
-  # Add a new entry for each device on the node that ceph should consume.
-  # puppet agent will need to run four times for the device to be formatted,
-  #   and for the OSD to be added to the crushmap.
-  #ceph::osd::device { '/dev/sdb': }
-  #ceph::osd::device { '/dev/sdc': }
-  #ceph::osd::device { '/dev/sdd': }
 #}
 
 # Swift Proxy
