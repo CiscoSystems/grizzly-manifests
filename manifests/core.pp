@@ -193,6 +193,197 @@ node os_base inherits base {
 
 }
 
+class allinone (
+  $tunnel_ip                         = $::ipaddress,
+  $public_address                    = $::controller_node_public,
+  $public_interface                  = $::public_interface,
+  # network
+  $internal_address                  = $::controller_node_internal,
+  # by default it does not enable multi-host mode
+  $verbose                           = $::verbose,
+  $mysql_root_password               = $::mysql_root_password,
+  $vncproxy_host                     = $::controller_node_public,
+  $admin_email                       = $::admin_email,
+  $admin_password                    = $::admin_password,
+  $keystone_db_password              = $::keystone_db_password,
+  $keystone_admin_token              = $::keystone_admin_token,
+  $glance_db_password                = $::glance_db_password,
+  $glance_user_password              = $::glance_user_password,
+
+  # TODO this needs to be added
+  $glance_backend                    = $::glance_backend,
+  $rbd_store_user                    = $::glance_ceph_user,
+  $rbd_store_pool                    = $::glance_ceph_pool,
+
+  $nova_db_password                  = $::nova_db_password,
+  $nova_user_password                = $::nova_user_password,
+  $rabbit_password                   = $::rabbit_password,
+  $rabbit_user                       = $::rabbit_user,
+  # TODO deprecated
+  #export_resources                  = false,
+
+  ######### quantum variables #############
+  $core_plugin                       = $::quantum_core_plugin,
+  $cisco_vswitch_plugin              = $::cisco_vswitch_plugin,
+  $cisco_nexus_plugin                = $::cisco_nexus_plugin,
+  $nexus_credentials                 = $::nexus_credentials,
+  # need to set from a variable
+  # database
+  $db_host                           = $::controller_node_address,
+  $quantum_db_password               = $quantum_db_password,
+  $quantum_db_name                   = 'quantum',
+  $quantum_db_user                   = 'quantum',
+  # enable quantum services
+  $enable_dhcp_agent                 = $true,
+  $enable_l3_agent                   = $true,
+  $enable_metadata_agent             = $true,
+  # Metadata Configuration
+  $metadata_shared_secret            = 'secret',
+  # ovs config
+  $ovs_local_ip                      = $::ipaddress,
+  $bridge_interface                  = $::external_interface,
+  #$bridge_interface                  = $::public_interface,
+  $enable_ovs_agent                  = true,
+  $ovs_vlan_ranges                   = $::ovs_vlan_ranges,
+  $ovs_bridge_mappings               = $::ovs_bridge_mappings,
+  $ovs_bridge_uplinks                = $::ovs_bridge_uplinks,
+  $tenant_network_type               = $::tenant_network_type,
+  # Keystone
+  $quantum_user_password             = $::quantum_user_password,
+  # horizon
+  $secret_key                        = 'super_secret',
+  # cinder
+  $cinder_user_password              = $::cinder_user_password,
+  $cinder_db_password                = $::cinder_db_password,
+  $volume_group                      = $::hostname,
+  # Quantum quotas
+  $quantum_quota_network             = $::quantum_quota_network,
+  $quantum_quota_subnet              = $::quantum_quota_subnet,
+  $quantum_quota_port                = $::quantum_quota_port,
+  $quantum_quota_router              = $::quantum_quota_router,
+  $quantum_quota_floatingip          = $::quantum_quota_floatingip,
+  $quantum_quota_security_group      = $::quantum_quota_security_group,
+  $quantum_quota_security_group_rule = $::quantum_quota_security_group_rule,
+) {
+
+  if $core_plugin == 'cisco' {
+     $core_plugin_real = 'quantum.plugins.cisco.network_plugin.PluginV2'
+  } else {
+     $core_plugin_real = 'quantum.plugins.openvswitch.ovs_quantum_plugin.OVSQuantumPluginV2'
+  }
+
+  class { 'openstack::all':
+    public_address           => $public_address,
+    public_interface         => $public_interface,
+    internal_address         => $internal_address,
+    bridge_interface         => $bridge_interface,
+    mysql_root_password      => $mysql_root_password,
+    db_host                  => $db_host,
+    admin_email              => $admin_email,
+    admin_password           => $admin_password,
+    rabbit_password          => $rabbit_password,
+    keystone_db_password     => $keystone_db_password,
+    keystone_admin_token     => $keystone_admin_token,
+    glance_db_password       => $glance_db_password,
+    glance_user_password     => $glance_user_password,
+    cinder_user_password     => $cinder_user_password,
+    cinder_db_password       => $cinder_db_password,
+    quantum_db_password      => $quantum_db_password,
+    quantum_user_password    => $quantum_user_password,
+    enable_dhcp_agent        => $enable_dhcp_agent,
+    enable_l3_agent          => $enable_l3_agent,
+    enable_metadata_agent    => $enable_metadata_agent,
+    enable_ovs_agent         => $enable_ovs_agent,
+    metadata_shared_secret   => $metadata_shared_secret,
+    ovs_local_ip             => $tunnel_ip,
+    network_vlan_ranges      => $ovs_vlan_ranges,
+    bridge_mappings          => $ovs_bridge_mappings,
+    bridge_uplinks           => $ovs_bridge_uplinks,
+    tenant_network_type      => $tenant_network_type,
+    nova_db_password         => $nova_db_password,
+    nova_user_password       => $nova_user_password,
+    secret_key               => $secret_key,
+    vncproxy_host            => $vncproxy_host,
+    libvirt_type             => $libvirt_type,
+  }
+
+  if ($::swift_proxy_address) {
+    class { 'swift::keystone::auth':
+      auth_name        => $swift_user,
+      password         => $swift_password,
+      public_address   => $::swift_proxy_address,
+      admin_address    => $::swift_proxy_address,
+      internal_address => $::swift_proxy_address,
+    }
+  }
+
+  class { "quantum::quota":
+    quota_network             => $quantum_quota_network,
+    quota_subnet              => $quantum_quota_subnet,
+    quota_port                => $quantum_quota_port,
+    quota_router              => $quantum_quota_router,
+    quota_floatingip          => $quantum_quota_floatingip,
+    quota_security_group      => $quantum_quota_security_group,
+    quota_security_group_rule => $quantum_quota_security_group_rule,
+  }
+
+  if $cisco_vswitch_plugin == 'n1k' {
+    $cisco_vswitch_plugin_real = 'quantum.plugins.cisco.n1kv.n1kv_quantum_plugin.N1kvQuantumPluginV2'
+  } else {
+    $cisco_vswitch_plugin_real = 'quantum.plugins.openvswitch.ovs_quantum_plugin.OVSQuantumPluginV2'
+  }
+
+  if $cisco_nexus_plugin == 'nexus' {
+    $cisco_nexus_plugin_real = 'quantum.plugins.cisco.nexus.cisco_nexus_plugin_v2.NexusPlugin'
+
+    package { 'python-ncclient':
+      ensure => installed,
+    } ~> Service['quantum-server']
+
+    # hack to make sure the directory is created
+    Quantum_plugin_cisco<||> ->
+    file {'/etc/quantum/plugins/cisco/nexus.ini':
+      owner => 'root',
+      group => 'root',
+      content => template('nexus.ini.erb')
+    } ~> Service['quantum-server']
+  } else {
+    $cisco_nexus_plugin_real = undef
+  }
+  if $nexus_credentials {
+    file {'/var/lib/quantum/.ssh':
+      ensure => directory,
+      owner  => 'quantum',
+      require => Package['quantum-server']
+    } ->
+    nexus_creds{ $nexus_credentials: }
+  }
+
+  if $core_plugin == 'cisco' {
+    class { 'quantum::plugins::cisco':
+      database_name => $quantum_db_name,
+      database_user => $quantum_db_user,
+      database_pass => $quantum_db_password,
+      database_host => $db_host,
+      keystone_username => 'quantum',
+      keystone_password => $quantum_user_password,
+      keystone_auth_url => "http://${controller_node_public}:35357/v2.0/",
+      keystone_tenant   => 'services',
+      vswitch_plugin    => $cisco_vswitch_plugin_real,
+      nexus_plugin      => $cisco_nexus_plugin_real
+    }
+  }
+
+  class { "coe::quantum_log": }
+
+  if ($::glance_ceph_enabled) and ($::controller_has_mon) {
+    class { 'coe::ceph::glance': }
+  }
+  elsif ($::glance_ceph_enabled) and (!$::controller_has_mon) {
+    class { 'coe::ceph::control': }
+  }
+}
+
 class control(
   $tunnel_ip                         = $::controller_node_internal,
   $public_address                    = $::controller_node_public,
@@ -298,8 +489,7 @@ class control(
     glance_backend          => $glance_backend,
     rbd_store_user          => $rbd_store_user,
     rbd_store_pool          => $rbd_store_pool,
-
-
+    #Nova
     nova_db_password        => $nova_db_password,
     nova_user_password      => $nova_user_password,
     rabbit_password         => $rabbit_password,

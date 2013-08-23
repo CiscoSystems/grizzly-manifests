@@ -439,6 +439,11 @@ node 'build-node' inherits master-node {
 # limitation of Puppet (refer to http://projects.puppetlabs.com/issues/1168).
 node build-server inherits build-node { }
 
+# All-in-one is a single node installation, but can be extended to a multi-
+# node installation by enabling additional control nodes.
+node 'allinone' inherits os_base {
+  class { 'allinone': }
+}
 # Change control-server to the host name of your control node.  Note that the
 # hostname should be in all lowercase letters due to a limitation of Puppet
 # (refer to http://projects.puppetlabs.com/issues/1168).  If you wish
