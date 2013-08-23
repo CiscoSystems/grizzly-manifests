@@ -344,7 +344,7 @@ node 'build-node' inherits master-node {
 #    ip => "192.168.242.22",
 #    power_address => "192.168.242.122",
 #    power_user => "admin",
-#    power_password => "password"
+#    power_password => "password",
 #    power_type => "ipmitool"
 #  }
 
