@@ -29,7 +29,7 @@ import subprocess
 REPO_NAME = "grizzly-proposed"
 #APT_REPO_URL = "ftp://ftpeng.cisco.com/openstack/cisco"
 # uncomment this line if you prefer to use http
-APT_REPO_URL = "http://openstack-repo.cisco.com/openstack/n1k-test"
+APT_REPO_URL = "http://openstack-repo.cisco.com/openstack"
 
 ## ------- Other Constants --------------------------
 MODULE_FILE = "modules.list"
