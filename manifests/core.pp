@@ -413,10 +413,13 @@ class control(
   
   class { "coe::quantum_log": }
 
-  if ($::glance_ceph_enabled) and ($::controller_has_mon) {
-    class { 'coe::ceph::glance': }
+  if $::controller_has_mon {
+    class { 'coe::ceph::control': }
   }
-  elsif ($::glance_ceph_enabled) and (!$::controller_has_mon) {
+  elsif $::cinder_ceph_enabled {
+    class { 'coe::ceph::control': }
+  }
+  elsif $::glance_ceph_enabled {
     class { 'coe::ceph::control': }
   }
 
