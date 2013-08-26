@@ -410,6 +410,12 @@ class control(
   if $::controller_has_mon {
     class { 'coe::ceph::control': }
   }
+  elsif $::cinder_ceph_enabled {
+    class { 'coe::ceph::control': }
+  }
+  elsif $::glance_ceph_enabled {
+    class { 'coe::ceph::control': }
+  }
 
 }
 
