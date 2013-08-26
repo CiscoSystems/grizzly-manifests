@@ -481,50 +481,6 @@ class control(
       $cisco_nexus_plugin_real = undef
     }
 
-    if ($::swift_proxy_address) { 
-      class { 'swift::keystone::auth':
-        auth_name        => $swift_user,
-        password         => $swift_password,
-        public_address   => $::swift_proxy_address,
-        admin_address    => $::swift_proxy_address,
-        internal_address => $::swift_proxy_address,
-      }
-    }
-
-    class { "quantum::quota":
-      quota_network             => $quantum_quota_network,
-      quota_subnet              => $quantum_quota_subnet,
-      quota_port                => $quantum_quota_port,
-      quota_router              => $quantum_quota_router,
-      quota_floatingip          => $quantum_quota_floatingip,
-      quota_security_group      => $quantum_quota_security_group,
-      quota_security_group_rule => $quantum_quota_security_group_rule,
-    }
-
-    if $cisco_vswitch_plugin == 'n1k' {
-      $cisco_vswitch_plugin_real = 'quantum.plugins.cisco.n1kv.n1kv_quantum_plugin.N1kvQuantumPluginV2'
-    } else {
-      $cisco_vswitch_plugin_real = 'quantum.plugins.openvswitch.ovs_quantum_plugin.OVSQuantumPluginV2'
-    }
-
-    if $cisco_nexus_plugin == 'nexus' {
-      $cisco_nexus_plugin_real = 'quantum.plugins.cisco.nexus.cisco_nexus_plugin_v2.NexusPlugin'
-
-      package { 'python-ncclient':
-        ensure => installed,
-      } ~> Service['quantum-server']
-
-      # hack to make sure the directory is created
-      Quantum_plugin_cisco<||> ->
-      file {'/etc/quantum/plugins/cisco/nexus.ini':
-        owner => 'root',
-        group => 'root',
-        content => template('nexus.ini.erb')
-      } ~> Service['quantum-server']
-    } else {
-      $cisco_nexus_plugin_real = undef
-    }
-
     if $nexus_credentials {
       file {'/var/lib/quantum/.ssh':
         ensure => directory,
