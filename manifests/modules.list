@@ -9,9 +9,7 @@ cobbler
 coe
 collectd
 concat
-corosync
 dnsmasq
-drbd
 filemapper
 galera
 glance
@@ -23,6 +21,7 @@ keepalived
 keystone
 memcached
 mysql
+network
 naginator
 network
 nova
