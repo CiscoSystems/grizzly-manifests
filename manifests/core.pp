@@ -491,8 +491,6 @@ class control(
       }
     }
 
-    class { "naginator::control_target": }
-
     class { "quantum::quota":
       quota_network             => $quantum_quota_network,
       quota_subnet              => $quantum_quota_subnet,
