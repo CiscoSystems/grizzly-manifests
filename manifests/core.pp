@@ -101,6 +101,10 @@ UcXHbA==
 =v6jg
 -----END PGP PUBLIC KEY BLOCK-----',
         }
+        apt::pin { "cisco_supplemental":
+          priority   => '990',
+          originator => 'Cisco_Supplemental'
+        }
       }
 
       apt::pin { "cisco":
@@ -353,12 +357,18 @@ class control(
     }
 
     if $cisco_vswitch_plugin == 'n1k' {
-    # if n1k, set security group api to nova.The default
-    # firewall_driver is NoopFirewallDriver in puppet-nova.
-    # this should disable security groups.
+      # if n1k, set security group api to nova.The default
+      # firewall_driver is NoopFirewallDriver in puppet-nova.
+      # this should disable security groups.
       $security_group_api_real = 'nova'
     } else {
       $security_group_api_real = 'quantum'
+    }
+
+    if ($::swift_proxy_address) {
+      $swift_real = true
+    } else {
+      $swift_real = false
     }
 
     class { 'openstack::controller':
@@ -376,12 +386,9 @@ class control(
       keystone_admin_token    => $keystone_admin_token,
       glance_db_password      => $glance_db_password,
       glance_user_password    => $glance_user_password,
-
       glance_backend          => $glance_backend,
       rbd_store_user          => $rbd_store_user,
       rbd_store_pool          => $rbd_store_pool,
-
-
       nova_db_password        => $nova_db_password,
       nova_user_password      => $nova_user_password,
       rabbit_password         => $rabbit_password,
@@ -419,6 +426,59 @@ class control(
       # cinder
       cinder_user_password    => $cinder_user_password,
       cinder_db_password      => $cinder_db_password,
+      # swift
+      swift                   => $swift_real,
+      swift_store_user        => "services:swift",
+      swift_store_key         => $::swift_password,
+      swift_user_password     => $::swift_password,
+      swift_public_address    => $::swift_proxy_address,
+    }
+
+
+    if ($::swift_proxy_address) { 
+      class { 'swift::keystone::auth':
+        auth_name        => $swift_user,
+        password         => $swift_password,
+        public_address   => $::swift_proxy_address,
+        admin_address    => $::swift_proxy_address,
+        internal_address => $::swift_proxy_address,
+      }
+    }
+
+    class { "naginator::control_target": }
+
+    class { "quantum::quota":
+      quota_network             => $quantum_quota_network,
+      quota_subnet              => $quantum_quota_subnet,
+      quota_port                => $quantum_quota_port,
+      quota_router              => $quantum_quota_router,
+      quota_floatingip          => $quantum_quota_floatingip,
+      quota_security_group      => $quantum_quota_security_group,
+      quota_security_group_rule => $quantum_quota_security_group_rule,
+    }
+
+    if $cisco_vswitch_plugin == 'n1k' {
+      $cisco_vswitch_plugin_real = 'quantum.plugins.cisco.n1kv.n1kv_quantum_plugin.N1kvQuantumPluginV2'
+    } else {
+      $cisco_vswitch_plugin_real = 'quantum.plugins.openvswitch.ovs_quantum_plugin.OVSQuantumPluginV2'
+    }
+
+    if $cisco_nexus_plugin == 'nexus' {
+      $cisco_nexus_plugin_real = 'quantum.plugins.cisco.nexus.cisco_nexus_plugin_v2.NexusPlugin'
+
+      package { 'python-ncclient':
+        ensure => installed,
+      } ~> Service['quantum-server']
+
+      # hack to make sure the directory is created
+      Quantum_plugin_cisco<||> ->
+      file {'/etc/quantum/plugins/cisco/nexus.ini':
+        owner => 'root',
+        group => 'root',
+        content => template('nexus.ini.erb')
+      } ~> Service['quantum-server']
+    } else {
+      $cisco_nexus_plugin_real = undef
     }
 
     if ($::swift_proxy_address) { 
