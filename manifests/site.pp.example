@@ -153,7 +153,7 @@ $public_interface               = 'eth0'
 $external_interface             = 'eth1'
 
 # Uncomment and customize these next three variables to use a provider
-# network model
+# network model. 
 # $ovs_vlan_ranges is used to name a physical network and indicate the
 # VLAN tag or # tags that should be associated with that network. The first
 # parameter is the network name, while the second parameter is the starting
@@ -168,6 +168,11 @@ $external_interface             = 'eth1'
 # The first parameter is the physical network name and the second parameter
 # is the OVS external bridge name
 #$ovs_bridge_mappings = ['physnet1:br-ex']
+# To use vlan provider networks with OVS, you will also need to
+# set the tenant network type to 'vlan' instead of gre.  To
+# do so, uncomment the line below.  This is also necessary if using
+# the Cisco Nexus plugin.
+# $tenant_network_type = 'vlan'
 
 # Select the drive on which Ubuntu and OpenStack will be installed in each
 # node. The current assumption is that all nodes will be installed on the
@@ -262,8 +267,7 @@ $glance_backend      = 'file'
 # password.
 
 # The nexus plugin also requires the ovs plugin to be set to
-# vlan mode, which can be done by uncommenting the following line:
-# $tenant_network_type = 'vlan'
+# vlan mode.  To do this, set $tenant_network_type = 'vlan' above.
 
 ########### Test variables ############
 # Variables used to populate test script:
