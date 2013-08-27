@@ -543,8 +543,6 @@ class cinder_node() {
 
 ### begin ceph ###
 class ceph_common (
-  $fsid,
-  $auth_type = $::ceph_auth_type,
 ) {
   class { 'ceph::conf':
     fsid            => $::ceph_monitor_fsid,
@@ -557,10 +555,7 @@ class ceph_common (
 class ceph_mon (
   $id
 ) {
-  class { 'ceph_common':
-    fsid      => $::ceph_monitor_fsid,
-    auth_type => $::ceph_auth_type,
-  }
+  class { 'ceph_common': }
   ceph::mon { $id:
     monitor_secret => $::ceph_monitor_secret,
     mon_port       => 6789,
