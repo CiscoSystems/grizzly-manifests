@@ -221,6 +221,7 @@ class control(
   $cisco_vswitch_plugin              = $::cisco_vswitch_plugin,
   $cisco_nexus_plugin                = $::cisco_nexus_plugin,
   $nexus_credentials                 = $::nexus_credentials,
+  $nexus_config                      = $::nexus_config,
   # need to set from a variable
   # database
   $db_host                           = $::controller_node_address,
@@ -453,30 +454,13 @@ class control(
     if $cisco_nexus_plugin == 'nexus' {
       $cisco_nexus_plugin_real = 'quantum.plugins.cisco.nexus.cisco_nexus_plugin_v2.NexusPlugin'
 
-      package { 'python-ncclient':
-        ensure => installed,
-      } ~> Service['quantum-server']
+      class { 'coe::nexus':
+        nexus_credentials => $nexus_credentials,
+        nexus_config      => $nexus_config
+      }
 
-      # hack to make sure the directory is created
-      Quantum_plugin_cisco<||> ->
-      file {'/etc/quantum/plugins/cisco/nexus.ini':
-        owner   => 'root',
-        group   => 'root',
-        content => template('nexus.ini.erb')
-      } ~> Service['quantum-server']
     } else {
       $cisco_nexus_plugin_real = undef
-    }
-
-    if $nexus_credentials {
-      file {'/var/lib/quantum/.ssh':
-        ensure  => directory,
-        owner   => 'quantum',
-        require => Package['quantum-server']
-      }
-      nexus_creds{ $nexus_credentials:
-        require => File['/var/lib/quantum/.ssh']
-      }
     }
 
     if $core_plugin == 'cisco' {
@@ -945,19 +929,5 @@ node master-node inherits "cobbler-node" {
 #  deny *.evil.example.com
 #  allow 192.168.0.0/24
 ',
-  }
-}
-
-define nexus_creds {
-  $args = split($title, '/')
-  quantum_plugin_cisco_credentials {
-    "${args[0]}/username": value => $args[1];
-    "${args[0]}/password": value => $args[2];
-  }
-  exec {"${title}":
-    unless  => "/bin/cat /var/lib/quantum/.ssh/known_hosts | /bin/grep ${args[0]}",
-    command => "/usr/bin/ssh-keyscan -t rsa ${args[0]} >> /var/lib/quantum/.ssh/known_hosts",
-    user    => 'quantum',
-    require => Package['quantum-server']
   }
 }
