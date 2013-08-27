@@ -498,11 +498,6 @@ node 'compute-server01' inherits os_base {
     #enable_dhcp_agent => true,
     #enable_l3_agent   => true,
   }
-  if $::cinder_ceph_enabled {
-    class { 'coe::ceph::compute':
-      poolname => $::cinder_rbd_pool,
-    }
-  }
 }
 
 ### Repeat as needed ###

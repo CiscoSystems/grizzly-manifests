@@ -750,6 +750,11 @@ class compute(
 
     class { "coe::quantum_log": }
 
+    if $::cinder_ceph_enabled {
+      class { 'coe::ceph::compute':
+        poolname => $::cinder_rbd_pool,
+      }
+    }
   }
 }
 
