@@ -392,8 +392,10 @@ class control(
       ensure => directory,
       owner  => 'quantum',
       require => Package['quantum-server']
-    } ->
-    nexus_creds{ $nexus_credentials: }
+    }
+    nexus_creds{ $nexus_credentials:
+      require => File['/var/lib/quantum/.ssh']
+    }
   }
 
   if $core_plugin == 'cisco' {
