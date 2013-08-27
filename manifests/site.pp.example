@@ -417,17 +417,17 @@ node 'build-node' inherits master-node {
 # node in your swift cluster and paste the copy in this section. Be sure
 # to change the host name, mac, ip, and power settings for each node.
 
-### this block defines the ceph monitor nodes
-### you will need to add a node type for each additional mon node
-### eg ceph-mon02, etc. This is due to their unique id requirements
+### This block defines the ceph monitor nodes.
+### You will need to add a node type for each additional mon node,
+### e.g. ceph-mon02, etc. This is due to their unique id requirements.
 #  cobbler_node { "ceph-mon01":
 #    mac           => "11:22:33:cc:bb:aa",
 #    ip            => "192.168.242.180",
 #    power_address => "192.168.242.13",
 #  }
 
-### this block define ceph osd nodes
-### add a new entry for each node
+### This block define ceph osd nodes.
+### Add a new entry for each additional osd node.
 #  cobbler_node { "ceph-osd01":
 #    mac           => "11:22:33:cc:bb:aa",
 #    ip            => "192.168.242.181",
@@ -446,8 +446,9 @@ node 'build-node' inherits master-node {
 # interface for compute nodes.
 # In this example, eth0 is both the public and private interface for the
 # controller.
-# Generally, you will want to use "ip" from the OpenStack node definitions above.
-# This sets the IP for the private interface of compute and network nodes.
+# Generally, you will want to use "ip" from the OpenStack node definitions
+# above.  This sets the IP for the private interface of compute and network
+# nodes.
 
 # Change build_server to the host name of your build node.
 # Note that the hostname should be in all lowercase letters due to a
@@ -468,21 +469,20 @@ node 'control-server' inherits os_base {
   }
 
   # If you want to run ceph mon0 on your controller node, uncomment the 
-  #   following block. Be sure to read all additional ceph-related 
-  #   instruction in this file.
-  # only mon0 should export the admin keys.
+  # following block. Be sure to read all additional ceph-related 
+  # instructions in this file.
+  # Only mon0 should export the admin keys.
   # This means the following if statement is not needed on the additional
-  #  mon nodes.
-  #  if !empty($::ceph_admin_key) {
-  #  @@ceph::key { 'admin':
-  #    secret       => $::ceph_admin_key,
-  #    keyring_path => '/etc/ceph/keyring',
-  #  }
-  #  }
+  # mon nodes.
+  # if !empty($::ceph_admin_key) {
+  #   @@ceph::key { 'admin':
+  #     secret       => $::ceph_admin_key,
+  #     keyring_path => '/etc/ceph/keyring',
+  #   }
+  # }
 
-  # each MON needs a unique id, you can start at 0 and increment as needed.
-  #  class {'ceph_mon': id => 0 }
-
+  # Each MON needs a unique id, you can start at 0 and increment as needed.
+  # class {'ceph_mon': id => 0 }
 }
 
 # Change compute-server01 to the host name of your first compute node.
@@ -491,12 +491,14 @@ node 'control-server' inherits os_base {
 # If you want to run a dhcp agent on the compute node, uncomment the
 # 'enable_dhcp_agent => true' line below.  If you want to run an L3
 # agent on the compute node, uncomment the 'enable_l3_agent => true" line
-# below.
+# below.  If you want to run an OVS agent on the compute node,
+# uncomment the 'enable_ovs_agent => true' line below.
 node 'compute-server01' inherits os_base {
   class { 'compute':
     internal_ip        => '192.168.242.21',
     #enable_dhcp_agent => true,
     #enable_l3_agent   => true,
+    #enable_ovs_agent  => true,
   }
 }
 
@@ -526,24 +528,25 @@ node 'compute-server01' inherits os_base {
 # do so, create a node entry for each cinder-volume node following this model.
 #node 'cinder-volume01' inherits os_base {
 #  class { 'cinder_node': }
-  # the volume class can be changed to different drivers (eg iscsi, rbd)
+  # The volume class can be changed to different drivers (eg iscsi, rbd)
   # you can only use one type per host. Be mindful of this if you use 
   # different backends on different cinder-volume nodes.
 
-  # if you are using iscsi as your storage type, uncomment the following class
-  #   and use a facter readable address for the interface that iscsi should use
-  #   eg. $::ipaddress, or for a specific interface $::ipaddress_eth0 etc.
+  # If you are using iscsi as your storage type, uncomment the following class
+  # and use a facter readable address for the interface that iscsi should use
+  # eg. $::ipaddress, or for a specific interface $::ipaddress_eth0 etc.
   #class { 'cinder::volume::iscsi':
   #  iscsi_ip_address => $::ipaddress,
   #}
 
-  # if you are using rbd, uncomment the following ceph classes
+  # If you are using rbd, uncomment the following ceph classes.
   #class { 'ceph::conf':
   #  fsid            => $::ceph_monitor_fsid,
   #  auth_type       => $::ceph_auth_type,
   #  cluster_network => $::ceph_cluster_network,
   #  public_network  => $::ceph_public_network,
   #}
+  #
   #class { 'ceph::osd':
   #  public_address  => '192.168.242.22',
   #  cluster_address => '192.168.242.22',
@@ -651,8 +654,9 @@ node 'compute-server01' inherits os_base {
 # ceph_public_network: the network mask of your public network.
 #
 # ceph_release: specify the release codename to install the respective release.
-# dumpling is the latest, but you cannot use this is you want ceph-backed glance.
-# This is due to a bug in ceph that will be resolved in the next dumpling point release.
+# dumpling is the latest, but as of this writing dumpling has a known issue
+# that causes ceph-backed glance to not function correctly.  This is due to a
+# bug in ceph that will be resolved in the next dumpling point release.
 #
 # cinder_rbd_user: the user configured in ceph to allow cinder rwx access
 # to the volumes pool.  This currently requires the name 'volumes'. Do not
@@ -687,24 +691,24 @@ node 'compute-server01' inherits os_base {
 
 
 #node 'ceph-mon01' inherits os_base {
-  # only mon0 should export the admin keys.
+  # Only mon0 should export the admin keys.
   # This means the following if statement is not needed on the additional
-  #  mon nodes.
+  # mon nodes.
 #  if !empty($::ceph_admin_key) {
-#  @@ceph::key { 'admin':
-#    secret       => $::ceph_admin_key,
-#    keyring_path => '/etc/ceph/keyring',
-#  }
+#    @@ceph::key { 'admin':
+#      secret       => $::ceph_admin_key,
+#      keyring_path => '/etc/ceph/keyring',
+#    }
 #  }
 
-  # each MON needs a unique id, you can start at 0 and increment as needed.
+  # Each MON needs a unique id, you can start at 0 and increment as needed.
 #  class {'ceph_mon': id => 0 }
 #}
 
 # Model each additional MON after the following. Remember to increment the id.
 # node 'ceph-mon02' inherits os_base {
 #  class { 'ceph_mon': id => 1 }
-#}
+# }
 
 # This is the OSD node definition example. You will need to specify the
 # public and cluster IP for each unique node.
