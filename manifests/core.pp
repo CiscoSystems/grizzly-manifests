@@ -874,10 +874,6 @@ node master-node inherits "cobbler-node" {
   if ! $::node_gateway {
     # Prefetch the pip packages and put them somewhere the openstack nodes can fetch them
 
-    file {  "/var/www":
-      ensure => 'directory',
-	  }
-
     file {  "/var/www/packages":
       ensure  => 'directory',
       require => File['/var/www'],
