@@ -516,6 +516,7 @@ class control(
     elsif $::glance_ceph_enabled {
       class { 'coe::ceph::control': }
     }
+  }
 }
 
 ### begin cinder standalone nodes
