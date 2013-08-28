@@ -225,6 +225,10 @@ $glance_backend      = 'file'
 #   need to set this to true
 # $osd_on_compute = true
 
+# If you run additional mons on any of you compute nodes, this must
+# be set to true, otherwise, leave it false
+# $computes_have_mons = false
+
 ###### Quantum plugins #######
 # Use either OVS (the default) or Cisco quantum plugin:
 # $quantum_core_plugin = 'ovs'
