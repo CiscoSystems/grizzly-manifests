@@ -225,6 +225,13 @@ $glance_backend      = 'file'
 #   need to set this to true
 # $osd_on_compute = true
 
+# If you run additional mons on any of your compute nodes, this must
+# be set to true, otherwise, leave it false. When using this scenario
+# you should leave $osd_on_compute either false or commented out. Then
+# you will explicitly declare the Ceph OSD configuration for each
+# compute node that should run OSD.
+# $computes_have_mons = false
+
 ###### Quantum plugins #######
 # Use either OVS (the default) or Cisco quantum plugin:
 # $quantum_core_plugin = 'ovs'
