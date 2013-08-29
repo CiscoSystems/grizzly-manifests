@@ -313,7 +313,7 @@ class control(
       nova_user_password       => $nova_user_password,
       rabbit_password          => $rabbit_password,
       rabbit_user              => $rabbit_user,
-      rabbit_hosts             => [$controller01_hostname, $controller02_hostname, $controller03_hostname],
+      rabbit_hosts             => [$controller_vip_hostname],
       rabbit_cluster_nodes     => [$controller01_hostname, $controller02_hostname, $controller03_hostname],
       # quantum
       quantum_bind_address     => $internal_address,
@@ -641,8 +641,7 @@ class compute(
     # Keystone
     keystone_host         => $controller_cluster_vip,
     # Rabbit
-    rabbit_hosts          => [$controller01_hostname, $controller02_hostname, $controller03_hostname],
-    #rabbit_hosts          => [$controller_vip_hostname],
+    rabbit_hosts          => [$controller_vip_hostname],
     rabbit_password       => $rabbit_password,
     rabbit_user           => $rabbit_user,
     # Nova
