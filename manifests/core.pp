@@ -143,7 +143,6 @@ UcXHbA==
   } else {
     if($::proxy) {
       Package <| provider=='pip' |> {
-        # TODO(ijw): untested
         install_options => "--proxy=$::proxy"
       }
     }
@@ -209,18 +208,13 @@ class control(
   $keystone_admin_token              = $::keystone_admin_token,
   $glance_db_password                = $::glance_db_password,
   $glance_user_password              = $::glance_user_password,
-
-  # TODO this needs to be added
   $glance_backend                    = $::glance_backend,
   $rbd_store_user                    = $::glance_ceph_user,
   $rbd_store_pool                    = $::glance_ceph_pool,
-
   $nova_db_password                  = $::nova_db_password,
   $nova_user_password                = $::nova_user_password,
   $rabbit_password                   = $::rabbit_password,
   $rabbit_user                       = $::rabbit_user,
-  # TODO deprecated
-  #export_resources                  = false,
 
   ######### quantum variables #############
   $core_plugin                       = $::quantum_core_plugin,
@@ -294,7 +288,6 @@ class control(
       glance_db_password       => $glance_db_password,
       glance_user_password     => $glance_user_password,
       memcached_listen_ip      => $internal_address,
-      #cache_server_ip          => $controller_cluster_vip,
       cache_server_ip          => $internal_address,
       swift_store_user         => "${services_tenant}:${swift_user}",
       swift_store_key          => $::swift_password,
@@ -658,7 +651,6 @@ class compute(
       glance_api_servers    => "${controller_cluster_vip}:9292",
       vncproxy_host         => $controller_cluster_vip,
       vncserver_listen      => '0.0.0.0',
-      #memcached_servers     => ["${controller_cluster_vip}:11211"],
       memcached_servers     => ["$controller01_ip:11211","${controller02_ip}:11211","${controller03_ip}:11211"],
       enabled_apis          => 'ec2,osapi_compute',
       # Cinder
@@ -841,8 +833,9 @@ class load-balancer (
 }
 ########### Definition of the Build Node #######################
 #
-# Definition of this node should match the name assigned to the build node in your deployment.
-# In this example we are using build-node, you dont need to use the FQDN.
+# Definition of this node should match the name assigned to the build node
+# in your deployment.  In this example we are using build-node. Note that
+# just the host name is used, not the FQDN.
 #
 node master-node inherits "cobbler-node" {
   $build_node_fqdn = "${::build_node_name}.${::domain_name}"
@@ -881,7 +874,8 @@ node master-node inherits "cobbler-node" {
   }
 
   if ! $::node_gateway {
-    # Prefetch the pip packages and put them somewhere the openstack nodes can fetch them
+    # Prefetch the pip packages and put them somewhere the openstack nodes
+    # can fetch them
 
     file {  "/var/www/packages":
       ensure  => 'directory',
