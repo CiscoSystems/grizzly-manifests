@@ -2,15 +2,14 @@
 # basic multi-node openstack environments.
 # In this scenario Quantum is using OVS with GRE Tunnels
 
-
 node base {
   $build_node_fqdn = "${::build_node_name}.${::domain_name}"
 
-  ########### Folsom Release ###############
+  ########### Grizzly Release ###############
 
-    # Disable pipelining to avoid unfortunate interactions between apt and
-    # upstream network gear that does not properly handle http pipelining
-    # See https://bugs.launchpad.net/ubuntu/+source/apt/+bug/996151 for details
+  # Disable pipelining to avoid unfortunate interactions between apt and
+  # upstream network gear that does not properly handle http pipelining
+  # See https://bugs.launchpad.net/ubuntu/+source/apt/+bug/996151 for details
   if ($osfamily == 'debian') {
     file { '/etc/apt/apt.conf.d/00no_pipelining':
       ensure  => file,
@@ -21,7 +20,6 @@ node base {
     }
 
     # Load apt prerequisites.  This is only valid on Ubuntu systmes
-
     if($::package_repo == 'cisco_repo') {
       apt::source { "cisco-openstack-mirror_grizzly":
         location    => "$::location/cisco",
@@ -145,23 +143,21 @@ UcXHbA==
   } else {
     if($::proxy) {
       Package <| provider=='pip' |> {
-        # TODO(ijw): untested
         install_options => "--proxy=$::proxy"
       }
     }
   }
-  # (the equivalent work for apt is done by the cobbler boot, which sets this up as
-  # a part of the installation.)
-
+  # (the equivalent work for apt is done by the cobbler boot, which 
+  # sets this up as a part of the installation.)
 
   # /etc/hosts entries for the controller nodes
   host { $::controller_hostname:
-	  ip => $::controller_node_internal
+    ip => $::controller_node_internal
   }
 
   class { 'collectd':
-    graphitehost		=> $build_node_fqdn,
-	  management_interface	=> $::public_interface,
+    graphitehost         => $build_node_fqdn,
+    management_interface => $::public_interface,
   }
 }
 
@@ -169,19 +165,19 @@ node os_base inherits base {
   $build_node_fqdn = "${::build_node_name}.${::domain_name}"
 
   class { ntp:
-	  servers		=> [$build_node_fqdn],
-	  ensure 		=> running,
-	  autoupdate 	=> true,
+    servers     => [$build_node_fqdn],
+    ensure      => running,
+    autoupdate 	=> true,
   }
 
-    # Deploy a script that can be used to test nova
-    class { 'openstack::test_file':
-      image_type => $::test_file_image_type,
-    }
+  # Deploy a script that can be used to test nova
+  class { 'openstack::test_file':
+    image_type => $::test_file_image_type,
+  }
 
   class { 'openstack::auth_file':
-	  admin_password       => $admin_password,
-	  controller_node      => $controller_node_internal,
+    admin_password  => $admin_password,
+    controller_node => $controller_node_internal,
   }
 
   class { "naginator::base_target": }
@@ -190,7 +186,6 @@ node os_base inherits base {
   # trouble-shooting services. It should not generally be set to
   # true as it is known to break some OpenStack components
   $verbose            = false
-
 }
 
 class control(
@@ -213,18 +208,13 @@ class control(
   $keystone_admin_token              = $::keystone_admin_token,
   $glance_db_password                = $::glance_db_password,
   $glance_user_password              = $::glance_user_password,
-
-  # TODO this needs to be added
   $glance_backend                    = $::glance_backend,
   $rbd_store_user                    = $::glance_ceph_user,
   $rbd_store_pool                    = $::glance_ceph_pool,
-
   $nova_db_password                  = $::nova_db_password,
   $nova_user_password                = $::nova_user_password,
   $rabbit_password                   = $::rabbit_password,
   $rabbit_user                       = $::rabbit_user,
-  # TODO deprecated
-  #export_resources                  = false,
 
   ######### quantum variables #############
   $core_plugin                       = $::quantum_core_plugin,
@@ -269,6 +259,7 @@ class control(
 ) {
 
   if $enable_ha {
+    # HA setup
     class { 'openstack-ha::controller':
       # Galera
       galera_monitor_password  => $galera_monitor_password,
@@ -297,7 +288,6 @@ class control(
       glance_db_password       => $glance_db_password,
       glance_user_password     => $glance_user_password,
       memcached_listen_ip      => $internal_address,
-      #cache_server_ip          => $controller_cluster_vip,
       cache_server_ip          => $internal_address,
       swift_store_user         => "${services_tenant}:${swift_user}",
       swift_store_key          => $::swift_password,
@@ -350,16 +340,20 @@ class control(
       refreshonly => true
     }
   } else {
+    # Non-HA setup
+
+    # Set up Cisco or OVS core plugin.
     if $core_plugin == 'cisco' {
       $core_plugin_real = 'quantum.plugins.cisco.network_plugin.PluginV2'
     } else {
       $core_plugin_real = 'quantum.plugins.openvswitch.ovs_quantum_plugin.OVSQuantumPluginV2'
     }
 
+    # Nexus 1000v security group settings.
     if $cisco_vswitch_plugin == 'n1k' {
-      # if n1k, set security group api to nova.The default
-      # firewall_driver is NoopFirewallDriver in puppet-nova.
-      # this should disable security groups.
+      # If n1k, set security group api to nova.  The default
+      # firewall_driver is NoopFirewallDriver in puppet-nova,
+      # so this effectively disables security groups.
       $security_group_api_real = 'nova'
     } else {
       $security_group_api_real = 'quantum'
@@ -371,6 +365,7 @@ class control(
       $swift_real = false
     }
 
+    # Set up controller.
     class { 'openstack::controller':
       public_address          => $controller_node_public,
       # network
@@ -394,8 +389,6 @@ class control(
       rabbit_password         => $rabbit_password,
       rabbit_user             => $rabbit_user,
       security_group_api      => $security_group_api_real,
-      # TODO deprecated
-      #export_resources        => false,
 
       ######### quantum variables #############
       quantum_core_plugin     => $core_plugin_real,
@@ -434,7 +427,7 @@ class control(
       swift_public_address    => $::swift_proxy_address,
     }
 
-
+    # If we're setting up Swift, set up keystone for Swift too.
     if ($::swift_proxy_address) { 
       class { 'swift::keystone::auth':
         auth_name        => $swift_user,
@@ -445,8 +438,10 @@ class control(
       }
     }
 
+    # Sets up Nagios control-node monitoring.
     class { "naginator::control_target": }
 
+    # Set up Quantum quota support.
     class { "quantum::quota":
       quota_network             => $quantum_quota_network,
       quota_subnet              => $quantum_quota_subnet,
@@ -473,8 +468,8 @@ class control(
       # hack to make sure the directory is created
       Quantum_plugin_cisco<||> ->
       file {'/etc/quantum/plugins/cisco/nexus.ini':
-        owner => 'root',
-        group => 'root',
+        owner   => 'root',
+        group   => 'root',
         content => template('nexus.ini.erb')
       } ~> Service['quantum-server']
     } else {
@@ -483,8 +478,8 @@ class control(
 
     if $nexus_credentials {
       file {'/var/lib/quantum/.ssh':
-        ensure => directory,
-        owner  => 'quantum',
+        ensure  => directory,
+        owner   => 'quantum',
         require => Package['quantum-server']
       }
       nexus_creds{ $nexus_credentials:
@@ -494,10 +489,10 @@ class control(
 
     if $core_plugin == 'cisco' {
       class { 'quantum::plugins::cisco':
-        database_name => $quantum_db_name,
-        database_user => $quantum_db_user,
-        database_pass => $quantum_db_password,
-        database_host => $db_host,
+        database_name     => $quantum_db_name,
+        database_user     => $quantum_db_user,
+        database_pass     => $quantum_db_password,
+        database_host     => $db_host,
         keystone_username => 'quantum',
         keystone_password => $quantum_user_password,
         keystone_auth_url => "http://${controller_node_public}:35357/v2.0/",
@@ -509,6 +504,7 @@ class control(
   
     class { "coe::quantum_log": }
 
+    # Set up various Ceph scenarios.
     if $::controller_has_mon {
       class { 'coe::ceph::control': }
     }
@@ -535,7 +531,6 @@ class cinder_node() {
   package {'python-mysqldb':
     ensure => present,
   }
-
 }
 
 ### end cinder standalone nodes
@@ -565,6 +560,7 @@ class ceph_mon (
 
 ### end ceph
 
+# Class for compute nodes.
 class compute(
   $internal_ip,
   $tunnel_ip                         = $internal_ip,
@@ -598,7 +594,7 @@ class compute(
   $cinder_rbd_pool                   = $::cinder_rbd_pool,
   $cinder_rbd_secret_uuid            = $::cinder_rbd_secret_uuid,
   # quantum config
-  $quantum	                     = true,
+  $quantum                           = true,
   $quantum_user_password             = $::quantum_user_password,
   # Quantum OVS
   $enable_ovs_agent                  = true,
@@ -623,51 +619,54 @@ class compute(
 )
 {
 
+  # Nexus 1000v security group settings.
   if $cisco_vswitch_plugin == 'n1k' {
-  # if n1k, set security group api to nova.The default
-  # firewall_driver is NoopFirewallDriver in puppet-nova.
-  # this should disable security groups.
+    # If n1k, set security group api to nova.  The default
+    # firewall_driver is NoopFirewallDriver in puppet-nova,
+    # so this effectively disables security groups.
     $security_group_api_real     = 'nova'
   } else {
-    $security_group_api_real      = 'quantum'
+    $security_group_api_real     = 'quantum'
   }
 
+  # If using the HA, the compute nodes get a few different
+  # settings for control services.
   if ($enable_ha) {
     class { 'openstack-ha::compute':
-    # Networking
-    internal_address      => $internal_ip,
-    # Database
-    db_host               => $controller_cluster_vip,
-    # Keystone
-    keystone_host         => $controller_cluster_vip,
-    # Rabbit
-    rabbit_hosts          => [$controller_vip_hostname],
-    rabbit_password       => $rabbit_password,
-    rabbit_user           => $rabbit_user,
-    # Nova
-    libvirt_type          => $libvirt_type,
-    nova_user_password    => $nova_user_password,
-    nova_db_password      => $nova_db_password,
-    libvirt_vif_driver    => 'nova.virt.libvirt.vif.LibvirtHybridOVSBridgeDriver',
-    glance_api_servers    => "${controller_cluster_vip}:9292",
-    vncproxy_host         => $controller_cluster_vip,
-    vncserver_listen      => '0.0.0.0',
-    #memcached_servers     => ["${controller_cluster_vip}:11211"],
-    memcached_servers     => ["$controller01_ip:11211","${controller02_ip}:11211","${controller03_ip}:11211"],
-    enabled_apis          => 'ec2,osapi_compute',
-    # Cinder
-    cinder_db_password    => $cinder_db_password,
-    iscsi_ip_address      => $internal_ip,
-    # Quantum
-    quantum_host          => $controller_cluster_vip,
-    quantum_user_password => $quantum_user_password,
-    quantum_auth_url      => "http://${controller_cluster_vip}:35357/v2.0",
-    bridge_interface      => $external_interface,
-    # General
-    enabled               => true,
-    debug                 => $debug,
-    verbose               => $::verbose,
-  }
+      # Networking
+      internal_address      => $internal_ip,
+      # Database
+      db_host               => $controller_cluster_vip,
+      # Keystone
+      keystone_host         => $controller_cluster_vip,
+      # Rabbit
+      rabbit_hosts          => [$controller_vip_hostname],
+      rabbit_password       => $rabbit_password,
+      rabbit_user           => $rabbit_user,
+      # Nova
+      libvirt_type          => $libvirt_type,
+      nova_user_password    => $nova_user_password,
+      nova_db_password      => $nova_db_password,
+      libvirt_vif_driver    => 'nova.virt.libvirt.vif.LibvirtHybridOVSBridgeDriver',
+      glance_api_servers    => "${controller_cluster_vip}:9292",
+      vncproxy_host         => $controller_cluster_vip,
+      vncserver_listen      => '0.0.0.0',
+      memcached_servers     => ["$controller01_ip:11211","${controller02_ip}:11211","${controller03_ip}:11211"],
+      enabled_apis          => 'ec2,osapi_compute',
+      # Cinder
+      cinder_db_password    => $cinder_db_password,
+      iscsi_ip_address      => $internal_ip,
+      # Quantum
+      quantum_host          => $controller_cluster_vip,
+      quantum_user_password => $quantum_user_password,
+      quantum_auth_url      => "http://${controller_cluster_vip}:35357/v2.0",
+      bridge_interface      => $external_interface,
+      # General
+      enabled               => true,
+      debug                 => $debug,
+      verbose               => $::verbose,
+    }
+
     network_config { $::external_interface:
       ensure    => 'present',
       hotplug   => false,
@@ -757,6 +756,7 @@ class compute(
   }
 }
 
+# A class for standalone network nodes.
 class network (
   $internal_ip,
   $tunnel_ip             = $internal_ip,
@@ -806,6 +806,7 @@ class network (
   }
 }
 
+# A class for load balancer nodes (used in the HA model).
 class load-balancer (
   $controller_state,
   $swift_proxy_state,
@@ -832,46 +833,49 @@ class load-balancer (
 }
 ########### Definition of the Build Node #######################
 #
-# Definition of this node should match the name assigned to the build node in your deployment.
-# In this example we are using build-node, you dont need to use the FQDN.
+# Definition of this node should match the name assigned to the build node
+# in your deployment.  In this example we are using build-node. Note that
+# just the host name is used, not the FQDN.
 #
 node master-node inherits "cobbler-node" {
   $build_node_fqdn = "${::build_node_name}.${::domain_name}"
 
   host { $build_node_fqdn:
-	  ip => $::cobbler_node_ip
+    ip => $::cobbler_node_ip
   }
 
   host { $::build_node_name:
-	  ip => $::cobbler_node_ip
+    ip => $::cobbler_node_ip
   }
 
   # Change the servers for your NTP environment
   # (Must be a reachable NTP Server by your build-node, i.e. ntp.esl.cisco.com)
   class { ntp:
-	  servers 	=> $::ntp_servers,
-	  ensure 		=> running,
-	  autoupdate 	=> true,
+    servers    => $::ntp_servers,
+    ensure     => running,
+    autoupdate => true,
   }
 
   class { 'naginator': }
 
   class { 'graphite':
-	  graphitehost 	=> $build_node_fqdn,
+    graphitehost => $build_node_fqdn,
   }
 
   class { 'coe::site_index': }
 
-  # set up a local apt cache.  Eventually this may become a local mirror/repo instead
+  # Set up a local apt cache.  Eventually this may become a local
+  # mirror/repo instead.
   class { apt-cacher-ng:
-  	proxy 		=> $::proxy,
-  	avoid_if_range  => true, # Some proxies have issues with range headers
-                             # this stops us attempting to use them
-                             # marginally less efficient with other proxies
+    proxy          => $::proxy,
+    avoid_if_range => true, # Some proxies have issues with range headers
+                            # this stops us attempting to use them
+                            # marginally less efficient with other proxies
   }
 
   if ! $::node_gateway {
-    # Prefetch the pip packages and put them somewhere the openstack nodes can fetch them
+    # Prefetch the pip packages and put them somewhere the openstack nodes
+    # can fetch them
 
     file {  "/var/www/packages":
       ensure  => 'directory',
@@ -881,10 +885,12 @@ node master-node inherits "cobbler-node" {
     if($::proxy) {
       $proxy_pfx = "/usr/bin/env http_proxy=${::proxy} https_proxy=${::proxy} "
     } else {
-      $proxy_pfx=""
+      $proxy_pfx = ""
     }
+
     exec { 'pip2pi':
-      # Can't use package provider because we're changing its behaviour to use the cache
+      # Can't use package provider because we're changing it's behaviour
+      # to use the cache.
       command => "${proxy_pfx}/usr/bin/pip install pip2pi",
       creates => "/usr/local/bin/pip2pi",
       require => Package['python-pip'],
@@ -893,34 +899,38 @@ node master-node inherits "cobbler-node" {
       require => Exec['pip-cache']
     }
     exec { 'pip-cache':
-      # All the packages that all nodes - build, compute and control - require from pip
+      # All the packages that all nodes - build, compute and control - require
+      # from pip.  We cache these ahead of time.  Note that this creates
+      # /var/www/packages/simple, but you'll want to force a refresh if you
+      # change the 'command' line below.
       command => "${proxy_pfx}/usr/local/bin/pip2pi /var/www/packages collectd xenapi django-tagging graphite-web carbon whisper anyjson==0.3.3 amqp==0.9.4 kombu==2.4.7",
-      creates => '/var/www/packages/simple', # It *does*, but you'll want to force a refresh if you change the line above
+      creates => '/var/www/packages/simple',
       require => Exec['pip2pi'],
     }
   }
 
-  # set the right local puppet environment up.  This builds puppetmaster with storedconfigs (a nd a local mysql instance)
+  # Set the right local puppet environment up.  This builds puppetmaster
+  # with storedconfigs (and a local mysql instance).
   class { puppet:
-	  run_master 		=> true,
-	  puppetmaster_address 	=> $build_node_fqdn, 
-	  certname 		=> $build_node_fqdn,
-	  mysql_password 		=> 'ubuntu',
+    run_master           => true,
+    puppetmaster_address => $build_node_fqdn, 
+    certname             => $build_node_fqdn,
+    mysql_password       => 'ubuntu',
   }<-
 
   file {'/etc/puppet/files':
-	  ensure => directory,
-	  owner => 'root',
-	  group => 'root',
-	  mode => '0755',
+    ensure => directory,
+    owner  => 'root',
+    group  => 'root',
+    mode   => '0755',
   }
 
   file {'/etc/puppet/fileserver.conf':
-	  ensure => file,
-	  owner => 'root',
-	  group => 'root',
-	  mode => '0644',
-	  content => '
+    ensure  => file,
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0644',
+    content => '
 
 # This file consists of arbitrarily named sections/modules
 # defining where files are served from and to whom
@@ -941,7 +951,7 @@ node master-node inherits "cobbler-node" {
 #  deny *.evil.example.com
 #  allow 192.168.0.0/24
 ',
-    }
+  }
 }
 
 define nexus_creds {
@@ -951,7 +961,7 @@ define nexus_creds {
     "${args[0]}/password": value => $args[2];
   }
   exec {"${title}":
-    unless => "/bin/cat /var/lib/quantum/.ssh/known_hosts | /bin/grep ${args[0]}",
+    unless  => "/bin/cat /var/lib/quantum/.ssh/known_hosts | /bin/grep ${args[0]}",
     command => "/usr/bin/ssh-keyscan -t rsa ${args[0]} >> /var/lib/quantum/.ssh/known_hosts",
     user    => 'quantum',
     require => Package['quantum-server']
