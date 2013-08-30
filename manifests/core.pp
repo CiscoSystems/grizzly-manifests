@@ -475,8 +475,8 @@ class control(
       # hack to make sure the directory is created
       Quantum_plugin_cisco<||> ->
       file {'/etc/quantum/plugins/cisco/nexus.ini':
-        owner => 'root',
-        group => 'root',
+        owner   => 'root',
+        group   => 'root',
         content => template('nexus.ini.erb')
       } ~> Service['quantum-server']
     } else {
@@ -485,8 +485,8 @@ class control(
 
     if $nexus_credentials {
       file {'/var/lib/quantum/.ssh':
-        ensure => directory,
-        owner  => 'quantum',
+        ensure  => directory,
+        owner   => 'quantum',
         require => Package['quantum-server']
       }
       nexus_creds{ $nexus_credentials:
@@ -496,10 +496,10 @@ class control(
 
     if $core_plugin == 'cisco' {
       class { 'quantum::plugins::cisco':
-        database_name => $quantum_db_name,
-        database_user => $quantum_db_user,
-        database_pass => $quantum_db_password,
-        database_host => $db_host,
+        database_name     => $quantum_db_name,
+        database_user     => $quantum_db_user,
+        database_pass     => $quantum_db_password,
+        database_host     => $db_host,
         keystone_username => 'quantum',
         keystone_password => $quantum_user_password,
         keystone_auth_url => "http://${controller_node_public}:35357/v2.0/",
@@ -601,7 +601,7 @@ class compute(
   $cinder_rbd_pool                   = $::cinder_rbd_pool,
   $cinder_rbd_secret_uuid            = $::cinder_rbd_secret_uuid,
   # quantum config
-  $quantum	                     = true,
+  $quantum                           = true,
   $quantum_user_password             = $::quantum_user_password,
   # Quantum OVS
   $enable_ovs_agent                  = true,
@@ -633,7 +633,7 @@ class compute(
     # so this effectively disables security groups.
     $security_group_api_real     = 'nova'
   } else {
-    $security_group_api_real      = 'quantum'
+    $security_group_api_real     = 'quantum'
   }
 
   # If using the HA, the compute nodes get a few different
@@ -926,16 +926,16 @@ node master-node inherits "cobbler-node" {
 
   file {'/etc/puppet/files':
     ensure => directory,
-    owner => 'root',
-    group => 'root',
-    mode  => '0755',
+    owner  => 'root',
+    group  => 'root',
+    mode   => '0755',
   }
 
   file {'/etc/puppet/fileserver.conf':
-    ensure => file,
-    owner => 'root',
-    group => 'root',
-    mode => '0644',
+    ensure  => file,
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0644',
     content => '
 
 # This file consists of arbitrarily named sections/modules
@@ -967,7 +967,7 @@ define nexus_creds {
     "${args[0]}/password": value => $args[2];
   }
   exec {"${title}":
-    unless => "/bin/cat /var/lib/quantum/.ssh/known_hosts | /bin/grep ${args[0]}",
+    unless  => "/bin/cat /var/lib/quantum/.ssh/known_hosts | /bin/grep ${args[0]}",
     command => "/usr/bin/ssh-keyscan -t rsa ${args[0]} >> /var/lib/quantum/.ssh/known_hosts",
     user    => 'quantum',
     require => Package['quantum-server']
