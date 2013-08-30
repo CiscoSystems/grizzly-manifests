@@ -349,7 +349,7 @@ class control(
   } else {
     # Non-HA setup
 
-    # Set up Cisco or OVA core plugin.
+    # Set up Cisco or OVS core plugin.
     if $core_plugin == 'cisco' {
       $core_plugin_real = 'quantum.plugins.cisco.network_plugin.PluginV2'
     } else {
