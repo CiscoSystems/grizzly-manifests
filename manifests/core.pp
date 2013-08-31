@@ -427,17 +427,6 @@ class control(
       swift_public_address    => $::swift_proxy_address,
     }
 
-    # If we're setting up Swift, set up keystone for Swift too.
-    if ($::swift_proxy_address) { 
-      class { 'swift::keystone::auth':
-        auth_name        => $swift_user,
-        password         => $swift_password,
-        public_address   => $::swift_proxy_address,
-        admin_address    => $::swift_proxy_address,
-        internal_address => $::swift_proxy_address,
-      }
-    }
-
     # Sets up Nagios control-node monitoring.
     class { "naginator::control_target": }
 
