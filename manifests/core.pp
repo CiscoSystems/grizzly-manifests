@@ -321,6 +321,9 @@ class control(
       cinder_user_password     => $cinder_user_password,
       cinder_db_password       => $cinder_db_password,
     }
+    # Sets up Nagios control-node monitoring.
+    class { "naginator::control_target": }
+
     network_config { $::external_interface:
       ensure    => 'present',
       hotplug   => false,
@@ -655,6 +658,8 @@ class compute(
       debug                 => $debug,
       verbose               => $::verbose,
     }
+
+    class { "naginator::compute_target": }
 
     network_config { $::external_interface:
       ensure    => 'present',
