@@ -1,0 +1,1 @@
+ceph-volume-mapper is a tool that will map your ceph volumes to their associated virtual machines and display the results as a list. It should be used on the control server, although will likely also work on any server that has nova installed.
