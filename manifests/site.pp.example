@@ -426,6 +426,16 @@ node 'build-node' inherits master-node {
 #    power_address  => "192.168.242.173"
 #  }
 
+## this block defines the swift monitor nodes
+### you will need to add a node type for each additional mon node
+### eg swift-mon02, etc. This is due to their unique id requirements
+#  cobbler_node { "swift-mon01":
+#    node_type     => "swift-mon01",
+#    mac           => "11:22:33:cc:bb:aa",
+#    ip            => "192.168.242.180",
+#    power_address => "192.168.242.13",
+#  }
+
 ### Repeat as needed ###
 # Make a copy of your swift storage node block above for each additional
 # node in your swift cluster and paste the copy in this section. Be sure
