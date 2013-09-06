@@ -497,15 +497,21 @@ class control(
     class { "coe::quantum_log": }
 
     # Set up various Ceph scenarios.
-    if $::controller_has_mon {
-      class { 'coe::ceph::control': }
+    if !$::ceph_combo {
+      if $::controller_has_mon {
+        class { 'coe::ceph::control': }
+      }
+      elsif $::cinder_ceph_enabled {
+        class { 'coe::ceph::control': }
+      }
+      elsif $::glance_ceph_enabled {
+        class { 'coe::ceph::control': }
+      }
     }
-    elsif $::cinder_ceph_enabled {
-      class { 'coe::ceph::control': }
+    elsif $::ceph_combo {
+      class { 'coe::ceph::combined': }
     }
-    elsif $::glance_ceph_enabled {
-      class { 'coe::ceph::control': }
-    }
+
   }
 }
 
@@ -742,11 +748,17 @@ class compute(
 
     class { "coe::quantum_log": }
 
-    if $::cinder_ceph_enabled {
-      class { 'coe::ceph::compute':
-        poolname => $::cinder_rbd_pool,
+    if !$::ceph_combo {
+      if $::cinder_ceph_enabled {
+        class { 'coe::ceph::compute':
+          poolname => $::cinder_rbd_pool,
+        }
       }
     }
+    elsif $::ceph_combo {
+      class { 'coe::ceph::combined': iscompute => true, }
+    }
+
   }
 }
 

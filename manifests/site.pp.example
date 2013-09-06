@@ -239,6 +239,13 @@ $glance_backend      = 'file'
 # compute node that should run OSD.
 # $computes_have_mons = false
 
+# Another alternative is to run MON and OSD on the same node. Uncomment
+# $ceph_combo to enable this feature. You will NOT need to enabled
+# $osd_on_compute, $controller_has_mon, or $computes_have_mon for this
+# feature. You will need to specify the normal MON and OSD definitions
+# for each puppet node as usual.
+# $ceph_combo = true
+
 ###### Quantum plugins #######
 # Use either OVS (the default) or Cisco quantum plugin:
 # $quantum_core_plugin = 'ovs'
