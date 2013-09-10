@@ -549,6 +549,7 @@ node 'control-server' inherits os_base {
 node 'compute-server01' inherits os_base {
   class { 'compute':
     internal_ip        => '192.168.242.21',
+    enable_ovs_agent   => false,
     #enable_dhcp_agent => true,
     #enable_l3_agent   => true,
   }
