@@ -538,6 +538,33 @@ node 'control-server' inherits os_base {
 
 }
 
+# Change network-server01 to the host name of your first network node.
+# Note that the hostname should be in all lowercase letters due to a
+# limitation of Puppet (refer to http://projects.puppetlabs.com/issues/1168).
+# As n1k uvem is being installed on network node, set enable_ovs_agent=false.
+# Set true or false for enable_l3_agent and enable_dhcp_agent based on the requirement.
+node 'network-server01' inherits os_base {
+  class { 'network':
+    internal_ip => '51.1.1.4',
+    ovs_local_ip => '51.1.1.4' ,
+    enable_l3_agent => true,
+    enable_dhcp_agent => true,
+    enable_ovs_agent => false,
+    bridge_mappings => 'br-int:eth3',
+  }
+  class {"n1k-vem":
+    vemimage => $vemimage,
+    vsmip => $vsmip,
+    domainid => $domainid,
+    ctrlmac => $ctrlmac,
+    hostmgmtint => $hostmgmtint,
+    uplinkint => $uplinkint,
+    profile => 'sys-uplink',
+    vtepconfig => 'vmknic-int1 profint mode dhcp mac 00:01:22:33:44:66',
+    n1kconfname => "ns1",
+  }
+}
+
 # Change compute-server01 to the host name of your first compute node.
 # Note that the hostname should be in all lowercase letters due to a
 # limitation of Puppet (refer to http://projects.puppetlabs.com/issues/1168).
@@ -553,6 +580,12 @@ node 'compute-server01' inherits os_base {
     #enable_l3_agent   => true,
   }
 
+  if $::cinder_ceph_enabled {
+    class { 'coe::ceph::compute':
+      poolname => $::cinder_rbd_pool,
+    }
+  }
+
   class {"n1k-vem":
          vemimage => $vemimage,
          vsmip => $vsmip,
@@ -565,11 +598,6 @@ node 'compute-server01' inherits os_base {
          n1kconfname => "cs1",
   }
 
-  if $::cinder_ceph_enabled {
-    class { 'coe::ceph::compute':
-      poolname => $::cinder_rbd_pool,
-    }
-  }
 }
 
 node kvm-host-1 {
