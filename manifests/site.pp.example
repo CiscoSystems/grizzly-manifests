@@ -479,7 +479,6 @@ node 'control-server' inherits os_base {
    'CISCO_N1K/tunnel_bridge' : value => 'br-int';
    'CISCO_N1K/local_ip' : value => '<controller-ip>';
    'CISCO_N1K/tenant_network_type' : value => 'local';
-   'CISCO_N1K/bridge_mappings' : value => ' ';
    'CISCO_N1K/default_policy_profile' : value => 'dhcp_pp';
    'CISCO_N1K/POLL_DURATION' : value => '10';
    'DATABASE/sql_connection' : value => 'mysql://quantum:<quantum-db-pass>@127.0.0.1/quantum?charset=utf8';
