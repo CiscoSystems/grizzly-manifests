@@ -614,8 +614,8 @@ node kvm-host-1 {
           ### different uncomment the parameter and change the value as required
           ### memory is specified in KiB and disk size is in GB.
 
-          #cpu => '1',
-          #memory => '2048000',
+          vcpu => '2',
+          memory => '4096000',
           #disksize => '4'
           #consolepts => '2',
 
