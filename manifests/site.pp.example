@@ -485,7 +485,7 @@ node 'control-server' inherits os_base {
  }
 #vxlangw definition
 
-  class {"n1k-vxlangw":
+   n1k-vxlangw {'vxgwvm':
     gw_isoimage => $::gwimage,
     os_password => $admin_password,
     controller_ip => $controller_node_address,
