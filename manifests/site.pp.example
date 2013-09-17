@@ -560,7 +560,6 @@ node 'network-server01' inherits os_base {
     ctrlmac => $ctrlmac,
     hostmgmtint => $hostmgmtint,
     uplinkint => $uplinkint,
-    profile => 'sys-uplink',
     vtepconfig => 'vmknic-int1 profint mode dhcp mac 00:01:22:33:44:66',
     n1kconfname => "ns1",
   }
@@ -589,7 +588,6 @@ node 'compute-server01' inherits os_base {
          ctrlmac => $ctrlmac,
          hostmgmtint => $hostmgmtint,
          uplinkint => $uplinkint,
-         profile => 'sys-uplink',
          vtepconfig => 'virt vmknic-int1 profile profint mode dhcp mac 00:11:22:33:44:66, virt vmknic-int2 profile profint mode static address 192.168.1.91 netmask 255.255.255.0',
          n1kconfname => "cs1",
   }
