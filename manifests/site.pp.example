@@ -302,7 +302,7 @@ $hostmgmtint   = "eth2"
 $uplinkint     = "eth3:sys-uplink"
 
 
-#GW related shared variables
+#VXLAN Gateway related shared variables
 
 $gwimage         = "/home/n1kv/tonic_407_GW.qcow2"
 
@@ -514,7 +514,8 @@ node 'control-server' inherits os_base {
    'DATABASE/sql_connection' : value => 'mysql://quantum:<quantum-db-pass>@127.0.0.1/quantum?charset=utf8';
  }
 
-  #vxlangw definition
+#VXLAN Gateway related definition
+
   n1k-vxlangw {'vxgwvm':
     gw_isoimage => $::gwimage,
     os_password => $admin_password,
