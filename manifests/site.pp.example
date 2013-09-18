@@ -304,7 +304,7 @@ $uplinkint     = "eth3:sys-uplink"
 
 #VXLAN Gateway related shared variables
 
-$gwimage         = "/home/n1kv/tonic_407_GW.qcow2"
+$vxlangwimage         = "/home/n1kv/tonic_407_GW.qcow2"
 
 
 #### end shared variables #################
@@ -517,7 +517,7 @@ node 'control-server' inherits os_base {
 #VXLAN Gateway related definition
 
   n1k-vxlangw {'vxgwvm':
-    gw_isoimage => $::gwimage,
+    gw_isoimage => $::vxlangwimage,
     os_password => $admin_password,
     controller_ip => $controller_node_address,
   }
