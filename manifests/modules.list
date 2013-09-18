@@ -21,7 +21,6 @@ keepalived
 keystone
 memcached
 mysql
-network
 naginator
 network
 nova
