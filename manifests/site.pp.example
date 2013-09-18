@@ -972,7 +972,7 @@ $libvirt_vif_driver = 'nova.virt.libvirt.vif.LibvirtGenericVIFDriver'
 # first time, uncomment the line below and enter the name of the
 # linux-image package you want to load.  Note that this feature has only
 # been tested with Ubuntu's generic kernel images.
-#$load_kernel_pkg = 'linux-image-3.2.0-51-generic'
+#$load_kernel_pkg = 'linux-image-3.5.0-23-generic'
 
 ### Puppet Parameters ###
 # These settings load other puppet components. They should not be changed.
