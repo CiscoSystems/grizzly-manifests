@@ -206,7 +206,6 @@ $external_interface             = 'eth1'
 #   log_level => 'ERR',
 # }
 
-
 # Select the drive on which Ubuntu and OpenStack will be installed in each
 # node. The current assumption is that all nodes will be installed on the
 # same device name.

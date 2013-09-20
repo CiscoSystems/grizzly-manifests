@@ -508,13 +508,13 @@ class control(
     }
 
     coe::ovs {'ovs-appctl':
-      resource  => 'netdev_linux',
-      logger    => 'file',
+      module    => 'netdev_linux',
+      facility  => 'file',
       log_level => 'ERR',
     }
     coe::ovs {'ovs-appctl01':
-      resource  => 'netdev',
-      logger    => 'file',
+      module    => 'netdev',
+      facility  => 'file',
       log_level => 'ERR',
     }
 
@@ -761,13 +761,13 @@ class compute(
     }
 
     coe::ovs {'ovs-appctl':
-      resource  => 'netdev_linux',
-      logger    => 'file',
+      module    => 'netdev_linux',
+      facility  => 'file',
       log_level => 'ERR',
     }
     coe::ovs {'ovs-appctl01':
-      resource  => 'netdev',
-      logger    => 'file',
+      module    => 'netdev',
+      facility  => 'file',
       log_level => 'ERR',
     }
 
