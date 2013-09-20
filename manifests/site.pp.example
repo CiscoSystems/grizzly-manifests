@@ -181,6 +181,32 @@ $external_interface             = 'eth1'
 # the Cisco Nexus plugin.
 # $tenant_network_type = 'vlan'
 
+
+# This is a part of  core.pp definition example for controlling the log
+# level of different 'ovs-appctl' modules. You will need to specify the 
+# module example 'netdev', 'netdev_linux', 'ovsdb_error', 'ovsdb_idl', 
+# 'timeval'. facility as 'syslog', 'console', 'file', or 'ANY' and 
+# log_level as 'off', 'emer', 'err', 'warn', 'info', or 'dbg' 
+# for more details please visit 
+# "http://openvswitch.org/cgi-bin/ovsman.cgi?page=utilities%2Fovs-appctl.8.in"
+# You will need to specify a unique name for each module you want to reduce 
+# the log as given in example below
+# WARNING: Default level for modules 'netdev' and 'netdev_linux' for 
+# facility 'file'is set to ERR changing this from 'ERR' to 'INFO' or
+# 'dbg' may result in log flooding
+
+# coe::ovs {'ovs-appctl':
+#   module    => 'netdev_linux',
+#   facility  => 'file',
+#   log_level => 'ERR',
+# }
+# coe::ovs {'ovs-appctl01':
+#   module    => 'netdev',
+#   facility  => 'file',
+#   log_level => 'ERR',
+# }
+
+
 # Select the drive on which Ubuntu and OpenStack will be installed in each
 # node. The current assumption is that all nodes will be installed on the
 # same device name.

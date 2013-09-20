@@ -506,6 +506,18 @@ class control(
     elsif $::glance_ceph_enabled {
       class { 'coe::ceph::control': }
     }
+
+    coe::ovs {'ovs-appctl':
+      resource  => 'netdev_linux',
+      logger    => 'file',
+      log_level => 'ERR',
+    }
+    coe::ovs {'ovs-appctl01':
+      resource  => 'netdev',
+      logger    => 'file',
+      log_level => 'ERR',
+    }
+
   }
 }
 
@@ -747,6 +759,18 @@ class compute(
         poolname => $::cinder_rbd_pool,
       }
     }
+
+    coe::ovs {'ovs-appctl':
+      resource  => 'netdev_linux',
+      logger    => 'file',
+      log_level => 'ERR',
+    }
+    coe::ovs {'ovs-appctl01':
+      resource  => 'netdev',
+      logger    => 'file',
+      log_level => 'ERR',
+    }
+
   }
 }
 
