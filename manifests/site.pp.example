@@ -81,6 +81,7 @@ $cobbler_proxy          = "http://${cobbler_node_ip}:3142/"
 # 1) admin_user
 # 2) password_crypted
 # 3) autostart_puppet -- whether the puppet agent will auto start
+# 4) puppet_run_interval: how often the puppet agent will attempt a new run
 # Default user is: localadmin
 # Default SHA-512 hashed password is "ubuntu":
 # To generate a new SHA-512 hashed password, run the following command,
@@ -93,6 +94,7 @@ $cobbler_proxy          = "http://${cobbler_node_ip}:3142/"
 $admin_user             = 'localadmin'
 $password_crypted       = '$6$UfgWxrIv$k4KfzAEMqMg.fppmSOTd0usI4j6gfjs0962.JXsoJRWa5wMz8yQk4SfInn4.WZ3L/MCt5u.62tHDGB36EhiKF1'
 $autostart_puppet       = true
+$puppet_run_interval    = '30m'
 
 # If the setup uses the UCS B-series blades, enter the port on which the
 # ucsm accepts requests. By default the UCSM is enabled to accept requests

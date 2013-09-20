@@ -1134,4 +1134,12 @@ node master-node inherits "cobbler-node" {
 #  allow 192.168.0.0/24
 ',
   }
+
+  file_line { 'set puppet agent interval':
+    line    => "runinterval = $::puppet_run_interval",
+    path    => '/etc/puppet/puppet.conf',
+    require => Package['puppet'],
+  }
+
+
 }
