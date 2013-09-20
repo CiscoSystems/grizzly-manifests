@@ -602,6 +602,7 @@ class allinone (
     keystone_admin_token     => $keystone_admin_token,
     glance_db_password       => $glance_db_password,
     glance_user_password     => $glance_user_password,
+    glance_backend           => $glance_backend,
     cinder_user_password     => $cinder_user_password,
     cinder_db_password       => $cinder_db_password,
     quantum_db_password      => $quantum_db_password,
