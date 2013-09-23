@@ -505,7 +505,6 @@ class allinone (
   $public_interface                  = $::public_interface,
   # network
   $internal_address                  = $::controller_node_internal,
-  # by default it does not enable multi-host mode
   $verbose                           = $::verbose,
   $mysql_root_password               = $::mysql_root_password,
   $vncproxy_host                     = $::controller_node_public,
@@ -515,20 +514,15 @@ class allinone (
   $keystone_admin_token              = $::keystone_admin_token,
   $glance_db_password                = $::glance_db_password,
   $glance_user_password              = $::glance_user_password,
-
-  # TODO this needs to be added
   $glance_backend                    = $::glance_backend,
   $glance_rbd_user                   = $::glance_ceph_user,
   $glance_rbd_pool                   = $::glance_ceph_pool,
   $rbd_store_user                    = $::cinder_rbd_user,
   $rbd_store_pool                    = $::cinder_rbd_pool,
-
   $nova_db_password                  = $::nova_db_password,
   $nova_user_password                = $::nova_user_password,
   $rabbit_password                   = $::rabbit_password,
   $rabbit_user                       = $::rabbit_user,
-  # TODO deprecated
-  #export_resources                  = false,
 
   ######### quantum variables #############
   $core_plugin                       = $::quantum_core_plugin,
@@ -551,7 +545,6 @@ class allinone (
   # ovs config
   $ovs_local_ip                      = $::ipaddress,
   $bridge_interface                  = $::external_interface,
-  #$bridge_interface                  = $::public_interface,
   $enable_ovs_agent                  = true,
   $ovs_vlan_ranges                   = $::ovs_vlan_ranges,
   $ovs_bridge_mappings               = $::ovs_bridge_mappings,
