@@ -565,7 +565,6 @@ class allinone (
   $cinder_user_password              = $::cinder_user_password,
   $cinder_db_password                = $::cinder_db_password,
   $volume_group                      = 'cinder-volumes',
-  $volume_group                      = 'cinder-volumes',
   $manage_volumes                    = true,
   $setup_test_volume                 = true,
   $cinder_volume_driver              = $::cinder_storage_driver,
