@@ -505,7 +505,6 @@ class allinone (
   $public_interface                  = $::public_interface,
   # network
   $internal_address                  = $::controller_node_internal,
-  # by default it does not enable multi-host mode
   $verbose                           = $::verbose,
   $mysql_root_password               = $::mysql_root_password,
   $vncproxy_host                     = $::controller_node_public,
@@ -515,24 +514,22 @@ class allinone (
   $keystone_admin_token              = $::keystone_admin_token,
   $glance_db_password                = $::glance_db_password,
   $glance_user_password              = $::glance_user_password,
-
-  # TODO this needs to be added
   $glance_backend                    = $::glance_backend,
-  $rbd_store_user                    = $::glance_ceph_user,
-  $rbd_store_pool                    = $::glance_ceph_pool,
-
+  $glance_rbd_user                   = $::glance_ceph_user,
+  $glance_rbd_pool                   = $::glance_ceph_pool,
+  $rbd_store_user                    = $::cinder_rbd_user,
+  $rbd_store_pool                    = $::cinder_rbd_pool,
   $nova_db_password                  = $::nova_db_password,
   $nova_user_password                = $::nova_user_password,
   $rabbit_password                   = $::rabbit_password,
   $rabbit_user                       = $::rabbit_user,
-  # TODO deprecated
-  #export_resources                  = false,
 
   ######### quantum variables #############
   $core_plugin                       = $::quantum_core_plugin,
   $cisco_vswitch_plugin              = $::cisco_vswitch_plugin,
   $cisco_nexus_plugin                = $::cisco_nexus_plugin,
   $nexus_credentials                 = $::nexus_credentials,
+  $nexus_config                      = $::nexus_config,
   # need to set from a variable
   # database
   $db_host                           = $::controller_node_address,
@@ -548,7 +545,6 @@ class allinone (
   # ovs config
   $ovs_local_ip                      = $::ipaddress,
   $bridge_interface                  = $::external_interface,
-  #$bridge_interface                  = $::public_interface,
   $enable_ovs_agent                  = true,
   $ovs_vlan_ranges                   = $::ovs_vlan_ranges,
   $ovs_bridge_mappings               = $::ovs_bridge_mappings,
@@ -561,7 +557,13 @@ class allinone (
   # cinder
   $cinder_user_password              = $::cinder_user_password,
   $cinder_db_password                = $::cinder_db_password,
-  $volume_group                      = $::hostname,
+  $volume_group                      = 'cinder-volumes',
+  $manage_volumes                    = true,
+  $setup_test_volume                 = true,
+  $cinder_volume_driver              = $::cinder_storage_driver,
+  $cinder_rbd_user                   = $::cinder_rbd_user,
+  $cinder_rbd_pool                   = $::cinder_rbd_pool,
+  $cinder_rbd_secret_uuid            = $::cinder_rbd_secret_uuid,
   # Quantum quotas
   $quantum_quota_network             = $::quantum_quota_network,
   $quantum_quota_subnet              = $::quantum_quota_subnet,
@@ -593,6 +595,8 @@ class allinone (
     glance_db_password       => $glance_db_password,
     glance_user_password     => $glance_user_password,
     glance_backend           => $glance_backend,
+    glance_rbd_user          => $glance_rbd_user,
+    glance_rbd_pool          => $glance_rbd_pool,
     cinder_user_password     => $cinder_user_password,
     cinder_db_password       => $cinder_db_password,
     quantum_db_password      => $quantum_db_password,
@@ -612,6 +616,10 @@ class allinone (
     secret_key               => $secret_key,
     vncproxy_host            => $vncproxy_host,
     libvirt_type             => $libvirt_type,
+    cinder_volume_driver     => $cinder_storage_driver,
+    cinder_rbd_user          => $cinder_rbd_user,
+    cinder_rbd_pool          => $cinder_rbd_pool,
+    cinder_rbd_secret_uuid   => $cinder_rbd_secret_uuid,
   }
 
   if ($::swift_proxy_address) {
@@ -642,28 +650,12 @@ class allinone (
 
   if $cisco_nexus_plugin == 'nexus' {
     $cisco_nexus_plugin_real = 'quantum.plugins.cisco.nexus.cisco_nexus_plugin_v2.NexusPlugin'
-
-    package { 'python-ncclient':
-      ensure => installed,
-    } ~> Service['quantum-server']
-
-    # hack to make sure the directory is created
-    Quantum_plugin_cisco<||> ->
-    file {'/etc/quantum/plugins/cisco/nexus.ini':
-      owner => 'root',
-      group => 'root',
-      content => template('nexus.ini.erb')
-    } ~> Service['quantum-server']
+    class { 'coe::nexus':
+      nexus_credentials => $nexus_credentials,
+      nexus_config      => $nexus_config
+    }
   } else {
     $cisco_nexus_plugin_real = undef
-  }
-  if $nexus_credentials {
-    file {'/var/lib/quantum/.ssh':
-      ensure => directory,
-      owner  => 'quantum',
-      require => Package['quantum-server']
-    } ->
-    nexus_creds{ $nexus_credentials: }
   }
 
   if $core_plugin == 'cisco' {
@@ -682,12 +674,16 @@ class allinone (
   }
 
   class { "coe::quantum_log": }
-
-  if ($::glance_ceph_enabled) and ($::controller_has_mon) {
-    class { 'coe::ceph::glance': }
-  }
-  elsif ($::glance_ceph_enabled) and (!$::controller_has_mon) {
-    class { 'coe::ceph::control': }
+  if !$::ceph_combo {
+    if ($::glance_ceph_enabled) and ($::controller_has_mon) {
+      class { 'coe::ceph::glance': }
+    }
+    elsif ($::glance_ceph_enabled) and (!$::controller_has_mon) {
+      class { 'coe::ceph::control': }
+    }
+  } 
+  elsif $::ceph_combo {
+    class { 'coe::ceph::combined': iscompute => true, }
   }
 }
 
