@@ -555,8 +555,10 @@ node 'compute-server01' inherits os_base {
 # Defining cinder storage nodes is only necessary if you want to run
 # cinder volume servers aside from those already on the compute nodes. To
 # do so, create a node entry for each cinder-volume node following this model.
+
 #node 'cinder-volume01' inherits os_base {
 #  class { 'cinder_node': }
+
   # The volume class can be changed to different drivers (eg iscsi, rbd)
   # you can only use one type per host. Be mindful of this if you use
   # different backends on different cinder-volume nodes.
@@ -564,22 +566,19 @@ node 'compute-server01' inherits os_base {
   # If you are using iscsi as your storage type, uncomment the following class
   # and use a facter readable address for the interface that iscsi should use
   # eg. $::ipaddress, or for a specific interface $::ipaddress_eth0 etc.
+
   #class { 'cinder::volume::iscsi':
   #  iscsi_ip_address => $::ipaddress,
   #}
 
-  # If you are using rbd, uncomment the following ceph classes.
-  #class { 'ceph::conf':
-  #  fsid            => $::ceph_monitor_fsid,
-  #  auth_type       => $::ceph_auth_type,
-  #  cluster_network => $::ceph_cluster_network,
-  #  public_network  => $::ceph_public_network,
-  #}
-  #
+  # If you want to use disks for Ceph OSD, uncomment the following and define the disks.
   #class { 'ceph::osd':
   #  public_address  => '192.168.242.22',
   #  cluster_address => '192.168.242.22',
   #}
+
+  #ceph::osd::device { '/dev/sdd': }
+
 #}
 
 # Swift Proxy
@@ -724,6 +723,7 @@ node 'compute-server01' inherits os_base {
   # Only mon0 should export the admin keys.
   # This means the following if statement is not needed on the additional
   # mon nodes.
+
 #  if !empty($::ceph_admin_key) {
 #    @@ceph::key { 'admin':
 #      secret       => $::ceph_admin_key,
@@ -731,8 +731,10 @@ node 'compute-server01' inherits os_base {
 #    }
 #  }
 
-  # Each MON needs a unique id, you can start at 0 and increment as needed.
+# Each MON needs a unique id, you can start at 0 and increment as needed.
+
 #  class {'ceph_mon': id => 0 }
+
 #}
 
 # Model each additional MON after the following. Remember to increment the id.
@@ -744,21 +746,19 @@ node 'compute-server01' inherits os_base {
 # public and cluster IP for each unique node.
 
 #node 'ceph-osd01' inherits os_base {
-#  class { 'ceph::conf':
-#    fsid            => $::ceph_monitor_fsid,
-#    auth_type       => $::ceph_auth_type,
-#    cluster_network => $::ceph_cluster_network,
-#    public_network  => $::ceph_public_network,
-#  }
+
 #  class { 'ceph::osd':
 #    public_address  => '192.168.242.3',
 #    cluster_address => '192.168.242.3',
 #  }
-  # Specify the disk devices to use for OSD here.
-  # Add a new entry for each device on the node that ceph should consume.
-  # puppet agent will need to run four times for the device to be formatted,
-  #   and for the OSD to be added to the crushmap.
-#  ceph::osd::device { '/dev/sdd': }
+
+# Specify the disk devices to use for OSD here.
+# Add a new entry for each device on the node that ceph should consume.
+# puppet agent will need to run four times for the device to be formatted,
+# and for the OSD to be added to the crushmap.
+
+  #ceph::osd::device { '/dev/sdd': }
+
 #}
 
 
