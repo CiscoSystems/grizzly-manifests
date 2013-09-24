@@ -523,6 +523,7 @@ class allinone (
   $nova_user_password                = $::nova_user_password,
   $rabbit_password                   = $::rabbit_password,
   $rabbit_user                       = $::rabbit_user,
+  $rabbit_host                       = $::controller_node_internal,
 
   ######### quantum variables #############
   $core_plugin                       = $::quantum_core_plugin,
@@ -589,7 +590,9 @@ class allinone (
     db_host                  => $db_host,
     admin_email              => $admin_email,
     admin_password           => $admin_password,
+    rabbit_user              => $rabbit_user,
     rabbit_password          => $rabbit_password,
+    rabbit_host              => $rabbit_host,
     keystone_db_password     => $keystone_db_password,
     keystone_admin_token     => $keystone_admin_token,
     glance_db_password       => $glance_db_password,
