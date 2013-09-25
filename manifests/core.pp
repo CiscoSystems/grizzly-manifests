@@ -524,7 +524,7 @@ class allinone (
   $rabbit_password                   = $::rabbit_password,
   $rabbit_user                       = $::rabbit_user,
   $rabbit_host                       = $::controller_node_internal,
-
+  $force_config_drive                = $::force_config_drive,
   ######### quantum variables #############
   $core_plugin                       = $::quantum_core_plugin,
   $cisco_vswitch_plugin              = $::cisco_vswitch_plugin,
@@ -623,6 +623,7 @@ class allinone (
     cinder_rbd_user          => $cinder_rbd_user,
     cinder_rbd_pool          => $cinder_rbd_pool,
     cinder_rbd_secret_uuid   => $cinder_rbd_secret_uuid,
+    force_config_drive       => $force_config_drive,
   }
 
   if ($::swift_proxy_address) {
