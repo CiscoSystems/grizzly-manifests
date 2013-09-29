@@ -611,6 +611,7 @@ node kvm-host-1 {
           nodeip => "62.1.151.100",
           nodenetmask => "255.255.255.0",
           nodegateway => "62.1.151.254",
+          nodedns => $::node_dns,
           ### The commented out parameters have a default value as specified, if you want it to be
           ### different uncomment the parameter and change the value as required
           ### memory is specified in KiB and disk size is in GB.
