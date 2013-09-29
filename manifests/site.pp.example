@@ -302,9 +302,9 @@ $hostmgmtint   = "eth2"
 $uplinkint     = "eth3:sys-uplink"
 
 
-#GW related shared variables
+#VXLAN Gateway related shared variables
 
-$gwimage         = "/home/n1kv/tonic_407_GW.qcow2"
+$vxlangwimage         = "/home/n1kv/tonic_407_GW.qcow2"
 
 
 #### end shared variables #################
@@ -514,9 +514,10 @@ node 'control-server' inherits os_base {
    'DATABASE/sql_connection' : value => 'mysql://quantum:<quantum-db-pass>@127.0.0.1/quantum?charset=utf8';
  }
 
-  #vxlangw definition
+#VXLAN Gateway related definition
+
   n1k-vxlangw {'vxgwvm':
-    gw_isoimage => $::gwimage,
+    gw_isoimage => $::vxlangwimage,
     os_password => $admin_password,
     controller_ip => $controller_node_address,
   }
@@ -559,7 +560,6 @@ node 'network-server01' inherits os_base {
     ctrlmac => $ctrlmac,
     hostmgmtint => $hostmgmtint,
     uplinkint => $uplinkint,
-    profile => 'sys-uplink',
     vtepconfig => 'vmknic-int1 profint mode dhcp mac 00:01:22:33:44:66',
     n1kconfname => "ns1",
   }
@@ -588,7 +588,6 @@ node 'compute-server01' inherits os_base {
          ctrlmac => $ctrlmac,
          hostmgmtint => $hostmgmtint,
          uplinkint => $uplinkint,
-         profile => 'sys-uplink',
          vtepconfig => 'virt vmknic-int1 profile profint mode dhcp mac 00:11:22:33:44:66, virt vmknic-int2 profile profint mode static address 192.168.1.91 netmask 255.255.255.0',
          n1kconfname => "cs1",
   }
