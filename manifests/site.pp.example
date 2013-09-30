@@ -494,9 +494,9 @@ node build-server inherits build-node { }
 # default, all agents will run on the control node.
 node 'control-server' inherits os_base {
   class { 'control':
-    #enable_dhcp_agent     => false,
-    #enable_l3_agent       => false,
-    #enable_metadata_agent => false,
+    enable_dhcp_agent     => false,
+    enable_l3_agent       => false,
+    enable_metadata_agent => false,
   }
 
   quantum_plugin_cisco {
