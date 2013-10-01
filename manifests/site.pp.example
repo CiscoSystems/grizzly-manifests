@@ -523,7 +523,7 @@ node 'control-server' inherits os_base {
 # WARNING: Default log level for modules 'netdev' and 'netdev_linux' for 
 # facility 'file'is set to ERR changing this from 'ERR' to 'INFO' or
 # 'dbg' may result in log flooding
-    coe::ovs{ ['netdev', 'netdev_linux']:
+  coe::ovs{ ['netdev', 'netdev_linux']:
     facility    => 'file',
     log_level => 'err',
   }
@@ -556,7 +556,7 @@ node 'compute-server01' inherits os_base {
 # facility 'file'is set to ERR changing this from 'ERR' to 'INFO' or
 # 'dbg' may result in log flooding
 # you need to add this for each compute nodes
-    coe::ovs{ ['netdev', 'netdev_linux']:
+  coe::ovs{ ['netdev', 'netdev_linux']:
     facility    => 'file',
     log_level => 'err',
   }
