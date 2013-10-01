@@ -512,6 +512,21 @@ node 'control-server' inherits os_base {
 
   # Each MON needs a unique id, you can start at 0 and increment as needed.
   # class {'ceph_mon': id => 0 }
+# This part is for controlling the log level of different modules in 'ovs-appctl' 
+# on controller node. You need to specify the modules of ovs-appctl such as 
+# 'netdev', 'netdev_linux', 'ovsdb_error', 'ovsdb_idl', 
+# 'timeval'etc in the format "coe::ovs{ ['netdev', 'ovsdb_error', 'ovsdb_idl',...]:.
+# facility as 'syslog', 'console', 'file', or 'ANY' and 
+# log_level as 'off', 'emer', 'err', 'warn', 'info', or 'dbg' 
+# for more details please visit 
+# "http://openvswitch.org/cgi-bin/ovsman.cgi?page=utilities%2Fovs-appctl.8.in"
+# WARNING: Default log level for modules 'netdev' and 'netdev_linux' for 
+# facility 'file'is set to ERR changing this from 'ERR' to 'INFO' or
+# 'dbg' may result in log flooding
+    coe::ovs{ ['netdev', 'netdev_linux']:
+    facility    => 'file',
+    log_level => 'err',
+  }
 }
 
 # Change compute-server01 to the host name of your first compute node.
@@ -528,6 +543,22 @@ node 'compute-server01' inherits os_base {
     #enable_dhcp_agent => true,
     #enable_l3_agent   => true,
     #enable_ovs_agent  => true,
+  }
+# This part is for controlling the log level of different modules in 'ovs-appctl' 
+# on compute node. You need to specify the modules of ovs-appctl such as 
+# 'netdev', 'netdev_linux', 'ovsdb_error', 'ovsdb_idl', 
+# 'timeval'etc in the format "coe::ovs{ ['netdev', 'ovsdb_error', 'ovsdb_idl',...]:.
+# facility as 'syslog', 'console', 'file', or 'ANY' and 
+# log_level as 'off', 'emer', 'err', 'warn', 'info', or 'dbg' 
+# for more details please visit 
+# "http://openvswitch.org/cgi-bin/ovsman.cgi?page=utilities%2Fovs-appctl.8.in"
+# WARNING: Default log level for modules 'netdev' and 'netdev_linux' for 
+# facility 'file'is set to ERR changing this from 'ERR' to 'INFO' or
+# 'dbg' may result in log flooding
+# you need to add this for each compute nodes
+    coe::ovs{ ['netdev', 'netdev_linux']:
+    facility    => 'file',
+    log_level => 'err',
   }
 }
 
