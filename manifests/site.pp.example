@@ -557,7 +557,6 @@ node 'network-server01' inherits os_base {
     vemimage => $vemimage,
     vsmip => $vsmip,
     domainid => $domainid,
-    ctrlmac => $ctrlmac,
     hostmgmtint => $hostmgmtint,
     uplinkint => $uplinkint,
     vtepconfig => 'vmknic-int1 profint mode dhcp mac 00:01:22:33:44:66',
@@ -585,7 +584,6 @@ node 'compute-server01' inherits os_base {
          vemimage => $vemimage,
          vsmip => $vsmip,
          domainid => $domainid,
-         ctrlmac => $ctrlmac,
          hostmgmtint => $hostmgmtint,
          uplinkint => $uplinkint,
          vtepconfig => 'virt vmknic-int1 profile profint mode dhcp mac 00:11:22:33:44:66, virt vmknic-int2 profile profint mode static address 192.168.1.91 netmask 255.255.255.0',
@@ -642,6 +640,7 @@ node kvm-host-2 {
           nodeip => "62.1.151.101",
           nodenetmask => "255.255.255.0",
           nodegateway => "62.1.151.254",
+          nodedns => $::node_dns,
           ####
           vsmname => 'vsm-s',
           role => 'secondary',
