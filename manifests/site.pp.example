@@ -848,6 +848,14 @@ $quantum_firewall_driver = 'quantum.agent.linux.iptables_firewall.OVSHybridIptab
 # been tested with Ubuntu's generic kernel images.
 #$load_kernel_pkg = 'linux-image-3.2.0-51-generic'
 
+# If you wish to specify kernel boot parameters, add them here.
+# The text you enter here will be placed in the /etc/default/grub
+# file's GRUB_CMDLINE_LINUX_DEFAULT line.  It is suggested that you
+# use the 'elevator=deadline' paramter as shown below if you plan
+# to use iSCSI-backed Cinder due to known kernel issues with cloning
+# volumes (refer to https://bugs.launchpad.net/bugs/1212250).
+$kernel_boot_params="quiet splash elevator=deadline"
+
 ### Puppet Parameters ###
 # These settings load other puppet components. They should not be changed.
 import 'cobbler-node'
