@@ -61,6 +61,14 @@ in-target /usr/sbin/update-grub ; "
   $kernel_cmd = ''
 }
 
+####### Set up to load custom kernel boot params #######
+if $::kernel_boot_params {
+  $kernel_boot_params_cmd ="in-target /bin/sed -i \"s/GRUB_CMDLINE_LINUX_DEFAULT=\\\"[a-zA-Z ]\\\+\\\"/GRUB_CMDLINE_LINUX_DEFAULT=\\\"$::kernel_boot_params\\\"/\" /etc/default/grub ; \\
+in-target /usr/sbin/update-grub ; "
+} else {
+  $kernel_boot_params_cmd = ''
+}
+
 ####### Preseed File Configuration #######
  cobbler::ubuntu::preseed { "cisco-preseed":
   admin_user 		=> $::admin_user,
@@ -82,8 +90,9 @@ echo -e "%s
 " > /target/etc/network/interfaces ; \
 sed -e "s/^[ ]*//" -i /target/etc/network/interfaces ; \
 %s \
+%s \
 ', $cobbler_node_fqdn, $cobbler_node_fqdn, $bonding,
-   $ra,$ra,$ra,$ra, $interfaces_file, $kernel_cmd),
+   $ra,$ra,$ra,$ra, $interfaces_file, $kernel_cmd, $kernel_boot_params_cmd),
   proxy 		=> "http://${cobbler_node_fqdn}:3142/",
   expert_disk 		=> $::expert_disk,
   diskpart 		=> [$::install_drive],
