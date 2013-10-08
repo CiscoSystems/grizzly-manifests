@@ -385,6 +385,17 @@ node 'build-node' inherits master-node {
 #    power_type => "ipmitool"
 #  }
 
+# Standalone ceph OSD/MON storage node example
+#  cobbler_node { "ceph-standlone01":
+#    mac => "11:22:33:44:55:66",
+#    ip => "192.168.242.22",
+#    power_address => "192.168.242.122",
+#    power_user => "admin",
+#    power_password => "password",
+#    power_type => "ipmitool"
+#  }
+
+
 
 ### Repeat as needed ###
 # Make a copy of your compute node block above for each additional OpenStack
@@ -760,6 +771,38 @@ node 'compute-server01' inherits os_base {
   #ceph::osd::device { '/dev/sdd': }
 
 #}
+
+# A standalone Ceph node that runs both MON and OSD services.
+
+#node 'ceph-standlone01' inherits os_base {
+#  class { 'ceph_allinone':
+#  }
+
+# Only the first MON should export the admin keys.
+# This means the following if statement is not needed on the additional
+# mon nodes.
+
+#  if !empty($::ceph_admin_key) {
+#    @@ceph::key { 'admin':
+#      secret       => $::ceph_admin_key,
+#      keyring_path => '/etc/ceph/keyring',
+#    }
+#  }
+
+# Each MON needs a unique id, you can start at 0 and increment as needed.
+
+#  class {'ceph_mon': id => 0 }
+
+
+# Specify the disk devices to use for OSD here.
+# Add a new entry for each device on the node that ceph should consume.
+# puppet agent will need to run four times for the device to be formatted,
+# and for the OSD to be added to the crushmap.
+
+  #ceph::osd::device { '/dev/sdd': }
+
+#}
+
 
 
 ### End repeated nodes ###
