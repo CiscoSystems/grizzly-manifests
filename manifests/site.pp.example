@@ -512,6 +512,9 @@ node 'control-server' inherits os_base {
 
   # Each MON needs a unique id, you can start at 0 and increment as needed.
   # class {'ceph_mon': id => 0 }
+  # if $controller_has_mon is set to true then uncomment the below line
+  # for nagios check for ceph
+  # class { "naginator::ceph_target":}
 }
 
 # Change compute-server01 to the host name of your first compute node.
@@ -529,6 +532,9 @@ node 'compute-server01' inherits os_base {
     #enable_l3_agent   => true,
     #enable_ovs_agent  => true,
   }
+  # if $osd_on_compute or $compute_have_mons is set to true then
+  # uncomment the below line for nagios check for ceph
+  # class { "naginator::ceph_target":} 
 }
 
 ### Repeat as needed ###
@@ -578,6 +584,7 @@ node 'compute-server01' inherits os_base {
   #}
 
   #ceph::osd::device { '/dev/sdd': }
+  #
 
 #}
 
@@ -758,6 +765,8 @@ node 'compute-server01' inherits os_base {
 # and for the OSD to be added to the crushmap.
 
   #ceph::osd::device { '/dev/sdd': }
+  # To enable nagios check for ceph on OSD nodes uncomment the below
+  # class { "naginator::ceph_target":}
 
 #}
 
