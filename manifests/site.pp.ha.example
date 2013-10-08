@@ -991,6 +991,37 @@ node 'swift03' inherits os_base {
 #  class { 'ceph::apt::ceph': release => $::ceph_release }
 #}
 
+# A standalone Ceph node that runs both MON and OSD services.
+
+#node 'ceph-standalone01' inherits os_base {
+#  class { 'ceph_allinone':
+#  }
+
+# Only the first MON should export the admin keys.
+# This means the following if statement is not needed on the additional
+# mon nodes.
+
+#  if !empty($::ceph_admin_key) {
+#    @@ceph::key { 'admin':
+#      secret       => $::ceph_admin_key,
+#      keyring_path => '/etc/ceph/keyring',
+#    }
+#  }
+
+# Each MON needs a unique id, you can start at 0 and increment as needed.
+
+#  class {'ceph_mon': id => 0 }
+
+# Specify the disk devices to use for OSD here.
+# Add a new entry for each device on the node that ceph should consume.
+# puppet agent will need to run four times for the device to be formatted,
+# and for the OSD to be added to the crushmap.
+
+  #ceph::osd::device { '/dev/sdd': }
+
+#}
+
+
 
 ### End repeated nodes ###
 

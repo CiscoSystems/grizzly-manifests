@@ -732,7 +732,7 @@ class ceph_mon (
   }
 }
 
-# allows for a standlone node with MON and OSD services
+# allows for a standalone node with MON and OSD services
 class ceph_allinone() {
   class { 'coe::ceph::combined': }
 }

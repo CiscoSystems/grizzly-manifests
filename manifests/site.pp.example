@@ -386,7 +386,7 @@ node 'build-node' inherits master-node {
 #  }
 
 # Standalone ceph OSD/MON storage node example
-#  cobbler_node { "ceph-standlone01":
+#  cobbler_node { "ceph-standalone01":
 #    mac => "11:22:33:44:55:66",
 #    ip => "192.168.242.22",
 #    power_address => "192.168.242.122",
@@ -774,7 +774,7 @@ node 'compute-server01' inherits os_base {
 
 # A standalone Ceph node that runs both MON and OSD services.
 
-#node 'ceph-standlone01' inherits os_base {
+#node 'ceph-standalone01' inherits os_base {
 #  class { 'ceph_allinone':
 #  }
 
@@ -792,7 +792,6 @@ node 'compute-server01' inherits os_base {
 # Each MON needs a unique id, you can start at 0 and increment as needed.
 
 #  class {'ceph_mon': id => 0 }
-
 
 # Specify the disk devices to use for OSD here.
 # Add a new entry for each device on the node that ceph should consume.
