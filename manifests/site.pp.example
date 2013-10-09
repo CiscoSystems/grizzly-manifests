@@ -624,6 +624,7 @@ node 'compute-server01' inherits os_base {
 #    storage_type       => 'disk',
 #    storage_devices    => ['sdb','sdc','sdd'],
 #    swift_hash_suffix  => $swift_hash,
+#    ring_server        => $::swiftproxy01_local_net_ip,
 #  }
 #  class { 'naginator::swift_target': }
 #}
@@ -635,6 +636,7 @@ node 'compute-server01' inherits os_base {
 #    storage_type       => 'disk',
 #    storage_devices    => ['sdb','sdc','sdd'],
 #    swift_hash_suffix  => $swift_hash,
+#    ring_server        => $::swiftproxy01_local_net_ip,
 #  }
 #  class { 'naginator::swift_target': }
 #}
@@ -646,6 +648,7 @@ node 'compute-server01' inherits os_base {
 #    storage_type       => 'disk',
 #    storage_devices    => ['sdb','sdc','sdd'],
 #    swift_hash_suffix  => $swift_hash,
+#    ring_server        => $::swiftproxy01_local_net_ip,
 #  }
 #  class { 'naginator::swift_target': }
 #}
