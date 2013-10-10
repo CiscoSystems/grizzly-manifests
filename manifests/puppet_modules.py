@@ -27,7 +27,7 @@ import subprocess
 
 ## ----- global variables that can be configurable via cmdline.
 #REPO_NAME = "grizzly-proposed"
-REPO_NAME = "grizzly/snapshots/2013-10-04"
+REPO_NAME = "grizzly/snapshots/2013-10-09"
 #APT_REPO_URL = "ftp://ftpeng.cisco.com/openstack/cisco"
 # uncomment this line if you prefer to use http
 APT_REPO_URL = "http://apt.ctocllab.cisco.com/repos/n1k-test"
