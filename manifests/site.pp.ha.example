@@ -621,17 +621,22 @@ node 'control01' inherits os_base {
     # Only needed on 1 controller in the cluster.
     keystone_swift_endpoint => true,
   }
-    # This part is for controlling the log level of different modules in 'ovs-appctl' 
-    # on controller node. You need to specify the modules of ovs-appctl such as 
-    # 'netdev', 'netdev_linux', 'ovsdb_error', 'ovsdb_idl', 
-    # 'timeval'etc in the format "coe::ovs{ ['netdev', 'ovsdb_error', 'ovsdb_idl',...]:.
-    # facility as 'syslog', 'console', 'file', or 'ANY' and 
-    # log_level as 'off', 'emer', 'err', 'warn', 'info', or 'dbg' 
-    # for more details please visit 
-    # "http://openvswitch.org/cgi-bin/ovsman.cgi?page=utilities%2Fovs-appctl.8.in"
-    # WARNING: Default log level for modules 'netdev' and 'netdev_linux' for 
-    # facility 'file'is set to ERR changing this from 'ERR' to 'INFO' or
-    # 'dbg' may result in log flooding
+
+  # This section controls the log level of different modules in
+  # 'ovs-appctl' on the controller node. You need to specify the modules
+  # of ovs-appctl such as 'netdev', 'netdev_linux', 'ovsdb_error', 'ovsdb_idl', 
+  # 'timeval'etc in the format 
+  # "coe::ovs{ ['netdev', 'ovsdb_error', 'ovsdb_idl',...]:.
+  # Also specify the facility as 'syslog', 'console', 'file', or 'ANY' and 
+  # log_level as 'off', 'emer', 'err', 'warn', 'info', or 'dbg' 
+  # for more details please visit 
+  # "http://openvswitch.org/cgi-bin/ovsman.cgi?page=utilities%2Fovs-appctl.8.in"
+  # You can place similar code into the node definitions for all
+  # other nodes on which ovs will run.
+  #
+  # WARNING: Default log level for modules 'netdev' and 'netdev_linux' for 
+  # facility 'file'is set to ERR changing this from 'ERR' to 'INFO' or
+  # 'dbg' may result in excessive log messages.
   coe::ovs{ ['netdev', 'netdev_linux']:
     facility    => 'file',
     log_level   => 'err',
@@ -653,17 +658,7 @@ node 'control02' inherits os_base {
     # Only needed on 1 controller in the cluster.
     keystone_swift_endpoint => false,
   }
-    # This part is for controlling the log level of different modules in 'ovs-appctl' 
-    # on controller node. You need to specify the modules of ovs-appctl such as 
-    # 'netdev', 'netdev_linux', 'ovsdb_error', 'ovsdb_idl', 
-    # 'timeval'etc in the format "coe::ovs{ ['netdev', 'ovsdb_error', 'ovsdb_idl',...]:.
-    # facility as 'syslog', 'console', 'file', or 'ANY' and 
-    # log_level as 'off', 'emer', 'err', 'warn', 'info', or 'dbg' 
-    # for more details please visit 
-    # "http://openvswitch.org/cgi-bin/ovsman.cgi?page=utilities%2Fovs-appctl.8.in"
-    # WARNING: Default log level for modules 'netdev' and 'netdev_linux' for 
-    # facility 'file'is set to ERR changing this from 'ERR' to 'INFO' or
-    # 'dbg' may result in log flooding
+
   coe::ovs{ ['netdev', 'netdev_linux']:
     facility    => 'file',
     log_level   => 'err',
@@ -685,17 +680,7 @@ node 'control03' inherits os_base {
     # Only needed on 1 controller in the cluster.
     keystone_swift_endpoint => false,
   }
-    # This part is for controlling the log level of different modules in 'ovs-appctl' 
-    # on controller node. You need to specify the modules of ovs-appctl such as 
-    # 'netdev', 'netdev_linux', 'ovsdb_error', 'ovsdb_idl', 
-    # 'timeval'etc in the format "coe::ovs{ ['netdev', 'ovsdb_error', 'ovsdb_idl',...]:.
-    # facility as 'syslog', 'console', 'file', or 'ANY' and 
-    # log_level as 'off', 'emer', 'err', 'warn', 'info', or 'dbg' 
-    # for more details please visit 
-    # "http://openvswitch.org/cgi-bin/ovsman.cgi?page=utilities%2Fovs-appctl.8.in"
-    # WARNING: Default log level for modules 'netdev' and 'netdev_linux' for 
-    # facility 'file'is set to ERR changing this from 'ERR' to 'INFO' or
-    # 'dbg' may result in log flooding
+
   coe::ovs{ ['netdev', 'netdev_linux']:
     facility    => 'file',
     log_level   => 'err',
@@ -712,17 +697,7 @@ node 'compute01' inherits os_base {
     enable_ha   => true,
     internal_ip => '192.168.220.51',
   }
-   # This part is for controlling the log level of different modules in 'ovs-appctl' 
-   # on controller node. You need to specify the modules of ovs-appctl such as 
-   # 'netdev', 'netdev_linux', 'ovsdb_error', 'ovsdb_idl', 
-   # 'timeval'etc in the format "coe::ovs{ ['netdev', 'ovsdb_error', 'ovsdb_idl',...]:.
-   # facility as 'syslog', 'console', 'file', or 'ANY' and 
-   # log_level as 'off', 'emer', 'err', 'warn', 'info', or 'dbg' 
-   # for more details please visit 
-   # "http://openvswitch.org/cgi-bin/ovsman.cgi?page=utilities%2Fovs-appctl.8.in"
-   # WARNING: Default log level for modules 'netdev' and 'netdev_linux' for 
-   # facility 'file'is set to ERR changing this from 'ERR' to 'INFO' or
-   # 'dbg' may result in log flooding
+
   coe::ovs{ ['netdev', 'netdev_linux']:
     facility    => 'file',
     log_level   => 'err',
@@ -734,17 +709,7 @@ node 'compute02' inherits os_base {
     enable_ha   => true,
     internal_ip => '192.168.220.52',
   }
-   # This part is for controlling the log level of different modules in 'ovs-appctl' 
-   # on controller node. You need to specify the modules of ovs-appctl such as 
-   # 'netdev', 'netdev_linux', 'ovsdb_error', 'ovsdb_idl', 
-   # 'timeval'etc in the format "coe::ovs{ ['netdev', 'ovsdb_error', 'ovsdb_idl',...]:.
-   # facility as 'syslog', 'console', 'file', or 'ANY' and 
-   # log_level as 'off', 'emer', 'err', 'warn', 'info', or 'dbg' 
-   # for more details please visit 
-   # "http://openvswitch.org/cgi-bin/ovsman.cgi?page=utilities%2Fovs-appctl.8.in"
-   # WARNING: Default log level for modules 'netdev' and 'netdev_linux' for 
-   # facility 'file'is set to ERR changing this from 'ERR' to 'INFO' or
-   # 'dbg' may result in log flooding
+
   coe::ovs{ ['netdev', 'netdev_linux']:
     facility    => 'file',
     log_level   => 'err',
@@ -756,17 +721,7 @@ node 'compute03' inherits os_base {
     enable_ha   => true,
     internal_ip => '192.168.220.53',
   }
-   # This part is for controlling the log level of different modules in 'ovs-appctl' 
-   # on controller node. You need to specify the modules of ovs-appctl such as 
-   # 'netdev', 'netdev_linux', 'ovsdb_error', 'ovsdb_idl', 
-   # 'timeval'etc in the format "coe::ovs{ ['netdev', 'ovsdb_error', 'ovsdb_idl',...]:.
-   # facility as 'syslog', 'console', 'file', or 'ANY' and 
-   # log_level as 'off', 'emer', 'err', 'warn', 'info', or 'dbg' 
-   # for more details please visit 
-   # "http://openvswitch.org/cgi-bin/ovsman.cgi?page=utilities%2Fovs-appctl.8.in"
-   # WARNING: Default log level for modules 'netdev' and 'netdev_linux' for 
-   # facility 'file'is set to ERR changing this from 'ERR' to 'INFO' or
-   # 'dbg' may result in log flooding
+
   coe::ovs{ ['netdev', 'netdev_linux']:
     facility    => 'file',
     log_level   => 'err',
