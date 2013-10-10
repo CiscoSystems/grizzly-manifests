@@ -804,6 +804,7 @@ node 'swift01' inherits os_base {
     storage_devices    => ['sdb','sdc','sdd','sde','sdf'],
     byte_size          => '2048',
     swift_hash_suffix  => $::swift_hash,
+    ring_server        => $::swiftproxy01_local_net_ip,
   }
 }
 
@@ -832,6 +833,7 @@ node 'swift02' inherits os_base {
     storage_devices    => ['sdb','sdc','sdd','sde','sdf'],
     byte_size          => '2048',
     swift_hash_suffix  => $::swift_hash,
+    ring_server        => $::swiftproxy01_local_net_ip,
   }
 }
 
@@ -860,6 +862,7 @@ node 'swift03' inherits os_base {
     storage_devices    => ['sdb','sdc','sdd','sde','sdf'],
     byte_size          => '2048',
     swift_hash_suffix  => $::swift_hash,
+    ring_server        => $::swiftproxy01_local_net_ip,
   }
 }
 
