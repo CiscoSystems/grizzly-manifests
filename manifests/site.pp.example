@@ -155,6 +155,12 @@ $public_interface               = 'eth0'
 # (this is only required on the network/controller node)
 $external_interface             = 'eth1'
 
+# Required. $service_address is needed to configure Nagios to point to the correct
+# IP address on each node. It's also used for Ceph, which is also
+# separately configurable further down this file. This entry should match 
+# the public_interface name, and the IP address fact prepended, as below.
+$service_address = $ipaddress_eth0
+
 # Uncomment and customize these next three variables to use a provider
 # network model.
 #
@@ -746,7 +752,7 @@ node 'compute-server01' inherits os_base {
 #$ceph_monitor_fsid      = 'e80afa94-a64c-486c-9e34-d55e85f26406'
 #$ceph_monitor_secret    = 'AQAJzNxR+PNRIRAA7yUp9hJJdWZ3PVz242Xjiw=='
 #$ceph_monitor_port      = '6789'
-#$ceph_monitor_address   = $::ipaddress
+#$ceph_monitor_address   = $::service_address
 #$ceph_cluster_network   = '192.168.242.0/24'
 #$ceph_public_network    = '192.168.242.0/24'
 #$ceph_release           = 'cuttlefish'
