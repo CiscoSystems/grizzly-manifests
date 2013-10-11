@@ -523,10 +523,10 @@ node 'control-server' inherits os_base {
 
   # Each MON needs a unique id, you can start at 0 and increment as needed.
   # class {'ceph_mon': id => 0 }
-  # This sectoin enables you to monitor ceph nodes with nagios plugin
-  # you need to use the following check for each ceph server that you
-  # want to monitor using nagios plugin
-  # class { "naginator::ceph_target":}
+  # This section enables you to monitor ceph nodes with a Nagios plugin.
+  # You will need to copy this class instantiation into the definition 
+  # of each node you want to monitor using the Nagios plugin.
+  # class { 'naginator::ceph_target':}
 
   # This section controls the log level of different modules in
   # 'ovs-appctl' on the controller node. You need to specify the modules
