@@ -155,8 +155,8 @@ $public_interface               = 'eth0'
 # (this is only required on the network/controller node)
 $external_interface             = 'eth1'
 
-# Required. $service_address is needed to configure Nagios to point to the correct
-# IP address on each node. It's also used for Ceph, which is also
+# Required. $service_address is needed to configure Nagios to point to 
+# the correct IP address on each node. It's also used for Ceph, which is also
 # separately configurable further down this file. This entry should match 
 # the public_interface name, and the IP address fact prepended, as below.
 $service_address = $ipaddress_eth0
