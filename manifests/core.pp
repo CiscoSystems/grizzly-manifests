@@ -692,6 +692,9 @@ class allinone (
   elsif $::ceph_combo {
     class { 'coe::ceph::combined': iscompute => true, }
   }
+
+  # Sets up Nagios control-node monitoring.
+  class { 'naginator::control_target': }
 }
 
 ### begin cinder standalone nodes
