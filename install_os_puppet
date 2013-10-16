@@ -13,7 +13,7 @@
 
 # 
 # set default tag to be retrieved
-CURRENT_TAG=g.2
+CURRENT_TAG=g.3
 
 
 set -o errexit
