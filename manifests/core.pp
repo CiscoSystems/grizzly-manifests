@@ -717,6 +717,10 @@ class compute(
       # Quantum Security Groups with OVS
       libvirt_vif_driver      => $libvirt_vif_driver,
       quantum_firewall_driver => $quantum_firewall_driver,
+      # Migration support
+      migration_support        => true,
+      vncserver_listen         => '0.0.0.0',
+
       # general
       enabled                 => $enabled,
       verbose                 => $verbose,
