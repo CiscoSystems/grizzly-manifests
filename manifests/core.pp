@@ -1095,7 +1095,7 @@ node master-node inherits 'cobbler-node' {
       # from pip.  We cache these ahead of time.  Note that this creates
       # /var/www/packages/simple, but you'll want to force a refresh if you
       # change the 'command' line below.
-      command => "${proxy_pfx}/usr/local/bin/pip2pi /var/www/packages collectd xenapi django-tagging graphite-web carbon whisper anyjson==0.3.3 amqp==0.9.4 kombu==2.4.7",
+      command => "${proxy_pfx}/usr/local/bin/pip2pi /var/www/packages xenapi django-tagging graphite-web carbon whisper anyjson==0.3.3 amqp==0.9.4 kombu==2.4.7",
       creates => '/var/www/packages/simple',
       require => Exec['pip2pi'],
     }
