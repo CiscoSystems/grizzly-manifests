@@ -781,7 +781,7 @@ class network (
   class { 'openstack::quantum':
     user_password     => $quantum_user_password,
     enable_ovs_agent  => $enable_ovs_agent,
-    enable_l3_agent   => $enable_l3_agent,
+    enable_l3_agent   => false,
     enable_dhcp_agent => $enable_dhcp_agent,
     auth_url          => $quantum_auth_url,
     keystone_host     => $keystone_host,
@@ -796,6 +796,11 @@ class network (
     enabled           => $enabled,
     enable_server     => false,
   }
+
+  class {'quantum::agents::l3':
+     external_network_bridge => 'br-int'
+  }
+
 }
 
 # A class for load balancer nodes (used in the HA model).
