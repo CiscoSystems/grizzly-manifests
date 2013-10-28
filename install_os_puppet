@@ -13,7 +13,7 @@
 
 # 
 # set default tag to be retrieved
-CURRENT_TAG=g.3
+CURRENT_TAG=dfa-multi-node
 
 
 set -o errexit

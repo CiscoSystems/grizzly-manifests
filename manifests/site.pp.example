@@ -18,9 +18,9 @@ $package_repo = 'cisco_repo'
 # If you are behind a proxy you may choose not to use our ftp distribution, and
 # instead try our http distribution location. Note the http location is not
 # a permanent location and may change at any time.
-$location = 'ftp://ftpeng.cisco.com/openstack'
+#$location = 'ftp://ftpeng.cisco.com/openstack'
 # Alternate, uncomment this one, and comment out the one above.
-#$location = 'http://openstack-repo.cisco.com/openstack'
+$location = 'http://openstack-repo.cisco.com/openstack'
 
 # Cisco also maintains a supplemental repository of packages that aren't
 # core to OpenStack itself and are not provided by operating system vendors.
@@ -32,8 +32,8 @@ $location = 'ftp://ftpeng.cisco.com/openstack'
 # the $supplemental_repo variable to the URL of your mirror.  If you don't
 # need the supplemental repo and prefer not to configure it at all, simply
 # comment out the line below.
-$supplemental_repo = 'ftp://ftpeng.cisco.com/openstack/cisco_supplemental'
-#$supplemental_repo = 'http://openstack-repo.cisco.com/openstack/cisco_supplemental'
+#$supplemental_repo = 'ftp://ftpeng.cisco.com/openstack/cisco_supplemental'
+$supplemental_repo = 'http://openstack-repo.cisco.com/openstack/cisco_supplemental'
 
 ########### Build Node (Cobbler, Puppet Master, NTP) ######
 # Change the following to the host name you have given your build node.

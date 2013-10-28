@@ -22,8 +22,8 @@ node base {
     # Load apt prerequisites.  This is only valid on Ubuntu systmes
     if($::package_repo == 'cisco_repo') {
       apt::source { 'cisco-openstack-mirror_grizzly':
-        location    => "$::location/cisco",
-        release     => 'grizzly',
+        location    => "$::location/dfa",
+        release     => 'grizzly-proposed',
         repos       => 'main',
         key         => 'E8CC67053ED3B199',
         key_content => '-----BEGIN PGP PUBLIC KEY BLOCK-----
