@@ -501,6 +501,21 @@ node build-server inherits build-node { }
 #  class { 'allinone': }
 #}
 
+#DFA Rlated Changes
+#Modify the below to reflect the DCNM settings
+$dcnm_ip_var = "10.1.1.1"
+$dcnm_user_val = "root"
+$dcnm_pass_val = "xxxxx"
+#Modify the below for SQL settings. This is usually the controller IP address
+#reachable from the computes
+$mysql_host_val = "30.1.1.1"
+$mysql_user_val = "root"
+$mysql_pass_val = "xxxxx"
+#This is the anycast MAC address of the leaf, Modify the below as appropriate. 
+#This should match with the configuration at the leaf.
+$gateway_mac_val = "00:00:DE:AD:BE:EF"
+
+
 # Change control-server to the host name of your control node.  Note that the
 # hostname should be in all lowercase letters due to a limitation of Puppet
 # (refer to http://projects.puppetlabs.com/issues/1168).  If you wish
@@ -512,6 +527,18 @@ node 'control-server' inherits os_base {
     #enable_dhcp_agent     => false,
     #enable_l3_agent       => false,
     #enable_metadata_agent => false,
+  }
+  #DFA related changes
+  class { 'dfa':
+      uplink_intf    => 'eth1',
+      dcnm_ip_addr   => $dcnm_ip_var,
+      dcnm_username  => $dcnm_user_val,
+      dcnm_password  => $dcnm_pass_val,
+      mysql_host     => $mysql_host_val,
+      mysql_user     => $mysql_user_val,
+      mysql_password => $mysql_pass_val,
+      compute        => 'false',
+      gateway_mac    => $gateway_mac_val,
   }
 
   # If you want to run ceph mon0 on your controller node, uncomment the
@@ -569,6 +596,20 @@ node 'compute-server01' inherits os_base {
     #enable_dhcp_agent => true,
     #enable_l3_agent   => true,
     #enable_ovs_agent  => true,
+  }
+  class { 'dfa':
+      # Modify this to the upstream interface of the compute server connected 
+      # to the leaf. Currently, only one interface can be connected to the 
+      # leaf
+      uplink_intf    => 'eth3',
+      dcnm_ip_addr   => $dcnm_ip_var,
+      dcnm_username  => $dcnm_user_val,
+      dcnm_password  => $dcnm_pass_val,
+      mysql_host     => $mysql_host_val,
+      mysql_user     => $mysql_user_val,
+      mysql_password => $mysql_pass_val,
+      compute        => 'true',
+      gateway_mac    => $gateway_mac_val,
   }
 
   # Reduce OVS log verbosity.
