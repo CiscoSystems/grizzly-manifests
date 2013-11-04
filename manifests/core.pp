@@ -795,6 +795,7 @@ class network (
     verbose           => $verbose,
     enabled           => $enabled,
     enable_server     => false,
+    dhcp_lease_time   => '3600',
   }
 
   class {'quantum::agents::l3':
