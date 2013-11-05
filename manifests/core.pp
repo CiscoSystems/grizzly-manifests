@@ -389,6 +389,7 @@ class control(
 
       ######### quantum variables #############
       quantum_core_plugin     => $core_plugin_real,
+      allow_overlapping_ips   => true,
       # need to set from a variable
       # database
       db_host                 => $db_host,
