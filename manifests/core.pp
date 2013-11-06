@@ -389,6 +389,7 @@ class control(
 
       ######### quantum variables #############
       quantum_core_plugin     => $core_plugin_real,
+      allow_overlapping_ips   => true,
       # need to set from a variable
       # database
       db_host                 => $db_host,
@@ -795,6 +796,7 @@ class network (
     verbose           => $verbose,
     enabled           => $enabled,
     enable_server     => false,
+    dhcp_lease_time   => '3600',
   }
 
   class {'quantum::agents::l3':
