@@ -22,7 +22,7 @@ node base {
     # Load apt prerequisites.  This is only valid on Ubuntu systmes
     if($::package_repo == 'cisco_repo') {
       apt::source { "cisco-openstack-mirror_grizzly":
-        location    => "$::location/n1k-test",
+        location    => "$::location/n1k-rel",
         release     => "grizzly/snapshots/2013-11-06",
         repos       => "main",
         key         => "6B7A62576A4F98AD",
