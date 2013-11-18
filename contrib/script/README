@@ -1,0 +1,44 @@
+create_sitepp.py
+
+
+   Usability
+   ---------
+        create_sitepp.py
+        create_sitepp.py -f <site_data.txt>
+
+  Functionality
+  -------------
+  This script creates the site.pp manifest file by prompting
+  user for all the required information
+ 
+
+  Prerequisites
+  -------------
+  1. You should have root access to make sure this script completes 
+     successfully
+  2. Collect all the information and have it handy before running the script
+
+
+  Information
+  -----------
+      Script prompts the user for various COI configuration information
+   and creates site.pp file and places it in /etc/puppet/manifests 
+   directory.
+
+      If a site.pp file already exists in /etc/puppet/manifests directory, 
+   user is prompted and if agreed the existing site.pp is saved in 
+   /home/n1kv/logs directory. Upto 10 site.pp files are saved. 
+   Named site.pp.1, site.pp.2 ..
+
+      All the data entered by the user is also saved in a data file in 
+   /home/logs/n1kv directory named site_data_file.txt. If the user
+   exits the script halfway and doesn't want to enter all the information
+   again, the -f option can be used. Script will then read from the data file
+   and prompt the user if they want to accept those values.
+
+   Upto 20 data files are backed up at /home/n1kv/logs. User can check 
+   the contents and use the appropriate data file.
+     Also after all the data is entered the user can save the data file
+   and user it for later runs.
+
+
