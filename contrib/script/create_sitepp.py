@@ -13,7 +13,7 @@ import datetime
 import getopt
 
 # Globals
-version = 17
+version = 18
 log_path = '/home/n1kv/logs'
 if not os.path.exists(log_path):
     os.makedirs(log_path)
@@ -2218,7 +2218,7 @@ while True:
     sitepp.write('    enable_l3_agent => true,\n')
     sitepp.write('    enable_dhcp_agent => %s,\n' % nw_dhcp_enable_list[nw_n])
     sitepp.write('    enable_ovs_agent => false,\n')
-    sitepp.write('    bridge_mappings => \'br-int:eth3\',\n')
+    sitepp.write('    bridge_mappings => \'br-int:%s\',\n' % external_interface)
     sitepp.write('  }\n')
     sitepp.write('  class {"n1k-vem":\n')
     sitepp.write('    vemimage => $vemimage,\n')
