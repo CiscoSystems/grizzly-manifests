@@ -561,6 +561,7 @@ node 'network-server01' inherits os_base {
     uplinkint => $uplinkint,
     vtepconfig => 'vmknic-int1 profint mode dhcp mac 00:01:22:33:44:66',
     n1kconfname => "ns1",
+    node_type => "network",
   }
 }
 
@@ -588,6 +589,7 @@ node 'compute-server01' inherits os_base {
          uplinkint => $uplinkint,
          vtepconfig => 'virt vmknic-int1 profile profint mode dhcp mac 00:11:22:33:44:66, virt vmknic-int2 profile profint mode static address 192.168.1.91 netmask 255.255.255.0',
          n1kconfname => "cs1",
+         node_type => "compute",
   }
 
   if $::cinder_ceph_enabled {
