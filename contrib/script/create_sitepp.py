@@ -13,7 +13,7 @@ import datetime
 import getopt
 
 # Globals
-version = 18
+version = 19
 log_path = '/home/n1kv/logs'
 if not os.path.exists(log_path):
     os.makedirs(log_path)
@@ -2144,6 +2144,7 @@ while True:
     sitepp.write('  }\n')
     sitepp.write('  class {"n1k-vem":\n')
     sitepp.write('     vemimage => $vemimage,\n')
+    sitepp.write('     node_type => "compute",\n')
     sitepp.write('     vsmip => $vsmip,\n')
     sitepp.write('     domainid => $domainid,\n')
     sitepp.write('     hostmgmtint => $hostmgmtint,\n')
@@ -2182,6 +2183,7 @@ while True:
     sitepp.write('  }\n')
     sitepp.write('  class {"n1k-vem":\n')
     sitepp.write('     vemimage => $vemimage,\n')
+    sitepp.write('     node_type => "compute",\n')
     sitepp.write('     vsmip => $vsmip,\n')
     sitepp.write('     domainid => $domainid,\n')
     sitepp.write('     hostmgmtint => $hostmgmtint,\n')
@@ -2222,6 +2224,7 @@ while True:
     sitepp.write('  }\n')
     sitepp.write('  class {"n1k-vem":\n')
     sitepp.write('    vemimage => $vemimage,\n')
+    sitepp.write('    node_type => "network",\n')
     sitepp.write('    vsmip => $vsmip,\n')
     sitepp.write('    domainid => $domainid,\n')
     sitepp.write('    hostmgmtint => $hostmgmtint,\n')
