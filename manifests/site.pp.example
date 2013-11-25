@@ -514,6 +514,9 @@ $mysql_pass_val = "xxxxx"
 #This is the anycast MAC address of the leaf, Modify the below as appropriate. 
 #This should match with the configuration at the leaf.
 $gateway_mac_val = "00:00:DE:AD:BE:EF"
+#This is the start of the segment ID base. Ensure that this doesn't conflict 
+#with other orchestrators segment ID
+$dfa_tunnel_base_var = "30000"
 
 
 # Change control-server to the host name of your control node.  Note that the
@@ -539,6 +542,7 @@ node 'control-server' inherits os_base {
       mysql_password => $mysql_pass_val,
       compute        => 'false',
       gateway_mac    => $gateway_mac_val,
+      dfa_tunnel_base => $dfa_tunnel_base_var,
   }
 
   # If you want to run ceph mon0 on your controller node, uncomment the
@@ -610,6 +614,7 @@ node 'compute-server01' inherits os_base {
       mysql_password => $mysql_pass_val,
       compute        => 'true',
       gateway_mac    => $gateway_mac_val,
+      dfa_tunnel_base => $dfa_tunnel_base_var,
   }
 
   # Reduce OVS log verbosity.
