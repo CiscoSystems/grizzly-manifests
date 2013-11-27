@@ -136,6 +136,15 @@ then
         fi
 fi
 
+if [ -d /root/cisco-grizzly-manifests/contrib ]
+then
+        echo "Copying contrib to contrib dir..."
+        if ! run_cmd cp -R /root/cisco-grizzly-manifests/contrib/ /etc/puppet/. ;then
+                echo "Can't copy contrib!!!"
+                exit 1
+        fi
+fi
+
 # Update APT again, to capture any changes and updates driven by the newly loaded code
 echo -e "\n\nUpdated apt repository...\n\n"
 if ! run_cmd apt-get $APT_CONFIG update; then
