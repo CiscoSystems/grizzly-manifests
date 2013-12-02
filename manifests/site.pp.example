@@ -517,7 +517,13 @@ $gateway_mac_val = "00:00:DE:AD:BE:EF"
 #This is the start of the segment ID base. Ensure that this doesn't conflict 
 #with other orchestrators segment ID
 $dfa_tunnel_base_var = "30000"
-
+#If a compute node is not directly connected to a leaf, but through any other 
+#physical bridge device, then VDP frames will not reach the leaf. In such cases,
+#VDP frames should use other reserved MCast DMAC that will not be consumed by
+#the intermediate bridge. The Leaf and intermediate bridge also may need to be
+#appropriately configured. If there's no such configuration in your setup, leave
+#the below field as it is, otherwise, enter the Mcast DMAC that you plan to use.
+$non_nearest_brdmac = "01:88:C2:00:00:00"
 
 # Change control-server to the host name of your control node.  Note that the
 # hostname should be in all lowercase letters due to a limitation of Puppet
@@ -533,16 +539,18 @@ node 'control-server' inherits os_base {
   }
   #DFA related changes
   class { 'dfa':
-      uplink_intf    => 'eth1',
-      dcnm_ip_addr   => $dcnm_ip_var,
-      dcnm_username  => $dcnm_user_val,
-      dcnm_password  => $dcnm_pass_val,
-      mysql_host     => $mysql_host_val,
-      mysql_user     => $mysql_user_val,
-      mysql_password => $mysql_pass_val,
-      compute        => 'false',
-      gateway_mac    => $gateway_mac_val,
-      dfa_tunnel_base => $dfa_tunnel_base_var,
+      uplink_intf            => 'eth1',
+      dcnm_ip_addr           => $dcnm_ip_var,
+      dcnm_username          => $dcnm_user_val,
+      dcnm_password          => $dcnm_pass_val,
+      mysql_host             => $mysql_host_val,
+      mysql_user             => $mysql_user_val,
+      mysql_password         => $mysql_pass_val,
+      compute                => 'false',
+      gateway_mac            => $gateway_mac_val,
+      dfa_tunnel_base        => $dfa_tunnel_base_var,
+      non_nearest_bridge     => 'false',
+      non_nearest_bridge_mac => $non_nearest_brdmac,
   }
 
   # If you want to run ceph mon0 on your controller node, uncomment the
@@ -605,16 +613,20 @@ node 'compute-server01' inherits os_base {
       # Modify this to the upstream interface of the compute server connected 
       # to the leaf. Currently, only one interface can be connected to the 
       # leaf
-      uplink_intf    => 'eth3',
-      dcnm_ip_addr   => $dcnm_ip_var,
-      dcnm_username  => $dcnm_user_val,
-      dcnm_password  => $dcnm_pass_val,
-      mysql_host     => $mysql_host_val,
-      mysql_user     => $mysql_user_val,
-      mysql_password => $mysql_pass_val,
-      compute        => 'true',
-      gateway_mac    => $gateway_mac_val,
-      dfa_tunnel_base => $dfa_tunnel_base_var,
+      uplink_intf            => 'eth3',
+      dcnm_ip_addr           => $dcnm_ip_var,
+      dcnm_username          => $dcnm_user_val,
+      dcnm_password          => $dcnm_pass_val,
+      mysql_host             => $mysql_host_val,
+      mysql_user             => $mysql_user_val,
+      mysql_password         => $mysql_pass_val,
+      compute                => 'true',
+      gateway_mac            => $gateway_mac_val,
+      dfa_tunnel_base        => $dfa_tunnel_base_var,
+      # If Compute is not directly connected to leaf, but through any other
+      # intermediate physical bridge, enter 'true' here. It is case-sensitive.
+      non_nearest_bridge     => 'false',
+      non_nearest_bridge_mac => $non_nearest_brdmac,
   }
 
   # Reduce OVS log verbosity.
