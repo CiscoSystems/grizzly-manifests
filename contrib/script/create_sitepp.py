@@ -942,11 +942,6 @@ if (from_file == 0 or new_nodes > 0):
             if (ucs_vtep_config == 1):
                 print "========================================================"
                 print "       VTEP Config FORMAT is as follows"
-                print "Dynamic"
-                print "virt vmknic-int1 profile profint mode dhcp mac" \
-                      " 00:11:22:33:44:66" 
-                print ""
-                print "Static"
                 print "virt vmknic-int2 profile profint mode static"\
                       " address 192.168.1.91 netmask 255.255.255.0 mac"\
                       " 00:11:22:33:44:66"
