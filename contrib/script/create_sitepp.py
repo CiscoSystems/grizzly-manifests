@@ -13,7 +13,7 @@ import datetime
 import getopt
 
 # Globals
-version = 19
+version = 20
 log_path = '/home/n1kv/logs'
 if not os.path.exists(log_path):
     os.makedirs(log_path)
@@ -508,7 +508,7 @@ print ""
 print " Please make sure you have the following ready before you start"
 print "1. vsm and vem image locations and the images are actually present there"
 print "2. You are aware of the Domain id to be used in the setup"
-print "3. Make sure you have created an uplink port-profile (type Ethernet) in the VSM."
+print "3. Make sure you have created an uplink port-profile (type Ethernet) in the VSM. (If the VSM is on N1010)"
 print "4. Decide the external and physical interfaces of the COI nodes "
 
 print ""
@@ -610,7 +610,7 @@ print "if no more specific host routes are added."
 print "============================================================"
 print ""
 
-external_interface = get_user_input("External interface (Defualt eth3): ",
+external_interface = get_user_input("External interface (Default eth3): ",
                                     "external_interface", "eth3")
 print ""
 print "============================================================"
@@ -857,11 +857,7 @@ if (from_file == 0 or new_nodes > 0):
             if (c_vtep_config == 1):
                 print "===================================================="
                 print "       VTEP Config FORMAT is as follows"
-                print "For dynamic"
-                print "virt vmknic-int1 profile profint mode dhcp mac" \
-                      " 00:11:22:33:44:66" 
                 print ""
-                print "For static"
                 print "virt vmknic-int2 profile profint mode static"\
                       " address 192.168.1.91 netmask 255.255.255.0 mac"\
                       " 00:11:22:33:44:66"
@@ -878,8 +874,9 @@ if (from_file == 0 or new_nodes > 0):
 
                     if (compute_vtep_diff_subnet == 1):
                         print ""
-                        print "WARNING!!!. This action will modify"\
-                             " the RPF check to loose "
+                        print " INFO: This action (i.e. if more than 1"
+                        print " VTEP in same subnet) will change RPF check"
+                        print " to loose mode"
                         print ""
                         compute_vtep_diff_subnet_list.append("1")
                     else:
@@ -965,8 +962,9 @@ if (from_file == 0 or new_nodes > 0):
 
                     if (ucs_vtep_diff_subnet == 1):
                         print ""
-                        print "WARNING!!!. This action will modify"\
-                             " the RPF check to loose "
+                        print " INFO: This action (i.e. if more than 1"
+                        print " VTEP in same subnet) will change RPF check"
+                        print " to loose mode"
                         print ""
                         ucs_vtep_diff_subnet_list.append("1")
                     else:
@@ -1166,11 +1164,7 @@ if (inputfile == "" or get_nw_from_user == 1):
             if (nw_vtep_config == 1):
                 print "===================================================="
                 print "       VTEP Config FORMAT is as follows"
-                print "For dynamic"
-                print "virt vmknic-int1 profile profint mode dhcp mac" \
-                      " 00:11:22:33:44:66" 
                 print ""
-                print "For static"
                 print "virt vmknic-int2 profile profint mode static"\
                       " address 192.168.1.91 netmask 255.255.255.0 mac"\
                       " 00:11:22:33:44:66"
@@ -1186,8 +1180,9 @@ if (inputfile == "" or get_nw_from_user == 1):
 
                     if (nw_vtep_diff_subnet == 1):
                         print ""
-                        print "WARNING!!!. This action will modify"\
-                             " the RPF check to loose "
+                        print " INFO: This action (i.e. if more than 1"
+                        print " VTEP in same subnet) will change RPF check"
+                        print " to loose mode"
                         print ""
                         nw_vtep_diff_subnet_list.append("1")
                     else:
@@ -1340,7 +1335,7 @@ else:
                                      "vsm_control_mac", "NONE")
     vsm_control_ip = get_valid_ip("Enter VSM management IP: ", 
                                 "vsm_control_ip", "NONE")
-    vsm_control_pw = get_user_input("VSM control password: ",
+    vsm_control_pw = get_user_input("VSM password: ",
                                     "vsm_control_pw", "NONE")
     vsm_role = get_vsm_role()
 
