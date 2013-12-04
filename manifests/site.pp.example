@@ -560,6 +560,7 @@ node 'network-server01' inherits os_base {
     hostmgmtint => $hostmgmtint,
     uplinkint => $uplinkint,
     vtepconfig => 'vmknic-int1 profint mode dhcp mac 00:01:22:33:44:66',
+    isMultipleVtepInSameSubnet => 'false',
     n1kconfname => "ns1",
     node_type => "network",
   }
