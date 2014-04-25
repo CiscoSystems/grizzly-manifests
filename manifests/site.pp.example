@@ -525,12 +525,82 @@ $dfa_tunnel_base_var = "30000"
 #the below field as it is, otherwise, enter the Mcast DMAC that you plan to use.
 $non_nearest_brdmac = "01:88:C2:00:00:00"
 
+#if a all-in-one node is required that can run both controller and compute, 
+#then uncomment the lines below and modify the name of the node. You will also 
+#modify the control server definition to compute, since there's one controller.
+#node 'allinone-server' inherits os_base {
+#  class { 'allinone':
+    #enable_dhcp_agent     => false,
+    #enable_l3_agent       => false,
+    #enable_metadata_agent => false,
+#    enable_ovs_agent  => true,
+#  }
+  #DFA related changes
+#  class { 'dfa':
+#      uplink_intf            => 'eth1',
+#      dcnm_ip_addr           => $dcnm_ip_var,
+#      dcnm_username          => $dcnm_user_val,
+#      dcnm_password          => $dcnm_pass_val,
+#      mysql_host             => $mysql_host_val,
+#      mysql_user             => $mysql_user_val,
+#      mysql_password         => $mysql_pass_val,
+#      compute                => 'allinone',
+#      gateway_mac            => $gateway_mac_val,
+#      dfa_tunnel_base        => $dfa_tunnel_base_var,
+#      non_nearest_bridge     => 'false',
+#      non_nearest_bridge_mac => $non_nearest_brdmac,
+#  }
+#
+  # If you want to run ceph mon0 on your controller node, uncomment the
+  # following block. Be sure to read all additional ceph-related
+  # instructions in this file.
+  # Only mon0 should export the admin keys.
+  # This means the following if statement is not needed on the additional
+  # mon nodes.
+  # if !empty($::ceph_admin_key) {
+  #   @@ceph::key { 'admin':
+  #     secret       => $::ceph_admin_key,
+  #     keyring_path => '/etc/ceph/keyring',
+  #   }
+  # }
+
+  # Each MON needs a unique id, you can start at 0 and increment as needed.
+  # class {'ceph_mon': id => 0 }
+  # This section enables you to monitor ceph nodes with a Nagios plugin.
+  # You will need to copy this class instantiation into the definition 
+  # of each node you want to monitor using the Nagios plugin.
+  # class { 'naginator::ceph_target':}
+
+  # This section controls the log level of different modules in
+  # 'ovs-appctl' on the controller node. You need to specify the modules
+  # of ovs-appctl such as 'netdev', 'netdev_linux', 'ovsdb_error', 'ovsdb_idl', 
+  # 'timeval'etc in the format 
+  # "coe::ovs{ ['netdev', 'ovsdb_error', 'ovsdb_idl',...]:.
+  # Also specify the facility as 'syslog', 'console', 'file', or 'ANY' and 
+  # log_level as 'off', 'emer', 'err', 'warn', 'info', or 'dbg' 
+  # for more details please visit 
+  # "http://openvswitch.org/cgi-bin/ovsman.cgi?page=utilities%2Fovs-appctl.8.in"
+  # You can place similar code into the node definitions for all
+  # other nodes on which ovs will run.
+  #
+  # WARNING: Default log level for modules 'netdev' and 'netdev_linux' for 
+  # facility 'file'is set to ERR changing this from 'ERR' to 'INFO' or
+  # 'dbg' may result in excessive log messages.
+#  coe::ovs{ ['netdev', 'netdev_linux']:
+#    facility    => 'file',
+#    log_level   => 'err',
+#  }
+#}
+
 # Change control-server to the host name of your control node.  Note that the
 # hostname should be in all lowercase letters due to a limitation of Puppet
 # (refer to http://projects.puppetlabs.com/issues/1168).  If you wish
 # to disable the L3, DHCP, or metadata agents on the control node,
 # uncomment the appropriate parameters in the node definition below.  By
 # default, all agents will run on the control node.
+# If allineone is enabled above, modify 'control' to 'compute' and 
+# compute=>false to true. 
+
 node 'control-server' inherits os_base {
   class { 'control':
     #enable_dhcp_agent     => false,
