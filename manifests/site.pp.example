@@ -506,6 +506,8 @@ node build-server inherits build-node { }
 $dcnm_ip_var = "10.1.1.1"
 $dcnm_user_val = "root"
 $dcnm_pass_val = "xxxxx"
+#This is the external DHCP server address, i.e. that of the DCNM
+$dcnm_dhcp_server_val = "20.1.2.3"
 #Modify the below for SQL settings. This is usually the controller IP address
 #reachable from the computes
 $mysql_host_val = "30.1.1.1"
@@ -549,6 +551,7 @@ $non_nearest_brdmac = "01:88:C2:00:00:00"
 #      dfa_tunnel_base        => $dfa_tunnel_base_var,
 #      non_nearest_bridge     => 'false',
 #      non_nearest_bridge_mac => $non_nearest_brdmac,
+#      dcnm_dhcp_server       => $dcnm_dhcp_server_val,  
 #  }
 #
   # If you want to run ceph mon0 on your controller node, uncomment the
@@ -621,6 +624,7 @@ node 'control-server' inherits os_base {
       dfa_tunnel_base        => $dfa_tunnel_base_var,
       non_nearest_bridge     => 'false',
       non_nearest_bridge_mac => $non_nearest_brdmac,
+      dcnm_dhcp_server       => $dcnm_dhcp_server_val,  
   }
 
   # If you want to run ceph mon0 on your controller node, uncomment the
@@ -697,6 +701,7 @@ node 'compute-server01' inherits os_base {
       # intermediate physical bridge, enter 'true' here. It is case-sensitive.
       non_nearest_bridge     => 'false',
       non_nearest_bridge_mac => $non_nearest_brdmac,
+      dcnm_dhcp_server       => $dcnm_dhcp_server_val,  
   }
 
   # Reduce OVS log verbosity.
