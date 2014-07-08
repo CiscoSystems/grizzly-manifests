@@ -1,6 +1,6 @@
 Grizzly-manifests
 ================
-
+this is a demo. Please ignore 
 Install Ubuntu 12.04.1 LTS x86_64 (preferred)
 
 	apt-get update && apt-get upgrade && apt-get install git puppet ipmitool python-jinja2 python-passlib python-yaml
